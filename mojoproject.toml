@@ -1,0 +1,13 @@
+[project]
+authors = ["Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"]
+channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
+name = "mojo-playground"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+max = "*"
+sdl3 = ">=3.2.14,<4"
+ipykernel = ">=6.29.5,<7"
