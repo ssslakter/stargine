@@ -2,6 +2,21 @@ import time
 from playground import *
 
 
+alias Vec3 = SIMD[DType.float32, 3]
+alias Vec4 = SIMD[DType.float32, 4]
+
+@value
+struct Vertex:
+    var position: Vec3
+    var color: Vec4
+
+
+alias vertices = [
+    Vertex(position=Vec3(0.0, 0.5, 0.0), color=Vec4(1.0, 0.0, 0.0, 1.0)),
+    Vertex(position=Vec3(0.5, -0.5, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)),
+    Vertex(position=Vec3(-0.5, -0.5, 0.0), color=Vec4(0.0, 0.0, 1.0, 1.0)),
+]
+
 fn app_iterate(context: GPUContext) raises:
     cmd = CommandBuffer.acquire(context.device)
 
