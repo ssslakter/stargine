@@ -68,6 +68,9 @@ struct CommandBuffer:
 
         return GPUTexture(texture_data, width, height)
 
+    fn begin_gpu_copy_pass(self: Self, out copy_pass: Ptr[SDL_GPUCopyPass]):
+        copy_pass = sdl_begin_gpu_copy_pass(self.buf)
+
 
 struct GPUTexture(Copyable, Movable):
     var texture: Ptr[SDL_GPUTexture]
@@ -112,7 +115,9 @@ struct GPUColorTargetInfo:
         padding2: UInt8 = 0,
     ):
         if not resolve_texture:
-            resolve_texture = Ptr[SDL_GPUTexture]()
+            resolve_texture_ptr = Ptr[SDL_GPUTexture]()
+        else:
+            resolve_texture_ptr = resolve_texture.value()
 
         self._info = SDL_GPUColorTargetInfo(
             texture=texture.texture,
@@ -122,7 +127,7 @@ struct GPUColorTargetInfo:
             mip_level=mip_level,
             layer_or_depth_plane=layer_or_depth_plane,
             resolve_mip_level=resolve_mip_level,
-            resolve_texture=resolve_texture.value(),
+            resolve_texture=resolve_texture_ptr,
             resolve_layer=resolve_layer,
             cycle=cycle,
             cycle_resolve_texture=cycle_resolve_texture,
@@ -160,3 +165,72 @@ struct GPURenderPass:
 
     fn end(self: Self):
         sdl_end_gpu_render_pass(self._render_pass)
+
+struct GPUCopyPass:
+    var _pass: Ptr[SDL_GPUCopyPass]
+
+    fn __init__(out self, command_buffer: CommandBuffer):
+        self._pass = sdl_begin_gpu_copy_pass(command_buffer.buf)
+
+    fn upload(self: Self, buffer: GPUTransferBufferLocation, src: GPUBufferRegion, cycle: Bool = False):
+        sdl_upload_to_gpu_buffer(self._pass, buffer._location, src._region, cycle)
+
+    fn end(self: Self):
+        sdl_end_gpu_copy_pass(self._pass)
+
+
+struct GPUBufferRegion:
+    var _region: Ptr[SDL_GPUBufferRegion]
+    fn __init__(out self, buffer: GPUBuffer, offset: UInt32, size: UInt32):
+        self._region = Ptr(to=SDL_GPUBufferRegion(buffer._handle, offset, size))
+
+struct GPUBuffer:
+    var _device_ptr: Ptr[SDL_GPUDevice]
+    var _handle: Ptr[SDL_GPUBuffer]
+
+    fn __init__(out self,
+        device: GPUDevice,
+        usage: SDL_GPUBufferUsageFlags,
+        size: UInt32,
+        props: SDL_PropertiesID = SDL_PropertiesID(0),
+    ) raises:
+        info = SDL_GPUBufferCreateInfo(usage, size, props)
+        self._device_ptr = device.device
+        self._handle = sdl_create_gpu_buffer(device.device, Ptr(to=info))
+
+    fn __moveinit__(out self, owned other: Self):
+        self._device_ptr = other._device_ptr
+        self._handle = other._handle
+
+    fn __del__(owned self):
+        sdl_release_gpu_buffer(self._device_ptr, self._handle)
+
+
+struct GPUTransferBufferLocation:
+    var _location: Ptr[SDL_GPUTransferBufferLocation]
+    fn __init__(out self, buffer: GPUTransferBuffer, offset: UInt32):
+        self._location = Ptr(to=SDL_GPUTransferBufferLocation(buffer._handle, offset))
+
+struct GPUTransferBuffer:
+    var _device_ptr: Ptr[SDL_GPUDevice]
+    var _handle: Ptr[SDL_GPUTransferBuffer]
+
+    fn __init__(out self, 
+    device: GPUDevice, 
+    usage: SDL_GPUTransferBufferUsage,
+    size: UInt32,
+    props: SDL_PropertiesID = SDL_PropertiesID(0),
+    ) raises:
+        info = SDL_GPUTransferBufferCreateInfo(usage, size, props)
+        self._device_ptr = device.device
+        self._handle = sdl_create_gpu_transfer_buffer(device.device, Ptr(to=info))
+
+    fn map_gpu_transfer_buffer[T: AnyType](self: Self, cycle: Bool = False) -> Ptr[T]:
+        return sdl_map_gpu_transfer_buffer(self._device_ptr, self._handle, cycle).bitcast[T]()
+
+
+    fn unmap_gpu_transfer_buffer(self: Self):
+        sdl_unmap_gpu_transfer_buffer(self._device_ptr, self._handle)
+
+    fn __del__(owned self):
+        sdl_release_gpu_transfer_buffer(self._device_ptr, self._handle)
