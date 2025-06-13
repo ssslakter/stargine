@@ -77,13 +77,14 @@ fn init_depth_stencil_state(
     )
 
 fn init_graphics_pipeline_target_info(
-    color_target_descriptions: List[SDL_GPUColorTargetDescription],
+    owned color_target_descriptions: List[SDL_GPUColorTargetDescription],
     depth_stencil_format: SDL_GPUTextureFormat = SDL_GPUTextureFormat(0),
     has_depth_stencil_target: Bool = False,
 ) -> SDL_GPUGraphicsPipelineTargetInfo:
+    var col_len: UInt32 = len(color_target_descriptions)
     return SDL_GPUGraphicsPipelineTargetInfo(
-        color_target_descriptions = color_target_descriptions.data,
-        num_color_targets = UInt32(len(color_target_descriptions)),
+        color_target_descriptions = color_target_descriptions.steal_data(),
+        num_color_targets = col_len,
         depth_stencil_format = depth_stencil_format,
         has_depth_stencil_target = has_depth_stencil_target,
         padding1 = 0,

@@ -17,6 +17,7 @@ struct GPUDevice:
         self.device = other.device
 
     fn __del__(owned self):
+        print("releasing gpu device")
         sdl_destroy_gpu_device(self.device)
 
 
@@ -203,6 +204,7 @@ struct GPUBuffer:
         self._handle = other._handle
 
     fn __del__(owned self):
+        print("releasing gpu buffer")
         sdl_release_gpu_buffer(self._device_ptr, self._handle)
 
 
@@ -233,4 +235,5 @@ struct GPUTransferBuffer:
         sdl_unmap_gpu_transfer_buffer(self._device_ptr, self._handle)
 
     fn __del__(owned self):
+        print("releasing transfer buffer")
         sdl_release_gpu_transfer_buffer(self._device_ptr, self._handle)

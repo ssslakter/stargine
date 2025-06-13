@@ -8,11 +8,6 @@ struct GPUShader:
 
     fn __init__(out self, device: GPUDevice, owned info: SDL_GPUShaderCreateInfo) raises:
         self._device_ptr = device.device
-        print("code_size:", info.code_size)
-        # TODO Here first 8 bytes are deleted for some reason
-        for i in range(UInt(info.code_size)):
-            print(info.code[i])
-            if i > 10: break
         self._handle = sdl_create_gpu_shader(device.device, Ptr(to=info))
 
     fn __del__(owned self):
@@ -32,22 +27,14 @@ fn load_shader(
     num_uniform_buffers: UInt32 = 0,
     props: SDL_PropertiesID = SDL_PropertiesID(0),
 ) raises -> GPUShader:
-    try:
-        with open(path, "rb") as file:
-            code = file.read_bytes()
-    except:
-        raise String("Error loading shader: {}").format(path)
-    
-    for i in range(len(code)):
-        print(code[i])
-        if i > 10: break
+    with open(path, "rb") as file:
+        code = file.read_bytes()
     
     code_size = len(code)*sizeof[UInt8]()
-    print("code_size:", code_size)
     
     var info = SDL_GPUShaderCreateInfo(
         code_size=code_size,
-        code=code.data,
+        code=code.steal_data(),
         format=format,
         stage=stage,
         entrypoint=entrypoint.unsafe_cstr_ptr(),
@@ -57,8 +44,6 @@ fn load_shader(
         num_uniform_buffers=num_uniform_buffers,
         props=props,
     )
-    for i in range(UInt(len(code) * sizeof[UInt8]())):
-        print(info.code[i])
-        if i > 10: break
+
 
     return GPUShader(device, info^)
