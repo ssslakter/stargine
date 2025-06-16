@@ -11,4 +11,5 @@ struct Window:
         self.window = other.window
 
     fn __del__(owned self):
+        print("releasing window")
         video.sdl_destroy_window(self.window)
