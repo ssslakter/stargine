@@ -64,7 +64,6 @@ alias vertices = List[Vertex](
 alias indices = List[UInt32](0, 1, 2, 0, 2, 3)
 
 alias Id = UInt32
-alias GL_FALSE = UInt32(0)
 
 
 @fieldwise_init
@@ -87,7 +86,7 @@ struct AppState(Movable):
         self.fullscreen = False
 
 
-fn app_init(mut state: AppState, gl: opengl.GL) raises:
+fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
 
     gl.gen_vertex_arrays(1, Ptr(to=state.vao))
@@ -149,7 +148,7 @@ fn app_init(mut state: AppState, gl: opengl.GL) raises:
         0,
         3,
         VertexAttribPointerType.FLOAT,
-        GL_FALSE,
+        False,
         sizeof[Vertex](),
         UnsafePointer[NoneType](),
     )
@@ -158,14 +157,14 @@ fn app_init(mut state: AppState, gl: opengl.GL) raises:
         1,
         4,
         VertexAttribPointerType.FLOAT,
-        GL_FALSE,
+        False,
         sizeof[Vertex](),
         UnsafePointer[Vec3]().offset(1).bitcast[NoneType](),
     )
     gl.enable_vertex_attrib_array(1)
 
 
-fn app_iterate(state: AppState, gl: opengl.GL) raises:
+fn app_iterate(state: AppState) raises:
     gl.clear_color(0.0, 0.0, 0.0, 0.0)
     gl.clear(ClearBufferMask.COLOR_BUFFER_BIT)
     gl.use_program(state.shader)
@@ -181,7 +180,7 @@ fn app_iterate(state: AppState, gl: opengl.GL) raises:
     gl.bind_vertex_array(0)
 
 
-def main_loop(state: AppState, gl: opengl.GL):
+def main_loop(state: AppState):
     var running = True
     var dragging = False
     var drag_offset_x: Float32 = 0.0
@@ -230,7 +229,7 @@ def main_loop(state: AppState, gl: opengl.GL):
                 )
         if not running:
             break
-        app_iterate(state, gl)
+        app_iterate(state)
 
 
 def main():
@@ -260,11 +259,11 @@ def main():
         )
 
     sdl.gl_make_current(window._handle, context)
-    gl = GL(sdl.gl_get_proc_address)
+    gl.init_opengl(sdl.gl_get_proc_address)
     state = AppState(window^, context)
 
-    app_init(state, gl)
-    main_loop(state, gl)
+    app_init(state)
+    main_loop(state)
 
     gl.delete_vertex_arrays(1, Ptr(to=state.vao))
     gl.delete_buffers(1, Ptr(to=state.vbo))
