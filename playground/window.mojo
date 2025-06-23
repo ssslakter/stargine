@@ -1,15 +1,15 @@
 from sdl import Ptr
-import sdl.video as video
+import sdl.sdl_video as video
 
 struct Window:
-    var window: Ptr[video.SDL_Window]
+    var _handle: Ptr[video.Window]
 
-    fn __init__(out self, window_title: String, width: Int32, height: Int32, window_flags: video.SDL_WindowFlags) raises:
-        self.window = video.sdl_create_window(window_title, width, height, window_flags)
+    fn __init__(out self, window_title: String, width: Int32, height: Int32, window_flags: video.WindowFlags) raises:
+        self._handle = video.create_window(window_title, width, height, window_flags)
 
     fn __moveinit__(out self, owned other: Self):
-        self.window = other.window
+        self._handle = other._handle
 
     fn __del__(owned self):
         print("releasing window")
-        video.sdl_destroy_window(self.window)
+        video.destroy_window(self._handle)
