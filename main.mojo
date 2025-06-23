@@ -14,7 +14,7 @@ alias win_height = 768
 
 
 @fieldwise_init
-struct Vertex(Writable, Copyable & Movable):
+struct Vertex(Copyable & Movable, Writable):
     var position: Vec3
     var color: Vec4
 
@@ -41,54 +41,234 @@ struct Vertex(Writable, Copyable & Movable):
         )
 
 
+def read_file(path: String) -> String:
+    with open(path, "r") as file:
+        return file.read()
+
+
 alias vertices = List[Vertex](
-    Vertex(position=Vec3(0.0, 0.5, 0.0), color=Vec4(1.0, 0.0, 0.0, 1.0)),
-    Vertex(position=Vec3(0.5, -0.5, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)),
-    Vertex(position=Vec3(-0.5, -0.5, 0.0), color=Vec4(0.0, 0.0, 1.0, 1.0)),
+    Vertex(
+        position=Vec3(0.0, 0.5, 0.0), color=Vec4(1.0, 0.0, 0.0, 1.0)
+    ),  # Top - Red
+    Vertex(
+        position=Vec3(0.5, 0.0, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)
+    ),  # Right - Green
+    Vertex(
+        position=Vec3(0.0, -0.5, 0.0), color=Vec4(0.0, 0.0, 1.0, 1.0)
+    ),  # Bottom - Blue
+    Vertex(
+        position=Vec3(-0.5, 0.0, 0.0), color=Vec4(1.0, 1.0, 0.0, 1.0)
+    ),  # Left - Yellow
 )
 
+alias indices = List[UInt32](0, 1, 2, 0, 2, 3)
 
-fn app_init(window: Window, gl: opengl.GL) raises:
-    gl.viewport(0, 0, win_width-100, win_height-100)
+alias Id = UInt32
+alias GL_FALSE = UInt32(0)
 
 
-fn app_iterate(window: Window, gl: opengl.GL) raises:
-    gl.clearColor(0.1, 0.2, 0.5, 1.0)
+@fieldwise_init
+struct AppState(Movable):
+    var window: Window
+    var gl_context: sdl.GLContext
+    var vbo: Id
+    var vao: Id
+    var ebo: Id
+    var shader: Id
+    var fullscreen: Bool
+
+    fn __init__(out self, owned window: Window, gl_context: sdl.GLContext):
+        self.window = window^
+        self.gl_context = gl_context
+        self.vbo = 0
+        self.vao = 0
+        self.ebo = 0
+        self.shader = 0
+        self.fullscreen = False
+
+
+fn app_init(mut state: AppState, gl: opengl.GL) raises:
+    gl.viewport(0, 0, win_width, win_height)
+
+    gl.gen_vertex_arrays(1, Ptr(to=state.vao))
+    gl.bind_vertex_array(state.vao)
+    gl.gen_buffers(1, Ptr(to=state.vbo))
+    gl.bind_buffer(BufferTargetARB.ARRAY_BUFFER, state.vbo)
+
+    gl.gen_buffers(1, Ptr(to=state.ebo))
+    gl.bind_buffer(BufferTargetARB.ELEMENT_ARRAY_BUFFER, state.ebo)
+
+    gl.buffer_data(
+        BufferTargetARB.ARRAY_BUFFER,
+        sizeof[Vertex]() * len(vertices),
+        vertices.unsafe_ptr().bitcast[NoneType](),
+        BufferUsageARB.STATIC_DRAW,
+    )
+
+    gl.buffer_data(
+        BufferTargetARB.ELEMENT_ARRAY_BUFFER,
+        sizeof[UInt32]() * len(indices),
+        indices.unsafe_ptr().bitcast[NoneType](),
+        BufferUsageARB.STATIC_DRAW,
+    )
+    vertex_src = read_file("shaders/vertex.glsl")
+    vertex_shader = gl.create_shader(ShaderType.VERTEX_SHADER)
+    var cstr_ptr = vertex_src.unsafe_cstr_ptr().origin_cast[
+        origin=MutableAnyOrigin
+    ]()
+    gl.shader_source(
+        vertex_shader,
+        1,
+        Ptr(to=cstr_ptr).origin_cast[mut=False](),
+        UnsafePointer[Int32](),
+    )
+    gl.compile_shader(vertex_shader)
+
+    fragment_src = read_file("shaders/fragment.glsl")
+    fragment_shader = gl.create_shader(ShaderType.FRAGMENT_SHADER)
+    cstr_ptr = fragment_src.unsafe_cstr_ptr().origin_cast[
+        origin=MutableAnyOrigin
+    ]()
+    gl.shader_source(
+        fragment_shader,
+        1,
+        Ptr(to=cstr_ptr).origin_cast[mut=False](),
+        UnsafePointer[Int32](),
+    )
+    gl.compile_shader(fragment_shader)
+
+    state.shader = gl.create_program()
+    gl.attach_shader(state.shader, vertex_shader)
+    gl.attach_shader(state.shader, fragment_shader)
+    gl.link_program(state.shader)
+    gl.delete_shader(vertex_shader)
+    gl.delete_shader(fragment_shader)
+    # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
+
+    gl.vertex_attrib_pointer(
+        0,
+        3,
+        VertexAttribPointerType.FLOAT,
+        GL_FALSE,
+        sizeof[Vertex](),
+        UnsafePointer[NoneType](),
+    )
+    gl.enable_vertex_attrib_array(0)
+    gl.vertex_attrib_pointer(
+        1,
+        4,
+        VertexAttribPointerType.FLOAT,
+        GL_FALSE,
+        sizeof[Vertex](),
+        UnsafePointer[Vec3]().offset(1).bitcast[NoneType](),
+    )
+    gl.enable_vertex_attrib_array(1)
+
+
+fn app_iterate(state: AppState, gl: opengl.GL) raises:
+    gl.clear_color(0.0, 0.0, 0.0, 0.0)
     gl.clear(ClearBufferMask.COLOR_BUFFER_BIT)
-    sdl.gl_swap_window(window._handle)
+    gl.use_program(state.shader)
+    gl.bind_vertex_array(state.vao)
+    # gl.bind_buffer(BufferTargetARB.ELEMENT_ARRAY_BUFFER, state.ebo)
+    gl.draw_elements(
+        PrimitiveType.TRIANGLES,
+        len(indices),
+        DrawElementsType.UNSIGNED_INT,
+        UnsafePointer[NoneType](),
+    )
+    sdl.gl_swap_window(state.window._handle)
+    gl.bind_vertex_array(0)
 
 
-def main_loop(window: Window, gl: opengl.GL):
+def main_loop(state: AppState, gl: opengl.GL):
     var running = True
+    var dragging = False
+    var drag_offset_x: Float32 = 0.0
+    var drag_offset_y: Float32 = 0.0
+
     while running:
         var event = Event(UInt32(0))
         while sdl.poll_event(Ptr(to=event)):
             if event[CommonEvent].type == Int(EventType.EVENT_QUIT):
                 running = False
                 break  # Exit event polling loop
-
-        if not running:  # If quit event was processed
+            # Handle window resize
+            if event[CommonEvent].type == Int(EventType.EVENT_WINDOW_RESIZED):
+                window_event = event[WindowEvent]
+                new_width = window_event.data1
+                new_height = window_event.data2
+                gl.viewport(0, 0, new_width, new_height)
+            if event[CommonEvent].type == Int(
+                EventType.EVENT_MOUSE_BUTTON_DOWN
+            ):
+                mouse_event = event[MouseMotionEvent]
+                dragging = True
+                drag_offset_x = mouse_event.x
+                drag_offset_y = mouse_event.y
+            elif event[CommonEvent].type == Int(
+                EventType.EVENT_MOUSE_BUTTON_UP
+            ):
+                dragging = False
+            elif (
+                event[CommonEvent].type == Int(EventType.EVENT_MOUSE_MOTION)
+                and dragging
+            ):
+                mouse_event = event[MouseMotionEvent]
+                mouse_x = mouse_event.x
+                mouse_y = mouse_event.y
+                # Get current window position
+                win_x, win_y = Int32(0), Int32(0)
+                sdl.get_window_position(
+                    state.window._handle, Ptr(to=win_x), Ptr(to=win_y)
+                )
+                # Set new position
+                sdl.set_window_position(
+                    state.window._handle,
+                    Int32(Float32(win_x) + Float32(mouse_x - drag_offset_x)),
+                    Int32(Float32(win_y) + Float32(mouse_y - drag_offset_y)),
+                )
+        if not running:
             break
-        app_iterate(window, gl)
+        app_iterate(state, gl)
 
 
 def main():
     sdl.init(InitFlags.INIT_VIDEO | InitFlags.INIT_EVENTS)
 
-    sdl.gl_set_attribute(sdl.GLAttr.GL_CONTEXT_PROFILE_MASK, Int(sdl.GLProfile.GL_CONTEXT_PROFILE_CORE))
+    sdl.gl_set_attribute(
+        sdl.GLAttr.GL_CONTEXT_PROFILE_MASK,
+        Int(sdl.GLProfile.GL_CONTEXT_PROFILE_CORE),
+    )
     sdl.gl_set_attribute(sdl.GLAttr.GL_CONTEXT_MAJOR_VERSION, 4)
     sdl.gl_set_attribute(sdl.GLAttr.GL_CONTEXT_MINOR_VERSION, 2)
     sdl.gl_set_attribute(sdl.GLAttr.GL_DOUBLEBUFFER, 1)
 
-    window = Window("SDL Window", win_width, win_height, WindowFlags.WINDOW_RESIZABLE | WindowFlags.WINDOW_OPENGL)
+    window = Window(
+        "SDL Window",
+        win_width,
+        win_height,
+        WindowFlags.WINDOW_RESIZABLE
+        | WindowFlags.WINDOW_OPENGL
+        | WindowFlags.WINDOW_TRANSPARENT
+        | WindowFlags.WINDOW_BORDERLESS,
+    )
     context = sdl.gl_create_context(window._handle)
     if not context:
-        raise Error("Failed to create OpenGL context. Unsupported OpenGL version.")
-    
+        raise Error(
+            "Failed to create OpenGL context. Unsupported OpenGL version."
+        )
+
     sdl.gl_make_current(window._handle, context)
     gl = GL(sdl.gl_get_proc_address)
+    state = AppState(window^, context)
 
-    app_init(window, gl)
-    
-    main_loop(window, gl)
+    app_init(state, gl)
+    main_loop(state, gl)
+
+    gl.delete_vertex_arrays(1, Ptr(to=state.vao))
+    gl.delete_buffers(1, Ptr(to=state.vbo))
+    gl.delete_buffers(1, Ptr(to=state.ebo))
+    gl.delete_program(state.shader)
+
     sdl.quit()
