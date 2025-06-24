@@ -1,10 +1,11 @@
 import time
 from sys import sizeof
-from sdl import InitFlags, WindowFlags, Event, CommonEvent, EventType, WindowEvent, MouseMotionEvent
-from playground.utils import *
-from playground.window import *
-import opengl as gl
+from sdl import InitFlags, WindowFlags, Event
+from sdl.sdl_events import *
 from opengl import BufferTargetARB, VertexAttribPointerType, BufferUsageARB, ShaderType, DrawElementsType, PrimitiveType, ClearBufferMask
+import opengl as gl
+
+from playground import *
 
 alias win_width = 1024
 alias win_height = 768
@@ -18,11 +19,6 @@ struct Vertex(Copyable & Movable, Writable):
     fn write_to[W: Writer](self, mut writer: W):
         writer.write("Vertex(position=(", self.position[0], ", ", self.position[1], ", ", self.position[2], "))")
         writer.write(", color=(", self.color[0], ", ", self.color[1], ", ", self.color[2], ", ", self.color[3], "))")
-
-
-def read_file(path: String) -> String:
-    with open(path, "r") as file:
-        return file.read()
 
 
 alias triangle1 = List[Vertex](
@@ -40,7 +36,6 @@ alias triangle2 = List[Vertex](
 alias indices = InlineArray[UInt32, 6](0, 1, 2, 0, 2, 3)
 alias indices2 = InlineArray[UInt32, 3](0, 2, 3)
 
-alias Id = UInt32
 
 
 @fieldwise_init
@@ -86,25 +81,19 @@ fn app_init(mut state: AppState) raises:
     init_buffers(state.vaos[0], state.vbos[0], triangle1)
     init_buffers(state.vaos[1], state.vbos[1], triangle2)
 
-    vertex_src = read_file("shaders/vertex.glsl")
-    vertex_shader = gl.create_shader(ShaderType.VERTEX_SHADER)
-    var cstr_ptr = vertex_src.unsafe_cstr_ptr().origin_cast[origin=MutableAnyOrigin]()
-    gl.shader_source(vertex_shader, 1, Ptr(to=cstr_ptr).origin_cast[mut=False](), UnsafePointer[Int32]())
-    gl.compile_shader(vertex_shader)
-
-    fragment_src = read_file("shaders/fragment.glsl")
-    fragment_shader = gl.create_shader(ShaderType.FRAGMENT_SHADER)
-    cstr_ptr = fragment_src.unsafe_cstr_ptr().origin_cast[origin=MutableAnyOrigin]()
-    gl.shader_source(fragment_shader, 1, Ptr(to=cstr_ptr).origin_cast[mut=False](), UnsafePointer[Int32]())
-    gl.compile_shader(fragment_shader)
-
+    vertex_shader = load_shader("shaders/vertex.glsl", ShaderType.VERTEX_SHADER)
+    fragment_shader = load_shader("shaders/fragment.glsl", ShaderType.FRAGMENT_SHADER)
     state.shader = gl.create_program()
-    gl.attach_shader(state.shader, vertex_shader)
-    gl.attach_shader(state.shader, fragment_shader)
-    gl.link_program(state.shader)
-    gl.delete_shader(vertex_shader)
-    gl.delete_shader(fragment_shader)
+    link_shader_program(state.shader, vertex_shader, fragment_shader)
+
     # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
+
+fn reload_shaders(mut state: AppState) raises:
+    gl.delete_program(state.shader)
+    vertex_shader = load_shader("shaders/vertex.glsl", ShaderType.VERTEX_SHADER)
+    fragment_shader = load_shader("shaders/fragment.glsl", ShaderType.FRAGMENT_SHADER)
+    state.shader = gl.create_program()
+    link_shader_program(state.shader, vertex_shader, fragment_shader)
 
 
 fn app_iterate(state: AppState) raises:
@@ -124,7 +113,7 @@ fn app_iterate(state: AppState) raises:
     gl.bind_vertex_array(0)
 
 
-def main_loop(state: AppState):
+def main_loop(mut state: AppState):
     var running = True
     var dragging = False
     var drag_offset_x: Float32 = 0.0
@@ -135,8 +124,14 @@ def main_loop(state: AppState):
         while sdl.poll_event(Ptr(to=event)):
             if event[CommonEvent].type == Int(EventType.EVENT_QUIT):
                 running = False
-                break  # Exit event polling loop
-            # Handle window resize
+                break 
+            if event[CommonEvent].type == Int(EventType.EVENT_KEY_DOWN):
+                key_event = event[KeyboardEvent]
+                if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_ESCAPE):
+                    running = False
+                    break
+                if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_R):
+                    reload_shaders(state)
             if event[CommonEvent].type == Int(EventType.EVENT_WINDOW_RESIZED):
                 window_event = event[WindowEvent]
                 new_width = window_event.data1

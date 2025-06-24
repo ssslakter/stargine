@@ -1,5 +1,4 @@
 from .window import *
 from .gpu import *
-
-# from .shader import *
-from sdl import *
+from .shader import *
+from .utils import *
