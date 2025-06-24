@@ -14,7 +14,6 @@
 #         sdl_release_gpu_shader(self._device_ptr, self._handle)
 
 
-
 # fn load_shader(
 #     path: String,
 #     device: GPUDevice,
@@ -29,9 +28,9 @@
 # ) raises -> GPUShader:
 #     with open(path, "rb") as file:
 #         code = file.read_bytes()
-    
+
 #     code_size = len(code)*sizeof[UInt8]()
-    
+
 #     var info = SDL_GPUShaderCreateInfo(
 #         code_size=code_size,
 #         code=code.steal_data(),

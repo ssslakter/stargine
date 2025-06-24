@@ -40,18 +40,13 @@ struct CommandBuffer:
 
     fn __del__(owned self):
         if not self._submitted:
-            print(
-                "Warning: Command buffer not submitted before destruction,"
-                " leaking resources"
-            )
+            print("Warning: Command buffer not submitted before destruction, leaking resources")
 
     fn submit(owned self) raises:
         gpu.submit_gpu_command_buffer(self.buf)
         self._submitted = True
 
-    fn wait_and_acquire_gpu_swapchain_texture(
-        self: Self, window: Window
-    ) raises -> Optional[GPUTexture]:
+    fn wait_and_acquire_gpu_swapchain_texture(self: Self, window: Window) raises -> Optional[GPUTexture]:
         var width: UInt32 = 0
         var height: UInt32 = 0
         var texture_data = Ptr[gpu.GPUTexture, mut=True]()
@@ -78,9 +73,7 @@ struct GPUTexture(Copyable, Movable):
     var width: UInt32
     var height: UInt32
 
-    fn __init__(
-        out self, texture: Ptr[gpu.GPUTexture], width: UInt32, height: UInt32
-    ) raises:
+    fn __init__(out self, texture: Ptr[gpu.GPUTexture], width: UInt32, height: UInt32) raises:
         self.texture = texture
         self.width = width
         self.height = height
@@ -148,13 +141,9 @@ struct GPURenderPass:
         command_buffer: CommandBuffer,
         color_target_info: GPUColorTargetInfo,
         num_color_targets: UInt32,
-        depth_stencil_target_info: Optional[
-            gpu.GPUDepthStencilTargetInfo
-        ] = None,
+        depth_stencil_target_info: Optional[gpu.GPUDepthStencilTargetInfo] = None,
     ) -> Self:
-        depth_stencil_target_info_ptr = Ptr(
-            to=depth_stencil_target_info.value()
-        ) if depth_stencil_target_info else Ptr[gpu.GPUDepthStencilTargetInfo]()
+        depth_stencil_target_info_ptr = Ptr(to=depth_stencil_target_info.value()) if depth_stencil_target_info else Ptr[gpu.GPUDepthStencilTargetInfo]()
 
         var render_pass = gpu.begin_gpu_render_pass(
             command_buffer.buf,
@@ -166,6 +155,7 @@ struct GPURenderPass:
 
     fn end(self: Self):
         gpu.end_gpu_render_pass(self._render_pass)
+
 
 struct GPUCopyPass:
     var _pass: Ptr[gpu.GPUCopyPass]
@@ -182,14 +172,17 @@ struct GPUCopyPass:
 
 struct GPUBufferRegion:
     var _region: Ptr[gpu.GPUBufferRegion]
+
     fn __init__(out self, buffer: GPUBuffer, offset: UInt32, size: UInt32):
         self._region = Ptr(to=gpu.GPUBufferRegion(buffer._handle, offset, size))
+
 
 struct GPUBuffer:
     var _device_ptr: Ptr[gpu.GPUDevice]
     var _handle: Ptr[gpu.GPUBuffer]
 
-    fn __init__(out self,
+    fn __init__(
+        out self,
         device: GPUDevice,
         usage: gpu.GPUBufferUsageFlags,
         size: UInt32,
@@ -210,18 +203,21 @@ struct GPUBuffer:
 
 struct GPUTransferBufferLocation:
     var _location: Ptr[gpu.GPUTransferBufferLocation]
+
     fn __init__(out self, buffer: GPUTransferBuffer, offset: UInt32):
         self._location = Ptr(to=gpu.GPUTransferBufferLocation(buffer._handle, offset))
+
 
 struct GPUTransferBuffer:
     var _device_ptr: Ptr[gpu.GPUDevice]
     var _handle: Ptr[gpu.GPUTransferBuffer]
 
-    fn __init__(out self, 
-    device: GPUDevice, 
-    usage: gpu.GPUTransferBufferUsage,
-    size: UInt32,
-    props: gpu.PropertiesID = gpu.PropertiesID(0),
+    fn __init__(
+        out self,
+        device: GPUDevice,
+        usage: gpu.GPUTransferBufferUsage,
+        size: UInt32,
+        props: gpu.PropertiesID = gpu.PropertiesID(0),
     ) raises:
         info = gpu.GPUTransferBufferCreateInfo(usage, size, props)
         self._device_ptr = device.device
@@ -229,7 +225,6 @@ struct GPUTransferBuffer:
 
     fn map_gpu_transfer_buffer[T: AnyType](self: Self, cycle: Bool = False) -> Ptr[T]:
         return gpu.map_gpu_transfer_buffer(self._device_ptr, self._handle, cycle).bitcast[T]()
-
 
     fn unmap_gpu_transfer_buffer(self: Self):
         gpu.unmap_gpu_transfer_buffer(self._device_ptr, self._handle)

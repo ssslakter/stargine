@@ -1,6 +1,7 @@
 from sdl import Ptr
 import sdl.sdl_video as video
 
+
 struct Window:
     var _handle: Ptr[video.Window]
 

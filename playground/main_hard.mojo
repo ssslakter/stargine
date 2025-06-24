@@ -4,7 +4,6 @@
 # from playground import utils
 
 
-
 # alias Vec3 = Tuple[Float32, Float32, Float32]
 # alias Vec4 = Tuple[Float32, Float32, Float32, Float32]
 
@@ -36,7 +35,7 @@
 #     if not swapchain_texture:
 #         cmd^.submit()
 #         return
-    
+
 #     var color_target_info = GPUColorTargetInfo(
 #         texture=swapchain_texture.value(),
 #         clear_color=SDL_FColor(r=0.95, g=0.95, b=0.95, a=1.0),
@@ -60,22 +59,22 @@
 #     sdl_draw_gpu_primitives(render_pass._render_pass, 3, 1, 0, 0)
 
 #     render_pass.end()
-    
+
 #     cmd^.submit()
 
 # from pathlib import cwd
 # def main_loop(window: Window, device: GPUDevice):
 #     print(cwd())
-#     var vertex_shader = load_shader("shaders/vertex.spv", 
-#                                     device, 
-#                                     SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV, 
+#     var vertex_shader = load_shader("shaders/vertex.spv",
+#                                     device,
+#                                     SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV,
 #                                     SDL_GPUShaderStage(SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_VERTEX))
-    
-#     var fragment_shader = load_shader("shaders/fragment.spv", 
-#                                  device, 
-#                                  SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV, 
+
+#     var fragment_shader = load_shader("shaders/fragment.spv",
+#                                  device,
+#                                  SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV,
 #                                  SDL_GPUShaderStage(SDL_GPUShaderStage.SDL_GPU_SHADERSTAGE_FRAGMENT))
-    
+
 #     var vertex_buffer_descriptions = [SDL_GPUVertexBufferDescription(
 #         slot = 0,
 #         input_rate = SDL_GPUVertexInputRate(SDL_GPUVertexInputRate.SDL_GPU_VERTEXINPUTRATE_VERTEX),
@@ -145,7 +144,7 @@
 
 #     var cmd = CommandBuffer.acquire(device)
 #     var copy_pass = cmd.begin_gpu_copy_pass()
-    
+
 #     var location = SDL_GPUTransferBufferLocation (
 #         transfer_buffer = transfer_buffer._handle,
 #         offset = 0,
@@ -168,7 +167,7 @@
 #             if event[SDL_CommonEvent].type == SDL_EventType.SDL_EVENT_QUIT:
 #                 running = False
 #                 break # Exit event polling loop
-        
+
 #         if not running: # If quit event was processed
 #             break
 #         app_iterate(window, device, pipeline, vertex_buffer, transfer_buffer)
