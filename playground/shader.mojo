@@ -2,6 +2,51 @@ import opengl as gl
 from opengl import ShaderType
 from .utils import *
 
+@register_passable("trivial")
+struct Shader(Copyable, Movable):
+    var id: Id
+
+    fn __init__(out self):
+        self.id = 0
+
+    fn __init__(out self, vertex_path: String, fragment_path: String) raises:
+        vertex_shader = load_shader(vertex_path, ShaderType.VERTEX_SHADER)
+        fragment_shader = load_shader(fragment_path, ShaderType.FRAGMENT_SHADER)
+        self.id = gl.create_program()
+        link_shader_program(self.id, vertex_shader, fragment_shader)
+        gl.delete_shader(vertex_shader)
+        gl.delete_shader(fragment_shader)
+
+    fn use(self): gl.use_program(self.id)
+
+    fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]) raises:
+        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        if dtype is DType.float32:
+            gl.uniform1f(location, rebind[Float32](value))
+        elif dtype is DType.int32:
+            gl.uniform1i(location, rebind[Int32](value))
+
+    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype]]) raises:        
+        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        if dtype is DType.float32:
+            var v = rebind[Vec2](value)
+            gl.uniform2f(location, v[0], v[1])
+
+    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
+        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        if dtype is DType.float32:
+            var v = rebind[Vec3](value)
+            gl.uniform3f(location, v[0], v[1], v[2])
+
+    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
+        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        if dtype is DType.float32:
+            var v = rebind[Vec4](value)
+            gl.uniform4f(location, v[0], v[1], v[2], v[3])
+
+
+        
+
 def read_file(path: String) -> String:
     with open(path, "r") as file:
         return file.read()
