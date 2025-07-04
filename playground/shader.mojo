@@ -1,6 +1,7 @@
 import opengl as gl
 from opengl import ShaderType
 from .utils import *
+from .linalg import *
 
 @register_passable("trivial")
 struct Shader(Copyable, Movable):
@@ -21,28 +22,35 @@ struct Shader(Copyable, Movable):
 
     fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]) raises:
         var location = gl.get_uniform_location(self.id, name)
+        @parameter
         if dtype is DType.float32:
             gl.uniform1f(location, rebind[Float32](value))
         elif dtype is DType.int32:
             gl.uniform1i(location, rebind[Int32](value))
 
-    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype]]) raises:        
+    fn set_uniform[dtype: DType](self, owned name: String, value: Vec2[dtype]) raises:        
         var location = gl.get_uniform_location(self.id, name)
+        @parameter
         if dtype is DType.float32:
-            var v = rebind[Vec2](value)
-            gl.uniform2f(location, v[0], v[1])
+            var v = rebind[Vec2f](value)
+            gl.uniform2f(location, v.x(), v.y())
 
-    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
+    fn set_uniform[dtype: DType](self, owned name: String, value: Vec3[dtype]) raises:
         var location = gl.get_uniform_location(self.id, name)
+        @parameter
         if dtype is DType.float32:
-            var v = rebind[Vec3](value)
-            gl.uniform3f(location, v[0], v[1], v[2])
+            var v = rebind[Vec3f](value)
+            gl.uniform3f(location, v.x(), v.y(), v.z())
+        elif dtype is DType.int32:
+            var v = rebind[Vec3i](value)
+            gl.uniform3i(location, v.x(), v.y(), v.z())
 
-    fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
+    fn set_uniform[dtype: DType](self, owned name: String, value: Vec4[dtype]) raises:
         var location = gl.get_uniform_location(self.id, name)
+        @parameter
         if dtype is DType.float32:
-            var v = rebind[Vec4](value)
-            gl.uniform4f(location, v[0], v[1], v[2], v[3])
+            var v = rebind[Vec4f](value)
+            gl.uniform4f(location, v.x(), v.y(), v.z(), v.w())
 
 
         
