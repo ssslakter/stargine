@@ -3,6 +3,7 @@ from utils.index import IndexList
 from python import Python, PythonObject
 from buffer import NDBuffer
 from python._cpython import PyObjectPtr
+from .imports import *
 
 @fieldwise_init
 struct PyArrayObject[dtype: DType](Copyable, Movable):

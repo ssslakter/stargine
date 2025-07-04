@@ -1,3 +1,4 @@
+from memory import OwnedPointer
 import math
 from sys import sizeof
 import time
@@ -6,6 +7,7 @@ from opengl import BufferTargetARB, VertexAttribPointerType, BufferUsageARB, Sha
 import opengl as gl
 import sdl
 from .linalg import *
+from .core import *
 
 
 alias win_width = 1024
@@ -13,7 +15,7 @@ alias win_height = 768
 
 
 @fieldwise_init
-struct Vertex(Copyable & Movable, Writable):
+struct Vertex(Copyable & Movable, Writable, WithVertexLayout):
     var position: Vec3f
     var color: Vec4f
     var tex_coords: Vec2f
@@ -22,6 +24,14 @@ struct Vertex(Copyable & Movable, Writable):
         writer.write("Vertex(position=(", self.position[0], ", ", self.position[1], ", ", self.position[2], "))")
         writer.write(", color=(", self.color[0], ", ", self.color[1], ", ", self.color[2], ", ", self.color[3], "))")
         writer.write(", tex_coords=(", self.tex_coords[0], ", ", self.tex_coords[1], "))")
+
+    @staticmethod
+    fn get_layout() -> VertexLayout:
+        return VertexLayout(elements=[
+            VertexAttribute(total_size=sizeof[Vec3f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
+            VertexAttribute(total_size=sizeof[Vec4f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
+            VertexAttribute(total_size=sizeof[Vec2f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
+        ])
 
 alias triangle = List[Vertex](
     Vertex(position=Vec3f(-0.5, -0.5, 0.0), color=Vec4f(0.0, 0.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),  # Bottom - Blue
@@ -36,9 +46,9 @@ alias indices = InlineArray[UInt32, 3](0, 1, 2)
 struct AppState(Movable):
     var window: Window
     var gl_context: sdl.GLContext
-    var vbos: List[VertexBuffer[Vertex]]
-    var vaos: List[Id]
-    var ebos: List[Id]
+    var vbo: VertexBuffer[Vertex]
+    var vao: VertexArray
+    var ebo: IndexBuffer
     var texture_id: Id
     var shader: Shader
     var fullscreen: Bool
@@ -48,24 +58,15 @@ struct AppState(Movable):
         self.window = window^
         self.gl_context = gl_context
         self.vbos = []
-        self.vaos = List[Id](10, 0)
-        self.ebos = List[Id](10, 0)
+        self.vaos = []
+        self.ebos = []
         self.texture_id = 0
         self.shader = Shader()
         self.fullscreen = False
         self.start_time = time.monotonic()/Float64(1e6)
 
-fn init_buffers(mut state: AppState, vao_id: Id, vertices: List[Vertex]):
-    gl.bind_vertex_array(vao_id)
-    state.vbos.append(VertexBuffer[Vertex](vertices))
-    # gl.buffer_data(BufferTargetARB.ELEMENT_ARRAY_BUFFER, sizeof[UInt32]() * 3, indices.unsafe_ptr().bitcast[NoneType](), BufferUsageARB.STATIC_DRAW)
-    # TODO get rid of hack with offsets
-    gl.vertex_attrib_pointer(0, 3, VertexAttribPointerType.FLOAT, False, sizeof[Vertex](), UnsafePointer[NoneType]())
-    gl.enable_vertex_attrib_array(0)
-    gl.vertex_attrib_pointer(1, 4, VertexAttribPointerType.FLOAT, False, sizeof[Vertex](), UnsafePointer[Vec3f]().offset(1).bitcast[NoneType]())
-    gl.enable_vertex_attrib_array(1)
-    gl.vertex_attrib_pointer(2, 2, VertexAttribPointerType.FLOAT, False, sizeof[Vertex](), UnsafePointer[Float32]().offset(8).bitcast[NoneType]())
-    gl.enable_vertex_attrib_array(2)
+fn init_buffers(mut state: AppState, vertices: List[Vertex]):
+
 
 fn init_texture() raises -> Id:
     var texture_id: Id = 0
@@ -88,26 +89,15 @@ fn init_texture() raises -> Id:
 fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
 
-    gl.gen_vertex_arrays(2, state.vaos.unsafe_ptr())
-    gl.gen_buffers(2, state.ebos.unsafe_ptr())
-    
     state.texture_id = init_texture()
-    # Set up triangles
-    init_buffers(state, state.vaos[0], triangle)
 
-    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
+    # Set up triangles
+    state.vbos.append(VertexBuffer[Vertex](triangle))
+    state.vaos.append(VertexArray(Vertex.get_layout()))
+
+    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")^
 
     # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
-
-fn app_cleanup(owned state: AppState):
-    gl.delete_vertex_arrays(2, state.vaos.unsafe_ptr())
-    gl.delete_buffers(2, state.ebos.unsafe_ptr())
-    gl.delete_program(state.shader.id)
-
-
-fn reload_shaders(mut state: AppState) raises:
-    gl.delete_program(state.shader.id)
-    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
 
 
 fn update(state: AppState) raises:
@@ -121,11 +111,11 @@ fn update(state: AppState) raises:
 
     # Draw first triangle
     gl.bind_texture(gl.TextureTarget.TEXTURE_2D, state.texture_id)
-    gl.bind_vertex_array(state.vaos[0])
+    state.vaos[0].bind()
     gl.draw_arrays(PrimitiveType.TRIANGLES, 0, 3)
 
     # Draw second triangle
-    gl.bind_vertex_array(state.vaos[1])
-    gl.draw_arrays(PrimitiveType.TRIANGLES, 0, 3)
+    # state.vaos[1].bind()
+    # gl.draw_arrays(PrimitiveType.TRIANGLES, 0, 3)
 
     sdl.gl_swap_window(state.window._handle)

@@ -1,4 +1,3 @@
-import opengl as gl
 from opengl import ShaderType
 from .utils import *
 from ..linalg import *
@@ -12,17 +11,24 @@ def compile_shader(paths: List[String], shader_type: ShaderType) -> Id:
     return shader
 
 
-struct Shader(Copyable, Movable):
+struct Shader(Movable):
+    var fragment_paths: List[String]
+    var vertex_paths: List[String]
     var id: Id
 
     fn __init__(out self):
         self.id = 0
+        self.fragment_paths = []
+        self.vertex_paths = []
 
     fn __init__(out self, fragment_path: String, vertex_path: String) raises:
         self = Self([fragment_path], [vertex_path])
 
     fn __init__(out self, fragment_paths: List[String], vertex_paths: List[String]) raises:
+        print('initializing shader')
         self.id = gl.create_program()
+        self.fragment_paths = fragment_paths
+        self.vertex_paths = vertex_paths
         vertex_shader = compile_shader(vertex_paths, ShaderType.VERTEX_SHADER)
         fragment_shader = compile_shader(fragment_paths, ShaderType.FRAGMENT_SHADER)
         gl.attach_shader(self.id, vertex_shader)
@@ -32,7 +38,13 @@ struct Shader(Copyable, Movable):
         gl.delete_shader(fragment_shader)
 
     fn __del__(owned self):
+        print('deleting shader')
         gl.delete_program(self.id)
+
+    fn reload(mut self) raises:
+        print('reloading shader')
+        gl.delete_program(self.id)
+        self = Self(self.fragment_paths, self.vertex_paths)
 
     fn bind(self):
         gl.use_program(self.id)

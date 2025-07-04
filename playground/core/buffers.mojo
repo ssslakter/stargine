@@ -1,9 +1,7 @@
-import opengl as gl
-from .imports import *
 from .utils import *
 
 
-struct VertexBuffer[T: Copyable & Movable](Copyable, Movable):
+struct VertexBuffer[T: Copyable & Movable](Movable, Copyable):
     var id: Id
 
     fn __init__[T: Copyable & Movable](out self, data: List[T]):
@@ -29,7 +27,7 @@ struct VertexBuffer[T: Copyable & Movable](Copyable, Movable):
 
 
 
-struct IndexBuffer:
+struct IndexBuffer(Movable, Copyable):
     var id: Id
     var count: Int
 
@@ -58,7 +56,3 @@ struct IndexBuffer:
 
     fn get_count(self) -> Int:
         return self.count
-
-struct VertexArray:
-    var id: Id
-

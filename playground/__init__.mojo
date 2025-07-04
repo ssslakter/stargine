@@ -1,5 +1,4 @@
 from .window import *
 from .gpu import *
-from .shader import *
-from .utils import *
+from .core import *
 from .app import *

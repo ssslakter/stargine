@@ -22,8 +22,8 @@ def main_loop(mut state: AppState):
                 if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_ESCAPE):
                     running = False
                     break
-                if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_R):
-                    reload_shaders(state)
+                if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_R): pass
+                    # state.shader.reload()
             if event[CommonEvent].type == Int(EventType.EVENT_WINDOW_RESIZED):
                 window_event = event[WindowEvent]
                 new_width = window_event.data1
@@ -74,6 +74,5 @@ def main():
 
     app_init(state)
     main_loop(state)
-    app_cleanup(state^)
 
     sdl.quit()
