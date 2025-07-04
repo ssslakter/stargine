@@ -20,21 +20,19 @@ struct Vertex(Copyable & Movable, Writable):
         writer.write(", color=(", self.color[0], ", ", self.color[1], ", ", self.color[2], ", ", self.color[3], "))")
 
 
-alias triangle1 = List[Vertex](
+alias triangle = List[Vertex](
     Vertex(position=Vec3(-0.5, -0.5, 0.0), color=Vec4(0.0, 0.0, 1.0, 1.0)),  # Bottom - Blue
-    Vertex(position=Vec3(-0.5, 0.5, 0.0), color=Vec4(1.0, 1.0, 0.0, 1.0)),  # Left - Yellow
-    Vertex(position=Vec3(0.5, 0.5, 0.0), color=Vec4(1.0, 0.0, 0.0, 1.0)),  # Top - Red
+    Vertex(position=Vec3(0.0, 0.5, 0.0), color=Vec4(1.0, 1.0, 0.0, 1.0)),  # Left - Yellow
+    Vertex(position=Vec3(0.5, -0.5, 0.0), color=Vec4(1.0, 0.0, 0.0, 1.0)),  # Top - Red
 )
 
-alias triangle2 = List[Vertex](
-    Vertex(position=Vec3(-0.5, -0.5, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)),
-    Vertex(position=Vec3(0.5, 0.5, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)),
-    Vertex(position=Vec3(0.5, -0.5, 0.0), color=Vec4(0.0, 1.0, 0.0, 1.0)),
+alias tex_coords = List[Vec2](
+    Vec2(0.0, 0.0),
+    Vec2(1.0, 0.0),
+    Vec2(0.5, 1.0),
 )
 
-alias indices = InlineArray[UInt32, 6](0, 1, 2, 0, 2, 3)
-alias indices2 = InlineArray[UInt32, 3](0, 2, 3)
-
+alias indices = InlineArray[UInt32, 3](0, 1, 2)
 
 
 @fieldwise_init
@@ -76,10 +74,13 @@ fn app_init(mut state: AppState) raises:
     gl.gen_vertex_arrays(2, state.vaos.unsafe_ptr())
     gl.gen_buffers(2, state.vbos.unsafe_ptr())
     gl.gen_buffers(2, state.ebos.unsafe_ptr())
+    print(Int(gl.TextureWrapMode.MIRRORED_REPEAT))
+    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
+    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
+    
 
     # Set up triangles
-    init_buffers(state.vaos[0], state.vbos[0], triangle1)
-    init_buffers(state.vaos[1], state.vbos[1], triangle2)
+    init_buffers(state.vaos[0], state.vbos[0], triangle)
 
     state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
 

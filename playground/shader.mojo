@@ -20,26 +20,26 @@ struct Shader(Copyable, Movable):
     fn use(self): gl.use_program(self.id)
 
     fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]) raises:
-        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        var location = gl.get_uniform_location(self.id, name)
         if dtype is DType.float32:
             gl.uniform1f(location, rebind[Float32](value))
         elif dtype is DType.int32:
             gl.uniform1i(location, rebind[Int32](value))
 
     fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype]]) raises:        
-        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        var location = gl.get_uniform_location(self.id, name)
         if dtype is DType.float32:
             var v = rebind[Vec2](value)
             gl.uniform2f(location, v[0], v[1])
 
     fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
-        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        var location = gl.get_uniform_location(self.id, name)
         if dtype is DType.float32:
             var v = rebind[Vec3](value)
             gl.uniform3f(location, v[0], v[1], v[2])
 
     fn set_uniform[dtype: DType](self, owned name: String, value: Tuple[Scalar[dtype], Scalar[dtype], Scalar[dtype], Scalar[dtype]]) raises:
-        var location = gl.get_uniform_location(self.id, name.unsafe_cstr_ptr())
+        var location = gl.get_uniform_location(self.id, name)
         if dtype is DType.float32:
             var v = rebind[Vec4](value)
             gl.uniform4f(location, v[0], v[1], v[2], v[3])
@@ -53,10 +53,9 @@ def read_file(path: String) -> String:
 
 
 def load_shader(path: String, type: ShaderType) -> Id:
-    vertex_src = read_file(path)
+    vertex_src = [read_file(path)]
     shader = gl.create_shader(type)
-    var cstr_ptr = vertex_src.unsafe_cstr_ptr().origin_cast[origin=MutableAnyOrigin]()
-    gl.shader_source(shader, 1, Ptr(to=cstr_ptr).origin_cast[mut=False](), UnsafePointer[Int32]())
+    gl.shader_source(shader, 1, vertex_src, UnsafePointer[Int32]())
     gl.compile_shader(shader)
     return shader
 
