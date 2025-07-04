@@ -36,7 +36,7 @@ alias indices = InlineArray[UInt32, 3](0, 1, 2)
 struct AppState(Movable):
     var window: Window
     var gl_context: sdl.GLContext
-    var vbos: List[Id]
+    var vbos: List[VertexBuffer[Vertex]]
     var vaos: List[Id]
     var ebos: List[Id]
     var texture_id: Id
@@ -47,7 +47,7 @@ struct AppState(Movable):
     fn __init__(out self, owned window: Window, gl_context: sdl.GLContext):
         self.window = window^
         self.gl_context = gl_context
-        self.vbos = List[Id](10, 0)
+        self.vbos = []
         self.vaos = List[Id](10, 0)
         self.ebos = List[Id](10, 0)
         self.texture_id = 0
@@ -55,11 +55,9 @@ struct AppState(Movable):
         self.fullscreen = False
         self.start_time = time.monotonic()/Float64(1e6)
 
-fn init_buffers(vao_id: Id, vbo_id: Id, vertices: List[Vertex]):
+fn init_buffers(mut state: AppState, vao_id: Id, vertices: List[Vertex]):
     gl.bind_vertex_array(vao_id)
-    gl.bind_buffer(BufferTargetARB.ARRAY_BUFFER, vbo_id)
-    # gl.bind_buffer(BufferTargetARB.ELEMENT_ARRAY_BUFFER, state.ebos[0])
-    gl.buffer_data(BufferTargetARB.ARRAY_BUFFER, sizeof[Vertex]() * 3, vertices.unsafe_ptr().bitcast[NoneType](), BufferUsageARB.STATIC_DRAW)
+    state.vbos.append(VertexBuffer[Vertex](vertices))
     # gl.buffer_data(BufferTargetARB.ELEMENT_ARRAY_BUFFER, sizeof[UInt32]() * 3, indices.unsafe_ptr().bitcast[NoneType](), BufferUsageARB.STATIC_DRAW)
     # TODO get rid of hack with offsets
     gl.vertex_attrib_pointer(0, 3, VertexAttribPointerType.FLOAT, False, sizeof[Vertex](), UnsafePointer[NoneType]())
@@ -91,12 +89,11 @@ fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
 
     gl.gen_vertex_arrays(2, state.vaos.unsafe_ptr())
-    gl.gen_buffers(2, state.vbos.unsafe_ptr())
     gl.gen_buffers(2, state.ebos.unsafe_ptr())
     
     state.texture_id = init_texture()
     # Set up triangles
-    init_buffers(state.vaos[0], state.vbos[0], triangle)
+    init_buffers(state, state.vaos[0], triangle)
 
     state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
 
@@ -104,7 +101,6 @@ fn app_init(mut state: AppState) raises:
 
 fn app_cleanup(owned state: AppState):
     gl.delete_vertex_arrays(2, state.vaos.unsafe_ptr())
-    gl.delete_buffers(2, state.vbos.unsafe_ptr())
     gl.delete_buffers(2, state.ebos.unsafe_ptr())
     gl.delete_program(state.shader.id)
 
@@ -118,7 +114,7 @@ fn update(state: AppState) raises:
     t_ms = round(time.monotonic()/Float64(1e6) - state.start_time)
     green = Float32(math.sin(t_ms/2000)/2 + 0.5)
     blue = Float32(math.cos(t_ms/2000)/2 + 0.5)
-    state.shader.use()
+    state.shader.bind()
     state.shader.set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
     gl.clear_color(0.0, 0.2, 0.2, 0.0)
     gl.clear(ClearBufferMask.COLOR_BUFFER_BIT)

@@ -1,4 +1,4 @@
-from .buffer import *
+from .core.utils import *
 from python import Python
 
 def load_texture2d(path: String) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:

@@ -1,3 +1,4 @@
+from memory import UnsafePointer
 from utils.index import IndexList
 from python import Python, PythonObject
 from buffer import NDBuffer
@@ -33,3 +34,7 @@ def from_numpy[dtype: DType, rank: Int](py_array_object: PythonObject) -> NDBuff
     for i in range(rank):
         shape[i] = Int(py_arr.dimensions[i])
     return NDBuffer[dtype, rank=rank, origin=MutableAnyOrigin](py_arr.data, dynamic_shape=shape)
+
+
+alias Ptr = UnsafePointer
+alias Id = UInt32
