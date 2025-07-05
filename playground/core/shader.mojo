@@ -15,7 +15,7 @@ struct Shader(Movable):
     var fragment_paths: List[String]
     var vertex_paths: List[String]
     var id: Id
-
+    
     fn __init__(out self):
         self.id = 0
         self.fragment_paths = []

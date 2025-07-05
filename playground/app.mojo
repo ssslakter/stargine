@@ -41,7 +41,7 @@ struct AppState(Movable):
     var window: Window
     var gl_context: sdl.GLContext
     var vaos: List[VertexArray[Vertex]]
-    var texture_id: Id
+    var texture: Texture
     var shader: Shader
     var fullscreen: Bool
     var start_time: Float64  # start time in milliseconds
@@ -50,7 +50,7 @@ struct AppState(Movable):
         self.window = window^
         self.gl_context = gl_context
         self.vaos = []
-        self.texture_id = 0
+        self.texture = Texture()
         self.shader = Shader()
         self.fullscreen = False
         self.start_time = time.monotonic() / Float64(1e6)
@@ -58,7 +58,7 @@ struct AppState(Movable):
 
 fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
-    state.texture_id = init_texture("wall.jpg")
+    state.texture = Texture("wall.jpg")
 
     # Set up triangles
     state.vaos.append(VertexArray(Vertex.get_layout(), VertexBuffer[Vertex](triangle)))
@@ -77,7 +77,7 @@ fn update(state: AppState) raises:
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
 
     # Draw first triangle
-    gl.bind_texture(gl.TextureTarget.TEXTURE_2D, state.texture_id)
+    state.texture.bind()
     state.vaos[0].draw()
 
     state.window.swap()

@@ -4,7 +4,7 @@ from .imports import *
 alias PyPathLike = os.PathLike & PythonConvertible & Copyable
 
 
-def load_texture2d[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
+def load_image[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
     img = pil.open(path.to_python_object())
@@ -13,19 +13,34 @@ def load_texture2d[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8
     return from_numpy[DType.uint8, 3](np.array(img))
 
 
-fn init_texture[PathLike: PyPathLike](path: PathLike) raises -> Id:
-    var texture_id: Id = 0
-    gl.gen_textures(1, Ptr(to=texture_id))
-    gl.bind_texture(gl.TextureTarget.TEXTURE_2D, texture_id)
-    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-    try:
-        image = load_texture2d(path)
-    except e:
-        print("Failed to load texture:", e)
-        return 0
-    shape = image.get_shape()
-    width, height, channels = shape[0], shape[1], shape[2]
-    gl.tex_image_2d(gl.TextureTarget.TEXTURE_2D, 0, gl.InternalFormat.RGB, width, height, 0, gl.PixelFormat.RGB, gl.PixelType.UNSIGNED_BYTE, image.data.bitcast[NoneType]())
-    gl.generate_mipmap(gl.TextureTarget.TEXTURE_2D)
-    return texture_id
+struct Texture(Movable):
+    var id: Id
+
+    fn __init__(out self):
+        self.id = 0
+
+    fn __init__[PathLike: PyPathLike](out self, path: PathLike) raises:
+        self = Self()
+        gl.gen_textures(1, Ptr(to=self.id))
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
+        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
+        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
+        try:
+            var image = load_image(path)
+            var shape = image.get_shape()
+            width, height = shape[0], shape[1]
+            gl.tex_image_2d(gl.TextureTarget.TEXTURE_2D, 0, gl.InternalFormat.RGB, width, height, 0, gl.PixelFormat.RGB, gl.PixelType.UNSIGNED_BYTE, image.data.bitcast[NoneType]())
+            gl.generate_mipmap(gl.TextureTarget.TEXTURE_2D)
+        except e:
+            print("Failed to load texture:", e, ". Fallback to a black texture")
+            var black_pixel = InlineArray[UInt8, 3](0)
+            gl.tex_image_2d(gl.TextureTarget.TEXTURE_2D, 0, gl.InternalFormat.RGB, 1, 1, 0, gl.PixelFormat.RGB, gl.PixelType.UNSIGNED_BYTE, black_pixel.unsafe_ptr().bitcast[NoneType]())
+
+    fn __del__(owned self):
+        gl.delete_textures(1, Ptr(to=self.id))
+
+    fn bind(self):
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
+
+    fn unbind(self):
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, 0)
