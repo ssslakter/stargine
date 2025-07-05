@@ -3,6 +3,7 @@ from .imports import *
 
 alias PyPathLike = os.PathLike & PythonConvertible & Copyable
 
+
 def load_texture2d[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
@@ -10,6 +11,7 @@ def load_texture2d[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8
     img = img.convert("RGB")
     img = img.transpose(pil.FLIP_TOP_BOTTOM)
     return from_numpy[DType.uint8, 3](np.array(img))
+
 
 fn init_texture[PathLike: PyPathLike](path: PathLike) raises -> Id:
     var texture_id: Id = 0

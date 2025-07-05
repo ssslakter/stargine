@@ -4,7 +4,6 @@ import opengl as gl
 from playground import *
 
 
-
 def main_loop(mut state: AppState):
     var running = True
     var dragging = False
@@ -16,7 +15,7 @@ def main_loop(mut state: AppState):
         while sdl.poll_event(Ptr(to=event)):
             if event[CommonEvent].type == Int(EventType.EVENT_QUIT):
                 running = False
-                break 
+                break
             if event[CommonEvent].type == Int(EventType.EVENT_KEY_DOWN):
                 key_event = event[KeyboardEvent]
                 if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_ESCAPE):

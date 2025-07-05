@@ -32,7 +32,7 @@
 #             for j in range(C2):
 #                 res.data[i][j] = self.row(i).dot(other.col(j))
 #         return res
-    
+
 #     @always_inline
 #     fn __mul__(self, other: Vec[ncols, DType]) -> Vec[nrows, DType]:
 #         var res: Vec[nrows, DType]

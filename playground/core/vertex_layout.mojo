@@ -3,7 +3,7 @@ from .utils import *
 
 
 fn dtype_to_enum(dtype: DType) -> VertexAttribPointerType:
-    '''Maps a DType to OpenGL's VertexAttribPointerType.'''
+    """Maps a DType to OpenGL's VertexAttribPointerType."""
     if dtype == DType.float32:
         return VertexAttribPointerType.FLOAT
     elif dtype == DType.float64:
@@ -28,21 +28,25 @@ fn dtype_to_enum(dtype: DType) -> VertexAttribPointerType:
 # TODO: create compile time map that maps Dtypes to VertexAttribPointerType
 @register_passable("trivial")
 struct VertexAttribute(Copyable, Movable, Writable):
-    var total_size: Int32
-    var dtype_size: Int32
+    var num_components: Int
+    var offset: Int
+    var dtype_size: Int
     var dtype: VertexAttribPointerType
     var normalized: Bool
 
-    fn __init__(out self, dtype: DType, total_size: Int32, normalized: Bool = False):
-        self.total_size = total_size
+    fn __init__(out self, total_size: Int, dtype: DType, num_components: Int, normalized: Bool = False):
+        self.num_components = num_components
         self.dtype_size = dtype.sizeof()
+        self.offset = total_size
         self.dtype = dtype_to_enum(dtype)
         self.normalized = normalized
 
     fn write_to[W: Writer](self, mut writer: W):
         writer.write(
-            "VertexAttribute(total_size=",
-            self.total_size,
+            "VertexAttribute(num_components=",
+            self.num_components,
+            ", offset=",
+            self.offset,
             ", type_size=",
             self.dtype_size,
             ", normalized=",
@@ -53,21 +57,14 @@ struct VertexAttribute(Copyable, Movable, Writable):
 
 struct VertexLayout:
     var elements: List[VertexAttribute]
+    var stride: Int
 
-    fn __init__(out self):
-        self.elements = []
-
-    fn __init__(out self, elements: List[VertexAttribute]):
+    fn __init__(out self, elements: List[VertexAttribute], stride: Int):
         self.elements = elements
+        self.stride = stride
 
     fn append(self, owned element: VertexAttribute):
         self.elements.append(element)
-
-    fn total_size(self) -> Int32:
-        var res: Int32 = 0
-        for element in self.elements:
-            res += element.total_size
-        return res
 
 
 trait WithVertexLayout:
@@ -83,18 +80,19 @@ struct _VertexArrayInner(Movable):
         self.id = 0
         gl.gen_vertex_arrays(1, Ptr(to=self.id))
         self.bind()
-        offset, idx = Int32(0), UInt32(0)
+        offset, idx = Int(0), UInt(0)
         for element in layout.elements:
             gl.vertex_attrib_pointer(
                 idx,
-                element.total_size // element.dtype_size,
+                element.num_components,
                 element.dtype,
                 element.normalized,
-                layout.total_size(),
-                UnsafePointer[NoneType]().offset(offset).bitcast[NoneType](),
+                layout.stride,
+                # TODO: Use somehow types itself instead of using total_size (mojo must implement dynamic usage of types)
+                UnsafePointer[UInt8]().offset(offset).bitcast[NoneType](),
             )
             gl.enable_vertex_attrib_array(idx)
-            offset += element.total_size
+            offset += element.offset
             idx += 1
 
     fn __del__(owned self):

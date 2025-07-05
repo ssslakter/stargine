@@ -14,7 +14,7 @@ alias win_height = 768
 
 
 @fieldwise_init
-struct Vertex(Copyable & Movable, Writable, WithVertexLayout):
+struct Vertex(Copyable & Movable, WithVertexLayout, Writable):
     var position: Vec3f
     var color: Vec4f
     var tex_coords: Vec2f
@@ -26,11 +26,15 @@ struct Vertex(Copyable & Movable, Writable, WithVertexLayout):
 
     @staticmethod
     fn get_layout() -> VertexLayout:
-        return VertexLayout(elements=[
-            VertexAttribute(DType.float32, total_size=sizeof[Vec3f]()),
-            VertexAttribute(DType.float32, total_size=sizeof[Vec4f]()),
-            VertexAttribute(DType.float32, total_size=sizeof[Vec2f]()),
-        ])
+        return VertexLayout(
+            elements=[
+                VertexAttribute(sizeof[Vec3f](), DType.float32, num_components=3),
+                VertexAttribute(sizeof[Vec4f](), DType.float32, num_components=4),
+                VertexAttribute(sizeof[Vec2f](), DType.float32, num_components=2),
+            ],
+            stride=sizeof[Vertex](),
+        )
+
 
 alias triangle = List[Vertex](
     Vertex(position=Vec3f(-0.5, -0.5, 0.0), color=Vec4f(0.0, 0.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),  # Bottom - Blue
@@ -51,7 +55,7 @@ struct AppState(Movable):
     var texture_id: Id
     var shader: Shader
     var fullscreen: Bool
-    var start_time: Float64 # start time in milliseconds
+    var start_time: Float64  # start time in milliseconds
 
     fn __init__(out self, owned window: Window, gl_context: sdl.GLContext):
         self.window = window^
@@ -62,9 +66,7 @@ struct AppState(Movable):
         self.texture_id = 0
         self.shader = Shader()
         self.fullscreen = False
-        self.start_time = time.monotonic()/Float64(1e6)
-
-fn init_buffers(mut state: AppState, vertices: List[Vertex]):
+        self.start_time = time.monotonic() / Float64(1e6)
 
 
 fn app_init(mut state: AppState) raises:
@@ -73,22 +75,17 @@ fn app_init(mut state: AppState) raises:
 
     # Set up triangles
     state.vbos.append(VertexBuffer[Vertex](triangle))
-    print_list(triangle)
-    print_list(Vertex.get_layout().elements)
-    print(Vertex.get_layout().total_size())
     state.vaos.append(VertexArray(Vertex.get_layout()))
+    print(sizeof[Vertex]())
 
-    print('initializing state shaders')
     state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
-    print('shaders initialized')
-
     # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
 
 
 fn update(state: AppState) raises:
-    t_ms = round(time.monotonic()/Float64(1e6) - state.start_time)
-    green = Float32(math.sin(t_ms/2000)/2 + 0.5)
-    blue = Float32(math.cos(t_ms/2000)/2 + 0.5)
+    t_ms = round(time.monotonic() / Float64(1e6) - state.start_time)
+    green = Float32(math.sin(t_ms / 2000) / 2 + 0.5)
+    blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
     state.shader.bind()
     state.shader.set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
     gl.clear_color(0.0, 0.2, 0.2, 0.0)

@@ -2,6 +2,7 @@ from bit import next_power_of_two
 from math import sqrt
 from utils.static_tuple import StaticTuple
 
+
 @fieldwise_init
 @register_passable("trivial")
 struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
@@ -67,7 +68,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
 
     @always_inline
     fn write_to[W: Writer](self, mut writer: W):
-        writer.write("Vec", N, '(', self.data, ')')
+        writer.write("Vec", N, "(", self.data, ")")
 
     @always_inline
     fn dot(self, other: Self) -> Scalar[dtype]:
@@ -99,7 +100,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
     @always_inline
     fn x(self) -> Scalar[dtype]:
         return self.data[0]
-    
+
     @always_inline
     fn y(self) -> Scalar[dtype]:
         return self.data[1]

@@ -41,7 +41,7 @@ struct Shader(Movable):
         gl.delete_program(self.id)
 
     fn reload(mut self) raises:
-        print('reloading shader', self.id)
+        print("reloading shader", self.id)
         self = Self(self.fragment_paths, self.vertex_paths)
 
     fn bind(self):
