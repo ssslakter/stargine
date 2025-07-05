@@ -22,7 +22,7 @@ def main_loop(mut state: AppState):
                     running = False
                     break
                 if Int(key_event.scancode) == Int(sdl.Scancode.SCANCODE_R):
-                    state.shader.reload()
+                    state.shaders[0].reload()
             if event[CommonEvent].type == Int(EventType.EVENT_WINDOW_RESIZED):
                 window_event = event[WindowEvent]
                 new_width = window_event.data1

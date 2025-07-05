@@ -2,10 +2,8 @@ from python import PythonConvertible
 from .imports import *
 from .utils import *
 
-alias PyPathLike = os.PathLike & PythonConvertible & Copyable
 
-
-def load_image[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
+def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
     img = pil.open(path.to_python_object())
@@ -13,16 +11,16 @@ def load_image[PathLike: PyPathLike](path: PathLike) -> NDBuffer[DType.uint8, 3,
     return from_numpy[DType.uint8, 3](np.array(img))
 
 
-struct Texture(Movable):
+struct _TextureInner(Movable):
     var id: Id
 
     fn __init__(out self):
         self.id = 0
 
-    fn __init__[PathLike: PyPathLike](out self, path: PathLike) raises:
+    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
         self = Self()
         gl.gen_textures(1, Ptr(to=self.id))
-        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
+        self.bind()
         self.set_texture_params()
         try:
             var image = load_image(path)
@@ -75,3 +73,19 @@ struct Texture(Movable):
 
     fn unbind(self):
         gl.bind_texture(gl.TextureTarget.TEXTURE_2D, 0)
+
+
+struct Texture(Copyable, Movable):
+    var inner: ArcPointer[_TextureInner]
+
+    fn __init__(out self):
+        self.inner = ArcPointer[_TextureInner](_TextureInner())
+
+    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
+        self.inner = ArcPointer[_TextureInner](_TextureInner(path))
+
+    fn bind(self):
+        self.inner[].bind()
+
+    fn unbind(self):
+        self.inner[].unbind()

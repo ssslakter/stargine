@@ -40,28 +40,29 @@ alias triangle = List[Vertex](
 struct AppState(Movable):
     var window: Window
     var vaos: List[VertexArray[Vertex]]
-    var texture: Texture
-    var shader: Shader
+    var textures: List[Texture]
+    var shaders: List[Shader]
     var fullscreen: Bool
     var start_time: Float64  # start time in milliseconds
 
     fn __init__(out self, owned window: Window):
         self.window = window^
         self.vaos = []
-        self.texture = Texture()
-        self.shader = Shader()
+        self.textures = []
+        self.shaders = []
         self.fullscreen = False
         self.start_time = time.monotonic() / Float64(1e6)
 
 
 fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
-    state.texture = Texture("wall.jpg")
+    state.textures.append(Texture("wall.jpg"))
+    state.textures.append(Texture("test.png"))
+    state.shaders.append(Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl"))
 
     state.vaos.append(VertexArray(Vertex.get_layout(), VertexBuffer[Vertex](triangle)))
     print(sizeof[Vertex]())
 
-    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
     # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
 
 
@@ -69,11 +70,11 @@ fn update(state: AppState) raises:
     t_ms = round(time.monotonic() / Float64(1e6) - state.start_time)
     green = Float32(math.sin(t_ms / 2000) / 2 + 0.5)
     blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
-    state.shader.bind()
-    state.shader.set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
+    state.shaders[0].bind()
+    state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
 
-    state.texture.bind()
+    state.textures[0].bind()
     state.vaos[0].draw()
 
     state.window.swap()

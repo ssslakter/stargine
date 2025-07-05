@@ -5,6 +5,7 @@ from buffer import NDBuffer
 from python._cpython import PyObjectPtr
 from .imports import *
 
+alias ListElement = Copyable & Movable
 
 @fieldwise_init
 struct PyArrayObject[dtype: DType](Copyable, Movable):
@@ -49,6 +50,6 @@ fn print_list[T: Writable & Movable & Copyable](list: List[T]):
     print("]")
 
 
-def read_file(path: String) -> String:
+def read_file[PathLike: os.PathLike](path: PathLike) -> String:
     with open(path, "r") as file:
         return file.read()
