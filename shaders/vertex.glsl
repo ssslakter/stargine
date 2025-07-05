@@ -7,10 +7,12 @@ layout (location = 2) in vec2 aTexCoord;
 out vec4 vColor;
 uniform vec4 myColor;
 out vec2 vTexCoord;
+out vec4 vPosition;
 
 void main()
 {
-    gl_Position = vec4(aPosition, 1.0);
+    gl_Position = vec4(aPosition.x, aPosition.y, 0.0, 1.0);
+    vPosition = aPosition;
     vColor = aColor;
     vTexCoord = aTexCoord;
 }

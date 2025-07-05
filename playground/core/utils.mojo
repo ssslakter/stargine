@@ -39,3 +39,10 @@ def from_numpy[dtype: DType, rank: Int](py_array_object: PythonObject) -> NDBuff
 
 alias Ptr = UnsafePointer
 alias Id = UInt32
+
+
+fn print_list[T: Writable & Movable & Copyable](list: List[T]):
+    print("[", end="")
+    for item in list:
+        print(item, end=",\n")
+    print("]")

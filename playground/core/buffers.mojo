@@ -1,7 +1,7 @@
 from .utils import *
 
 
-struct VertexBuffer[T: Copyable & Movable](Movable, Copyable):
+struct _VertexBufferInner[T: Copyable & Movable](Movable):
     var id: Id
 
     fn __init__[T: Copyable & Movable](out self, data: List[T]):
@@ -26,14 +26,24 @@ struct VertexBuffer[T: Copyable & Movable](Movable, Copyable):
         gl.bind_buffer(gl.BufferTargetARB.ARRAY_BUFFER, 0)
 
 
+struct VertexBuffer[T: Copyable & Movable](Copyable, Movable):
+    var inner: ArcPointer[_VertexBufferInner[T]]
 
-struct IndexBuffer(Movable, Copyable):
+    fn __init__(out self, data: List[T]):
+        self.inner = ArcPointer[_VertexBufferInner[T]](_VertexBufferInner[T](data))
+
+    fn bind(self):
+        self.inner[].bind()
+
+    fn unbind(self):
+        self.inner[].unbind()
+
+
+struct _IndexBufferInner(Movable):
     var id: Id
-    var count: Int
 
     fn __init__(out self, data: List[UInt32]):
-        self.count = len(data)
-        var total_size = sizeof[UInt32]() * self.count
+        var total_size = sizeof[UInt32]() * len(data)
 
         self.id = 0
         gl.gen_buffers(1, self.id.address)
@@ -54,5 +64,15 @@ struct IndexBuffer(Movable, Copyable):
     fn unbind(self):
         gl.bind_buffer(gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER, 0)
 
-    fn get_count(self) -> Int:
-        return self.count
+
+struct IndexBuffer(Copyable, Movable):
+    var inner: ArcPointer[_IndexBufferInner]
+
+    fn __init__(out self, data: List[UInt32]):
+        self.inner = ArcPointer[_IndexBufferInner](_IndexBufferInner(data))
+
+    fn bind(self):
+        self.inner[].bind()
+
+    fn unbind(self):
+        self.inner[].unbind()

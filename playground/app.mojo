@@ -2,7 +2,6 @@ from memory import OwnedPointer
 import math
 from sys import sizeof
 import time
-from .texture import load_texture2d
 from opengl import BufferTargetARB, VertexAttribPointerType, BufferUsageARB, ShaderType, DrawElementsType, PrimitiveType, ClearBufferMask
 import opengl as gl
 import sdl
@@ -28,9 +27,9 @@ struct Vertex(Copyable & Movable, Writable, WithVertexLayout):
     @staticmethod
     fn get_layout() -> VertexLayout:
         return VertexLayout(elements=[
-            VertexAttribute(total_size=sizeof[Vec3f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
-            VertexAttribute(total_size=sizeof[Vec4f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
-            VertexAttribute(total_size=sizeof[Vec2f](), type_size=sizeof[Float32](), type=VertexAttribPointerType.FLOAT, normalized=False),
+            VertexAttribute(DType.float32, total_size=sizeof[Vec3f]()),
+            VertexAttribute(DType.float32, total_size=sizeof[Vec4f]()),
+            VertexAttribute(DType.float32, total_size=sizeof[Vec2f]()),
         ])
 
 alias triangle = List[Vertex](
@@ -46,9 +45,9 @@ alias indices = InlineArray[UInt32, 3](0, 1, 2)
 struct AppState(Movable):
     var window: Window
     var gl_context: sdl.GLContext
-    var vbo: VertexBuffer[Vertex]
-    var vao: VertexArray
-    var ebo: IndexBuffer
+    var vbos: List[VertexBuffer[Vertex]]
+    var vaos: List[VertexArray]
+    var ebos: List[IndexBuffer]
     var texture_id: Id
     var shader: Shader
     var fullscreen: Bool
@@ -68,34 +67,20 @@ struct AppState(Movable):
 fn init_buffers(mut state: AppState, vertices: List[Vertex]):
 
 
-fn init_texture() raises -> Id:
-    var texture_id: Id = 0
-    gl.gen_textures(1, Ptr(to=texture_id))
-    gl.bind_texture(gl.TextureTarget.TEXTURE_2D, texture_id)
-    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-    gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-    try:
-        image = load_texture2d("wall.jpg")
-    except:
-        print("Failed to load texture")
-        return 0
-    shape = image.get_shape()
-    width, height, channels = shape[0], shape[1], shape[2]
-    gl.tex_image_2d(gl.TextureTarget.TEXTURE_2D, 0, gl.InternalFormat.RGB, width, height, 0, gl.PixelFormat.RGB, gl.PixelType.UNSIGNED_BYTE, image.data.bitcast[NoneType]())
-    gl.generate_mipmap(gl.TextureTarget.TEXTURE_2D)
-    return texture_id
-
-
 fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
-
-    state.texture_id = init_texture()
+    state.texture_id = init_texture("wall.jpg")
 
     # Set up triangles
     state.vbos.append(VertexBuffer[Vertex](triangle))
+    print_list(triangle)
+    print_list(Vertex.get_layout().elements)
+    print(Vertex.get_layout().total_size())
     state.vaos.append(VertexArray(Vertex.get_layout()))
 
-    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")^
+    print('initializing state shaders')
+    state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
+    print('shaders initialized')
 
     # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
 

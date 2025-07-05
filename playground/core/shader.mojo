@@ -25,7 +25,6 @@ struct Shader(Movable):
         self = Self([fragment_path], [vertex_path])
 
     fn __init__(out self, fragment_paths: List[String], vertex_paths: List[String]) raises:
-        print('initializing shader')
         self.id = gl.create_program()
         self.fragment_paths = fragment_paths
         self.vertex_paths = vertex_paths
@@ -38,12 +37,11 @@ struct Shader(Movable):
         gl.delete_shader(fragment_shader)
 
     fn __del__(owned self):
-        print('deleting shader')
+        print("deleting shader", self.id)
         gl.delete_program(self.id)
 
     fn reload(mut self) raises:
-        print('reloading shader')
-        gl.delete_program(self.id)
+        print('reloading shader', self.id)
         self = Self(self.fragment_paths, self.vertex_paths)
 
     fn bind(self):
