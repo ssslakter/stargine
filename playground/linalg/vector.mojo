@@ -14,11 +14,11 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
         self = Self(data=data)
 
     @always_inline("nodebug")
+    @implicit
     fn __init__(out self, scalar: Scalar[dtype], /):
         self = Self(data=SIMD[dtype, next_power_of_two(N)](scalar))
 
     @always_inline("nodebug")
-    @implicit
     fn __init__(out self, *items: Scalar[dtype]):
         self.data = SIMD[dtype, next_power_of_two(N)]()
 

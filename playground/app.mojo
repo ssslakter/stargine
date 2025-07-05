@@ -39,16 +39,14 @@ alias triangle = List[Vertex](
 @fieldwise_init
 struct AppState(Movable):
     var window: Window
-    var gl_context: sdl.GLContext
     var vaos: List[VertexArray[Vertex]]
     var texture: Texture
     var shader: Shader
     var fullscreen: Bool
     var start_time: Float64  # start time in milliseconds
 
-    fn __init__(out self, owned window: Window, gl_context: sdl.GLContext):
+    fn __init__(out self, owned window: Window):
         self.window = window^
-        self.gl_context = gl_context
         self.vaos = []
         self.texture = Texture()
         self.shader = Shader()
@@ -60,7 +58,6 @@ fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
     state.texture = Texture("wall.jpg")
 
-    # Set up triangles
     state.vaos.append(VertexArray(Vertex.get_layout(), VertexBuffer[Vertex](triangle)))
     print(sizeof[Vertex]())
 
@@ -76,7 +73,6 @@ fn update(state: AppState) raises:
     state.shader.set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
 
-    # Draw first triangle
     state.texture.bind()
     state.vaos[0].draw()
 

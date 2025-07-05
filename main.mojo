@@ -69,7 +69,7 @@ def main():
 
     sdl.gl_make_current(window._handle, context)
     gl.init_opengl(sdl.gl_get_proc_address)
-    state = AppState(window^, context)
+    state = AppState(window^)
 
     app_init(state)
     main_loop(state)

@@ -47,3 +47,8 @@ fn print_list[T: Writable & Movable & Copyable](list: List[T]):
     for item in list:
         print(item, end=",\n")
     print("]")
+
+
+def read_file(path: String) -> String:
+    with open(path, "r") as file:
+        return file.read()

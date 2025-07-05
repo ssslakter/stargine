@@ -15,7 +15,7 @@ struct Shader(Movable):
     var fragment_paths: List[String]
     var vertex_paths: List[String]
     var id: Id
-    
+
     fn __init__(out self):
         self.id = 0
         self.fragment_paths = []
@@ -50,51 +50,33 @@ struct Shader(Movable):
     fn unbind(self):
         gl.use_program(0)
 
-    fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]) raises:
+    fn set_uniform(self, owned name: String, value: Texture):
+        self.set_uniform(name, value.id)
+
+    fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]):
+        self.set_uniform(name, Vec[1, dtype](value))
+
+    fn set_uniform[N: Int, dtype: DType, //](self, owned name: String, value: Vec[N, dtype]):
         var location = gl.get_uniform_location(self.id, name)
 
         @parameter
         if dtype is DType.float32:
-            gl.uniform1f(location, rebind[Float32](value))
+            var v = rebind[Vec[N, DType.float32]](value)
+            if N == 1:
+                gl.uniform1f(location, v.x())
+            elif N == 2:
+                gl.uniform2f(location, v.x(), v.y())
+            elif N == 3:
+                gl.uniform3f(location, v.x(), v.y(), v.z())
+            elif N == 4:
+                gl.uniform4f(location, v.x(), v.y(), v.z(), v.w())
         elif dtype is DType.int32:
-            gl.uniform1i(location, rebind[Int32](value))
-
-    fn set_uniform[dtype: DType](self, owned name: String, value: Vec2[dtype]) raises:
-        var location = gl.get_uniform_location(self.id, name)
-
-        @parameter
-        if dtype is DType.float32:
-            var v = rebind[Vec2f](value)
-            gl.uniform2f(location, v.x(), v.y())
-
-    fn set_uniform[dtype: DType](self, owned name: String, value: Vec3[dtype]) raises:
-        var location = gl.get_uniform_location(self.id, name)
-
-        @parameter
-        if dtype is DType.float32:
-            var v = rebind[Vec3f](value)
-            gl.uniform3f(location, v.x(), v.y(), v.z())
-        elif dtype is DType.int32:
-            var v = rebind[Vec3i](value)
-            gl.uniform3i(location, v.x(), v.y(), v.z())
-
-    fn set_uniform[dtype: DType](self, owned name: String, value: Vec4[dtype]) raises:
-        var location = gl.get_uniform_location(self.id, name)
-
-        @parameter
-        if dtype is DType.float32:
-            var v = rebind[Vec4f](value)
-            gl.uniform4f(location, v.x(), v.y(), v.z(), v.w())
-
-
-def read_file(path: String) -> String:
-    with open(path, "r") as file:
-        return file.read()
-
-
-fn link_shader_program(program: Id, owned vertex_shader: Id, owned fragment_shader: Id):
-    gl.attach_shader(program, vertex_shader)
-    gl.attach_shader(program, fragment_shader)
-    gl.link_program(program)
-    gl.delete_shader(vertex_shader)
-    gl.delete_shader(fragment_shader)
+            var v = rebind[Vec[N, DType.int32]](value)
+            if N == 1:
+                gl.uniform1i(location, v.x())
+            elif N == 2:
+                gl.uniform2i(location, v.x(), v.y())
+            elif N == 3:
+                gl.uniform3i(location, v.x(), v.y(), v.z())
+            elif N == 4:
+                gl.uniform4i(location, v.x(), v.y(), v.z(), v.w())
