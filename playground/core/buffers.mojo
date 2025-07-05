@@ -56,13 +56,13 @@ struct _IndexBufferInner(Movable):
         var total_size = sizeof[UInt32]() * len(data)
 
         self.id = 0
-        gl.gen_buffers(1, self.id.address)
+        gl.gen_buffers(1, Ptr(to=self.id))
         self.bind()
         gl.buffer_data(
             gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER,
             total_size,
             data.unsafe_ptr().bitcast[NoneType](),
-            gl.BufferTargetARB.STATIC_DRAW,
+            gl.BufferUsageARB.STATIC_DRAW,
         )
 
     fn __del__(owned self):

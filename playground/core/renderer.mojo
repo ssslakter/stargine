@@ -12,3 +12,8 @@ fn draw(vao: VertexArray, indices: List[UInt32]):
 
 fn polygon_mode(face: TriangleFace, mode: PolygonMode):
     gl.polygon_mode(face, mode)
+
+
+fn init_blend():
+    gl.enable(gl.EnableCap.BLEND)
+    gl.blend_func(gl.BlendingFactor.SRC_ALPHA, gl.BlendingFactor.ONE_MINUS_SRC_ALPHA)

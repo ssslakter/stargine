@@ -29,11 +29,14 @@ struct Vertex(Copyable & Movable, WithVertexLayout, Writable):
         )
 
 
-alias triangle = List[Vertex](
-    Vertex(position=Vec3f(-0.5, -0.5, 0.0), color=Vec4f(0.0, 0.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),  # Bottom - Blue
-    Vertex(position=Vec3f(0.0, 0.5, 0.0), color=Vec4f(1.0, 1.0, 0.0, 1.0), tex_coords=Vec2f(0.5, 1.0)),  # Left - Yellow
-    Vertex(position=Vec3f(0.5, -0.5, 0.0), color=Vec4f(1.0, 0.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),  # Top - Red
+alias vertices = List[Vertex](
+    Vertex(position=Vec3f(-0.5, -0.5, 0.0), color=Vec4f(0.0, 0.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),  # Bottom-left
+    Vertex(position=Vec3f( 0.5, -0.5, 0.0), color=Vec4f(1.0, 0.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),  # Bottom-right
+    Vertex(position=Vec3f( 0.5,  0.5, 0.0), color=Vec4f(0.0, 1.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 1.0)),  # Top-right
+    Vertex(position=Vec3f(-0.5,  0.5, 0.0), color=Vec4f(1.0, 1.0, 0.0, 1.0), tex_coords=Vec2f(0.0, 1.0)),  # Top-left
 )
+
+alias indices = List[UInt32](0, 1, 2, 2, 3, 0)
 
 
 @fieldwise_init
@@ -55,13 +58,18 @@ struct AppState(Movable):
 
 
 fn app_init(mut state: AppState) raises:
+    renderer.init_blend()
     gl.viewport(0, 0, win_width, win_height)
+    state.textures.append(Texture("glasses.png"))
     state.textures.append(Texture("wall.jpg"))
-    state.textures.append(Texture("test.png"))
-    state.shaders.append(Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl"))
+    shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
+    shader.set_uniform("texture1", state.textures[0])
+    shader.set_uniform("texture2", state.textures[1])
+    state.shaders.append(shader)
 
-    state.vaos.append(VertexArray(Vertex.get_layout(), VertexBuffer[Vertex](triangle)))
-    print(sizeof[Vertex]())
+    vbo = VertexBuffer[Vertex](vertices)
+    ebo = IndexBuffer(indices)
+    state.vaos.append(VertexArray(Vertex.get_layout(), vbo, ebo))
 
     # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
 
@@ -70,11 +78,13 @@ fn update(state: AppState) raises:
     t_ms = round(time.monotonic() / Float64(1e6) - state.start_time)
     green = Float32(math.sin(t_ms / 2000) / 2 + 0.5)
     blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
-    state.shaders[0].bind()
-    state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
-
+    
     state.textures[0].bind()
+    state.textures[1].bind(gl.TextureUnit.TEXTURE1)
+    state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
+
+    state.shaders[0].use()
     state.vaos[0].draw()
 
     state.window.swap()

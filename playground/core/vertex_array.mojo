@@ -37,9 +37,9 @@ struct _VertexArrayInner(Movable):
 struct VertexArray[T: Copyable & Movable](Copyable, Movable):
     var inner: ArcPointer[_VertexArrayInner]
     var vertices: VertexBuffer[T]
-    var indices: Optional[VertexBuffer[UInt32]]
+    var indices: Optional[IndexBuffer]
 
-    fn __init__(out self, layout: VertexLayout, vertices: VertexBuffer[T], indices: Optional[VertexBuffer[UInt32]] = None):
+    fn __init__(out self, layout: VertexLayout, vertices: VertexBuffer[T], indices: Optional[IndexBuffer] = None):
         self.inner = ArcPointer[_VertexArrayInner](_VertexArrayInner(layout))
         self.vertices = vertices
         self.indices = indices

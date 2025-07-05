@@ -59,11 +59,9 @@ struct Shader(Copyable, Movable):
         print("reloading shader", self.inner[].id)
         self = Self(self.fragment_paths, self.vertex_paths)
 
-    fn bind(self):
+    fn use(self):
         gl.use_program(self.inner[].id)
 
-    fn unbind(self):
-        gl.use_program(0)
 
     fn set_uniform(self, owned name: String, texture: Texture):
         self.set_uniform(name, texture.inner[].id)
@@ -72,6 +70,7 @@ struct Shader(Copyable, Movable):
         self.set_uniform(name, Vec[1, dtype](value))
 
     fn set_uniform[N: Int, dtype: DType, //](self, owned name: String, value: Vec[N, dtype]):
+        self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 
         @parameter

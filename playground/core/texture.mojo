@@ -8,7 +8,11 @@ def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: Pa
     pil = Python.import_module("PIL.Image")
     img = pil.open(path.to_python_object())
     img = img.transpose(pil.FLIP_TOP_BOTTOM)
-    return from_numpy[DType.uint8, 3](np.array(img))
+    arr = np.array(img)
+    if arr.ndim == 2:
+        arr = np.expand_dims(arr, axis=-1)
+    res = from_numpy[DType.uint8, 3](arr)
+    return res
 
 
 struct _TextureInner(Movable):
@@ -20,8 +24,7 @@ struct _TextureInner(Movable):
     fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
         self = Self()
         gl.gen_textures(1, Ptr(to=self.id))
-        self.bind()
-        self.set_texture_params()
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
         try:
             var image = load_image(path)
             var shape = image.get_shape()
@@ -29,13 +32,19 @@ struct _TextureInner(Movable):
             alias channels_to_format = {
                 3: gl.PixelFormat.RGB,
                 4: gl.PixelFormat.RGBA,
-                1: gl.PixelFormat.LUMINANCE,
+                1: gl.PixelFormat.LUMINANCE
+            }
+            alias channels_to_internal_format = {
+                3: gl.InternalFormat.RGB,
+                4: gl.InternalFormat.RGBA8,
+                1: gl.InternalFormat.R8 
             }
             pixel_format = channels_to_format[channels]
+            internal_format = channels_to_internal_format[channels]
             gl.tex_image_2d(
                 gl.TextureTarget.TEXTURE_2D,
                 0,
-                gl.InternalFormat.RGB,
+                internal_format,
                 width,
                 height,
                 0,
@@ -59,20 +68,8 @@ struct _TextureInner(Movable):
                 black_pixel.unsafe_ptr().bitcast[NoneType](),
             )
 
-    fn set_texture_params(self):
-        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.MIRRORED_REPEAT))
-        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_MIN_FILTER, Int(gl.TextureMinFilter.LINEAR))
-        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, gl.TextureParameterName.TEXTURE_MAG_FILTER, Int(gl.TextureMagFilter.LINEAR))
-
     fn __del__(owned self):
         gl.delete_textures(1, Ptr(to=self.id))
-
-    fn bind(self):
-        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
-
-    fn unbind(self):
-        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, 0)
 
 
 struct Texture(Copyable, Movable):
@@ -83,9 +80,17 @@ struct Texture(Copyable, Movable):
 
     fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
         self.inner = ArcPointer[_TextureInner](_TextureInner(path))
+        self.set_parameter(gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.CLAMP_TO_EDGE))
+        self.set_parameter(gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.CLAMP_TO_EDGE))
+        self.set_parameter(gl.TextureParameterName.TEXTURE_MIN_FILTER, Int(gl.TextureMinFilter.NEAREST))
+        self.set_parameter(gl.TextureParameterName.TEXTURE_MAG_FILTER, Int(gl.TextureMagFilter.NEAREST))
 
-    fn bind(self):
-        self.inner[].bind()
+    fn bind(self, texture_unit: gl.TextureUnit = gl.TextureUnit.TEXTURE0):
+        gl.active_texture(texture_unit)
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.inner[].id)
+
+    fn set_parameter(self, name: gl.TextureParameterName, value: Int):
+        gl.tex_parameteri(gl.TextureTarget.TEXTURE_2D, name, value)
 
     fn unbind(self):
-        self.inner[].unbind()
+        gl.bind_texture(gl.TextureTarget.TEXTURE_2D, 0)
