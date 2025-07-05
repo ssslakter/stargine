@@ -1,4 +1,4 @@
-from sdl import Ptr
+from .core import *
 import sdl.sdl_video as video
 
 
@@ -14,3 +14,6 @@ struct Window:
     fn __del__(owned self):
         print("releasing window")
         video.destroy_window(self._handle)
+
+    fn swap(self) raises:
+        sdl.gl_swap_window(self._handle)

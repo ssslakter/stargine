@@ -26,17 +26,27 @@ struct _VertexBufferInner[T: Copyable & Movable](Movable):
         gl.bind_buffer(gl.BufferTargetARB.ARRAY_BUFFER, 0)
 
 
-struct VertexBuffer[T: Copyable & Movable](Copyable, Movable):
+struct VertexBuffer[T: Copyable & Movable](Copyable, Movable, Sized):
     var inner: ArcPointer[_VertexBufferInner[T]]
+    var data: List[T]
 
     fn __init__(out self, data: List[T]):
         self.inner = ArcPointer[_VertexBufferInner[T]](_VertexBufferInner[T](data))
+        self.data = data
+
+    fn __len__(self) -> Int:
+        return len(self.data)
 
     fn bind(self):
         self.inner[].bind()
 
     fn unbind(self):
         self.inner[].unbind()
+
+    fn draw(self):
+        self.bind()
+        gl.draw_arrays(gl.PrimitiveType.TRIANGLES, 0, len(self.data))
+        self.unbind()
 
 
 struct _IndexBufferInner(Movable):
@@ -67,12 +77,24 @@ struct _IndexBufferInner(Movable):
 
 struct IndexBuffer(Copyable, Movable):
     var inner: ArcPointer[_IndexBufferInner]
+    var data: List[UInt32]
 
     fn __init__(out self, data: List[UInt32]):
         self.inner = ArcPointer[_IndexBufferInner](_IndexBufferInner(data))
+        self.data = data
 
     fn bind(self):
         self.inner[].bind()
 
     fn unbind(self):
         self.inner[].unbind()
+
+    fn draw(self):
+        self.bind()
+        gl.draw_elements(
+            gl.PrimitiveType.TRIANGLES,
+            len(self.data),
+            gl.DrawElementsType.UNSIGNED_INT,
+            Ptr[NoneType](),
+        )
+        self.unbind()

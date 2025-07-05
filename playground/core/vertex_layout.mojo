@@ -1,5 +1,5 @@
-from memory import ArcPointer
-from .utils import *
+from opengl import VertexAttribPointerType
+from .imports import *
 
 
 fn dtype_to_enum(dtype: DType) -> VertexAttribPointerType:
@@ -72,47 +72,3 @@ trait WithVertexLayout:
     fn get_layout() -> VertexLayout:
         ...
 
-
-struct _VertexArrayInner(Movable):
-    var id: Id
-
-    fn __init__(out self, layout: VertexLayout):
-        self.id = 0
-        gl.gen_vertex_arrays(1, Ptr(to=self.id))
-        self.bind()
-        offset, idx = Int(0), UInt(0)
-        for element in layout.elements:
-            gl.vertex_attrib_pointer(
-                idx,
-                element.num_components,
-                element.dtype,
-                element.normalized,
-                layout.stride,
-                # TODO: Use somehow types itself instead of using total_size (mojo must implement dynamic usage of types)
-                UnsafePointer[UInt8]().offset(offset).bitcast[NoneType](),
-            )
-            gl.enable_vertex_attrib_array(idx)
-            offset += element.offset
-            idx += 1
-
-    fn __del__(owned self):
-        gl.delete_vertex_arrays(1, Ptr(to=self.id))
-
-    fn bind(self):
-        gl.bind_vertex_array(self.id)
-
-    fn unbind(self):
-        gl.bind_vertex_array(0)
-
-
-struct VertexArray(Copyable, Movable):
-    var inner: ArcPointer[_VertexArrayInner]
-
-    fn __init__(out self, layout: VertexLayout):
-        self.inner = ArcPointer[_VertexArrayInner](_VertexArrayInner(layout))
-
-    fn bind(self):
-        self.inner[].bind()
-
-    fn unbind(self):
-        self.inner[].unbind()

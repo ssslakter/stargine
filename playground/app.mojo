@@ -1,10 +1,3 @@
-from memory import OwnedPointer
-import math
-from sys import sizeof
-import time
-from opengl import BufferTargetARB, VertexAttribPointerType, BufferUsageARB, ShaderType, DrawElementsType, PrimitiveType, ClearBufferMask
-import opengl as gl
-import sdl
 from .linalg import *
 from .core import *
 
@@ -42,16 +35,12 @@ alias triangle = List[Vertex](
     Vertex(position=Vec3f(0.5, -0.5, 0.0), color=Vec4f(1.0, 0.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),  # Top - Red
 )
 
-alias indices = InlineArray[UInt32, 3](0, 1, 2)
-
 
 @fieldwise_init
 struct AppState(Movable):
     var window: Window
     var gl_context: sdl.GLContext
-    var vbos: List[VertexBuffer[Vertex]]
-    var vaos: List[VertexArray]
-    var ebos: List[IndexBuffer]
+    var vaos: List[VertexArray[Vertex]]
     var texture_id: Id
     var shader: Shader
     var fullscreen: Bool
@@ -60,9 +49,7 @@ struct AppState(Movable):
     fn __init__(out self, owned window: Window, gl_context: sdl.GLContext):
         self.window = window^
         self.gl_context = gl_context
-        self.vbos = []
         self.vaos = []
-        self.ebos = []
         self.texture_id = 0
         self.shader = Shader()
         self.fullscreen = False
@@ -74,12 +61,11 @@ fn app_init(mut state: AppState) raises:
     state.texture_id = init_texture("wall.jpg")
 
     # Set up triangles
-    state.vbos.append(VertexBuffer[Vertex](triangle))
-    state.vaos.append(VertexArray(Vertex.get_layout()))
+    state.vaos.append(VertexArray(Vertex.get_layout(), VertexBuffer[Vertex](triangle)))
     print(sizeof[Vertex]())
 
     state.shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
-    # gl.polygon_mode(TriangleFace.FRONT_AND_BACK, PolygonMode.LINE)
+    # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
 
 
 fn update(state: AppState) raises:
@@ -88,16 +74,10 @@ fn update(state: AppState) raises:
     blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
     state.shader.bind()
     state.shader.set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
-    gl.clear_color(0.0, 0.2, 0.2, 0.0)
-    gl.clear(ClearBufferMask.COLOR_BUFFER_BIT)
+    renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
 
     # Draw first triangle
     gl.bind_texture(gl.TextureTarget.TEXTURE_2D, state.texture_id)
-    state.vaos[0].bind()
-    gl.draw_arrays(PrimitiveType.TRIANGLES, 0, 3)
+    state.vaos[0].draw()
 
-    # Draw second triangle
-    # state.vaos[1].bind()
-    # gl.draw_arrays(PrimitiveType.TRIANGLES, 0, 3)
-
-    sdl.gl_swap_window(state.window._handle)
+    state.window.swap()
