@@ -21,7 +21,7 @@ struct _TextureInner(Movable):
     fn __init__(out self):
         self.id = 0
 
-    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
+    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike):
         self = Self()
         gl.gen_textures(1, Ptr(to=self.id))
         gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.id)
