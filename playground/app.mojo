@@ -60,11 +60,11 @@ struct AppState(Movable):
 fn app_init(mut state: AppState) raises:
     renderer.init_blend()
     gl.viewport(0, 0, win_width, win_height)
-    state.textures.append(Texture("glasses.png"))
     state.textures.append(Texture("wall.jpg"))
+    # state.textures.append(Texture("wall.jpg"))
     shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
     shader.set_uniform("texture1", state.textures[0])
-    shader.set_uniform("texture2", state.textures[1])
+    # shader.set_uniform("texture2", state.textures[1])
     state.shaders.append(shader)
 
     vbo = VertexBuffer[Vertex](vertices)
@@ -74,14 +74,14 @@ fn app_init(mut state: AppState) raises:
     # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
 
 
-fn update(state: AppState) raises:
+fn update(mut state: AppState) raises:
     t_ms = round(time.monotonic() / Float64(1e6) - state.start_time)
     green = Float32(math.sin(t_ms / 2000) / 2 + 0.5)
     blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
     
     state.textures[0].bind()
-    state.textures[1].bind(gl.TextureUnit.TEXTURE1)
+    # state.textures[1].bind(gl.TextureUnit.TEXTURE1)
     state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
 
     state.shaders[0].use()

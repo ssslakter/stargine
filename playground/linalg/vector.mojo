@@ -103,6 +103,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
 
     @always_inline
     fn y(self) -> Scalar[dtype]:
+        constrained[N > 1, "Y is only defined for vectors with at least 2 elements."]()
         return self.data[1]
 
     @always_inline
@@ -122,6 +123,7 @@ alias Vec4[dtype: DType] = Vec[4, dtype]
 
 alias f32 = DType.float32
 alias i32 = DType.int32
+alias u32 = DType.uint32
 
 alias Vec2f = Vec2[f32]
 alias Vec3f = Vec3[f32]
@@ -130,3 +132,7 @@ alias Vec4f = Vec4[f32]
 alias Vec2i = Vec2[i32]
 alias Vec3i = Vec3[i32]
 alias Vec4i = Vec4[i32]
+
+alias Vec2u = Vec2[u32]
+alias Vec3u = Vec3[u32]
+alias Vec4u = Vec4[u32]

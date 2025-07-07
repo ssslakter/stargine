@@ -28,7 +28,7 @@ struct _TextureInner(Movable):
         try:
             var image = load_image(path)
             var shape = image.get_shape()
-            width, height, channels = shape[0], shape[1], shape[2]
+            height, width, channels = shape[0], shape[1], shape[2]
             alias channels_to_format = {
                 3: gl.PixelFormat.RGB,
                 4: gl.PixelFormat.RGBA,
@@ -36,7 +36,7 @@ struct _TextureInner(Movable):
             }
             alias channels_to_internal_format = {
                 3: gl.InternalFormat.RGB,
-                4: gl.InternalFormat.RGBA8,
+                4: gl.InternalFormat.RGBA,
                 1: gl.InternalFormat.R8 
             }
             pixel_format = channels_to_format[channels]
@@ -68,7 +68,7 @@ struct _TextureInner(Movable):
                 black_pixel.unsafe_ptr().bitcast[NoneType](),
             )
 
-    fn __del__(owned self):
+    fn __del__(var self):
         gl.delete_textures(1, Ptr(to=self.id))
 
 
