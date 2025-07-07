@@ -1,15 +1,14 @@
-from .core import *
+from .imports import *
 import sdl.sdl_video as video
 
 
-struct Window:
+struct Window(Movable):
+    var fullscreen: Bool
     var _handle: Ptr[video.Window]
 
     fn __init__(out self, window_title: String, width: Int32, height: Int32, window_flags: video.WindowFlags) raises:
+        self.fullscreen = False
         self._handle = video.create_window(window_title, width, height, window_flags)
-
-    fn __moveinit__(out self, owned other: Self):
-        self._handle = other._handle
 
     fn __del__(owned self):
         print("releasing window")
@@ -17,3 +16,10 @@ struct Window:
 
     fn swap(self) raises:
         sdl.gl_swap_window(self._handle)
+
+    fn toggle_fullscreen(mut self) raises:
+        if self.fullscreen:
+            video.set_window_fullscreen(self._handle, False)
+        else:
+            video.set_window_fullscreen(self._handle, True)
+        self.fullscreen = not self.fullscreen

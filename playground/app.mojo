@@ -88,3 +88,7 @@ fn update(mut state: AppState) raises:
     state.vaos[0].draw()
 
     state.window.swap()
+
+
+fn texture_reload(mut state: AppState, filename: String) raises:
+    state.textures[0] = Texture(filename)

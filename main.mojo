@@ -6,7 +6,7 @@ from playground import *
 
 def main_loop(mut state: AppState):
     var running = True
-    var event_handler = EventHandler()
+    var event_handler = EventHandler(texture_reload)
 
     while running:
         running = event_handler.poll_events(state)
