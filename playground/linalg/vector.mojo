@@ -5,7 +5,7 @@ from utils.static_tuple import StaticTuple
 
 @fieldwise_init
 @register_passable("trivial")
-struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
+struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
     var data: SIMD[dtype, next_power_of_two(N)]
 
     @always_inline("nodebug")
@@ -27,7 +27,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
             self.data[i] = items[i]
 
     @always_inline("nodebug")
-    fn __init__[other_dtype: DType, //](out self, value: Vec[N, other_dtype]):
+    fn __init__[other_dtype: DType, //](out self, value: Vec[other_dtype, N]):
         self = Self(data=value.data.cast[dtype]())
 
     @always_inline
@@ -117,9 +117,9 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
         return self.data[3]
 
 
-alias Vec2[dtype: DType] = Vec[2, dtype]
-alias Vec3[dtype: DType] = Vec[3, dtype]
-alias Vec4[dtype: DType] = Vec[4, dtype]
+alias Vec2 = Vec[_, 2]
+alias Vec3 = Vec[_, 3]
+alias Vec4 = Vec[_, 4]
 
 alias f32 = DType.float32
 alias i32 = DType.int32

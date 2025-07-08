@@ -3,16 +3,31 @@ from .imports import *
 from .utils import *
 
 
-def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
+def load_image_bytes[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> List[UInt8]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
     img = pil.open(path.to_python_object())
     img = img.transpose(pil.FLIP_TOP_BOTTOM)
+    img = img.convert("RGBA")
     arr = np.array(img)
+    bytes = arr.tobytes()
+    
+
+
+def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
+    np = Python.import_module("numpy")
+    pil = Python.import_module("PIL.Image")
+    img = pil.open(path.to_python_object())
+    # TODO Maybe this can be optimized for non-RGBA images
+    img = img.convert("RGBA")
+    arr = np.array(img)
+    arr = np.flipud(arr)
+    arr = np.ascontiguousarray(arr)
     if arr.ndim == 2:
         arr = np.expand_dims(arr, axis=-1)
     res = from_numpy[DType.uint8, 3](arr)
     return res
+    
 
 
 struct _TextureInner(Movable):
@@ -41,6 +56,8 @@ struct _TextureInner(Movable):
             }
             pixel_format = channels_to_format[channels]
             internal_format = channels_to_internal_format[channels]
+
+            gl.pixel_storei(gl.PixelStoreParameter.UNPACK_ALIGNMENT, 1)
             gl.tex_image_2d(
                 gl.TextureTarget.TEXTURE_2D,
                 0,
@@ -52,6 +69,7 @@ struct _TextureInner(Movable):
                 gl.PixelType.UNSIGNED_BYTE,
                 image.data.bitcast[NoneType](),
             )
+            gl.pixel_storei(gl.PixelStoreParameter.UNPACK_ALIGNMENT, 4)
             gl.generate_mipmap(gl.TextureTarget.TEXTURE_2D)
         except e:
             print("Failed to load texture:", e, ". Fallback to a black texture")
@@ -74,12 +92,14 @@ struct _TextureInner(Movable):
 
 struct Texture(Copyable, Movable):
     var inner: ArcPointer[_TextureInner]
+    var filename: String
 
     fn __init__(out self):
         self.inner = ArcPointer[_TextureInner](_TextureInner())
-
-    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement](out self, path: PathLike) raises:
+        self.filename = ""
+    fn __init__[PathLike: os.PathLike & PythonConvertible & ListElement & Stringable](out self, path: PathLike) raises:
         self.inner = ArcPointer[_TextureInner](_TextureInner(path))
+        self.filename = String(path)
         self.set_parameter(gl.TextureParameterName.TEXTURE_WRAP_S, Int(gl.TextureWrapMode.CLAMP_TO_EDGE))
         self.set_parameter(gl.TextureParameterName.TEXTURE_WRAP_T, Int(gl.TextureWrapMode.CLAMP_TO_EDGE))
         self.set_parameter(gl.TextureParameterName.TEXTURE_MIN_FILTER, Int(gl.TextureMinFilter.NEAREST))

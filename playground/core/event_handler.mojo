@@ -61,12 +61,15 @@ struct EventHandler:
 
         if Int(event.scancode) == Int(Scancode.SCANCODE_F11):
             app_state.window.toggle_fullscreen()
+            
 
         if Int(event.scancode) in [Int(Scancode.SCANCODE_T), Int(Scancode.SCANCODE_RETURN)]:
             self.text_input_state.start_text_input(app_state)
         return True
 
-    fn handle_window_resized(mut self, event: WindowEvent):
+    fn handle_window_resized(mut self, mut app_state: AppState, event: WindowEvent):
+        app_state.window.width = event.data1
+        app_state.window.height = event.data2
         gl.viewport(0, 0, event.data1, event.data2)
 
     fn handle_mouse_button_down(mut self, event: MouseMotionEvent):
@@ -104,7 +107,7 @@ struct EventHandler:
                     return False
 
             if event_type == Int(EventType.EVENT_WINDOW_RESIZED):
-                self.handle_window_resized(event[WindowEvent])
+                self.handle_window_resized(app_state, event[WindowEvent])
 
             if event_type == Int(EventType.EVENT_MOUSE_BUTTON_DOWN):
                 self.handle_mouse_button_down(event[MouseMotionEvent])

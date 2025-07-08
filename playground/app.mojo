@@ -60,8 +60,8 @@ struct AppState(Movable):
 fn app_init(mut state: AppState) raises:
     renderer.init_blend()
     gl.viewport(0, 0, win_width, win_height)
+    state.textures.append(Texture("glasses.png"))
     state.textures.append(Texture("wall.jpg"))
-    # state.textures.append(Texture("wall.jpg"))
     shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
     shader.set_uniform("texture1", state.textures[0])
     # shader.set_uniform("texture2", state.textures[1])
@@ -81,7 +81,7 @@ fn update(mut state: AppState) raises:
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
     
     state.textures[0].bind()
-    # state.textures[1].bind(gl.TextureUnit.TEXTURE1)
+    state.textures[1].bind(gl.TextureUnit.TEXTURE1)
     state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
 
     state.shaders[0].use()
@@ -91,4 +91,5 @@ fn update(mut state: AppState) raises:
 
 
 fn texture_reload(mut state: AppState, filename: String) raises:
-    state.textures[0] = Texture(filename)
+    fname = filename or state.textures[0].filename
+    state.textures[0] = Texture(fname)
