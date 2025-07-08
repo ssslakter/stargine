@@ -2,9 +2,10 @@ from bit import next_power_of_two
 from math import sqrt
 from utils.static_tuple import StaticTuple
 
+
 @fieldwise_init
 @register_passable("trivial")
-struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
+struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
     var data: SIMD[dtype, next_power_of_two(N)]
 
     @always_inline("nodebug")
@@ -13,11 +14,11 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
         self = Self(data=data)
 
     @always_inline("nodebug")
+    @implicit
     fn __init__(out self, scalar: Scalar[dtype], /):
         self = Self(data=SIMD[dtype, next_power_of_two(N)](scalar))
 
     @always_inline("nodebug")
-    @implicit
     fn __init__(out self, *items: Scalar[dtype]):
         self.data = SIMD[dtype, next_power_of_two(N)]()
 
@@ -26,7 +27,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
             self.data[i] = items[i]
 
     @always_inline("nodebug")
-    fn __init__[other_dtype: DType, //](out self, value: Vec[N, other_dtype]):
+    fn __init__[other_dtype: DType, //](out self, value: Vec[other_dtype, N]):
         self = Self(data=value.data.cast[dtype]())
 
     @always_inline
@@ -67,7 +68,7 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
 
     @always_inline
     fn write_to[W: Writer](self, mut writer: W):
-        writer.write("Vec", N, '(', self.data, ')')
+        writer.write("Vec", N, "(", self.data, ")")
 
     @always_inline
     fn dot(self, other: Self) -> Scalar[dtype]:
@@ -99,9 +100,10 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
     @always_inline
     fn x(self) -> Scalar[dtype]:
         return self.data[0]
-    
+
     @always_inline
     fn y(self) -> Scalar[dtype]:
+        constrained[N > 1, "Y is only defined for vectors with at least 2 elements."]()
         return self.data[1]
 
     @always_inline
@@ -115,12 +117,13 @@ struct Vec[N: Int, dtype: DType](Copyable, Movable, Writable):
         return self.data[3]
 
 
-alias Vec2[dtype: DType] = Vec[2, dtype]
-alias Vec3[dtype: DType] = Vec[3, dtype]
-alias Vec4[dtype: DType] = Vec[4, dtype]
+alias Vec2 = Vec[_, 2]
+alias Vec3 = Vec[_, 3]
+alias Vec4 = Vec[_, 4]
 
 alias f32 = DType.float32
 alias i32 = DType.int32
+alias u32 = DType.uint32
 
 alias Vec2f = Vec2[f32]
 alias Vec3f = Vec3[f32]
@@ -129,3 +132,7 @@ alias Vec4f = Vec4[f32]
 alias Vec2i = Vec2[i32]
 alias Vec3i = Vec3[i32]
 alias Vec4i = Vec4[i32]
+
+alias Vec2u = Vec2[u32]
+alias Vec3u = Vec3[u32]
+alias Vec4u = Vec4[u32]

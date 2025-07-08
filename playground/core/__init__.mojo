@@ -2,3 +2,8 @@ from .imports import *
 from .utils import *
 from .buffers import *
 from .shader import *
+from .vertex_layout import *
+from .vertex_array import *
+from .texture import *
+from .event_handler import *
+from .window import *

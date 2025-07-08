@@ -1,40 +1,67 @@
-from memory import UnsafePointer
 from utils.index import IndexList
 from python import Python, PythonObject
 from buffer import NDBuffer
-from python._cpython import PyObjectPtr
+from memory import memcpy
+from .imports import *
 
-@fieldwise_init
-struct PyArrayObject[dtype: DType](Copyable, Movable):
-    """
-    Container for a numpy array.
-
-    See: https://numpy.org/doc/2.1/reference/c-api/types-and-structures.html#c.PyArrayObject
-    """
-
-    var data: UnsafePointer[Scalar[dtype]]
-    var nd: Int
-    var dimensions: UnsafePointer[Int]
-    var strides: UnsafePointer[Int]
-    var base: PyObjectPtr
-    var descr: PyObjectPtr
-    var flags: Int
-    var weakreflist: PyObjectPtr
-
-    # version dependent private members are omitted
-    # ...
-
-
-def from_numpy[dtype: DType, rank: Int](py_array_object: PythonObject) -> NDBuffer[dtype, rank=rank, origin=MutableAnyOrigin]:
-    py_arr_ptr = UnsafePointer[PyArrayObject[dtype], **_](unchecked_downcast_value=py_array_object)
-    py_arr = py_arr_ptr[]
-    if py_arr.nd != rank:
-        raise Error(String("NumPy array rank mismatch: {} != {}").format(py_arr.nd, rank))
-    var shape = IndexList[rank]()
-    for i in range(rank):
-        shape[i] = Int(py_arr.dimensions[i])
-    return NDBuffer[dtype, rank=rank, origin=MutableAnyOrigin](py_arr.data, dynamic_shape=shape)
-
-
+alias ListElement = Copyable & Movable
 alias Ptr = UnsafePointer
 alias Id = UInt32
+
+
+fn print_list[T: Writable & Movable & Copyable](list: List[T]):
+    print("[", end="")
+    for item in list:
+        print(item, end=",\n")
+    print("]")
+
+
+def read_file[PathLike: os.PathLike](path: PathLike) -> String:
+    with open(path, "r") as file:
+        return file.read()
+
+
+alias numpy_dtype_map = {
+    DType.bool: 'bool',
+    DType.int8: 'int8',
+    DType.int16: 'int16',
+    DType.int32: 'int32',
+    DType.int64: 'int64',
+    DType.uint8: 'uint8',
+    DType.uint16: 'uint16',
+    DType.uint32: 'uint32',
+    DType.uint64: 'uint64',
+    DType.float16: 'float16',
+    DType.float32: 'float32',
+    DType.float64: 'float64'
+}
+
+
+fn from_numpy[dtype: DType, rank: Int](array: PythonObject) raises -> UnsafePointer[Scalar[dtype]]:
+    np = Python.import_module("numpy")
+    arr = np.ascontiguousarray(array)
+    if arr.ndim != rank:
+        raise Error("Incorrect numpy rank: ", String(arr.ndim), ", expected: ", rank)
+    if numpy_dtype_map[dtype] != String(arr.dtype):
+        raise Error("Incorrect numpy dtype: ", String(arr.dtype), ", expected: ", numpy_dtype_map[dtype])
+    src = arr.ctypes.data.unsafe_get_as_pointer[dtype]()
+    dst = UnsafePointer[Scalar[dtype]].alloc(Int(arr.size))
+    memcpy(dst, src, Int(arr.size))
+    return dst
+
+
+struct NDArray[dtype: DType, rank: Int]:
+    var data: UnsafePointer[Scalar[dtype]]
+    var buf: NDBuffer[dtype, rank, MutableAnyOrigin]
+
+    @always_inline
+    fn __init__(out self, array: PythonObject) raises:
+        self.data = from_numpy[dtype, rank](array)
+        index_list = IndexList[rank]()
+        for i in range(rank):
+            index_list[i] = Int(array.shape[i])
+        self.buf = NDBuffer[dtype, rank, MutableAnyOrigin](self.data, dynamic_shape=index_list)
+
+    @always_inline
+    fn get_shape(self) -> IndexList[rank]:
+        return self.buf.get_shape()
