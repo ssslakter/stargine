@@ -17,8 +17,9 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         self = Self()
         self.fill(value)
 
-    fn __init__(out self, rows: List[Vec[dtype, cols]]):
-        constrained[len(rows) == Self.rows, "Number of rows must match"]()
+    fn __init__(out self, rows: List[Vec[dtype, cols]]) raises:
+        if len(rows) != Self.rows:
+            raise Error("Number of rows must match")
         self = Self()
         for i in range(len(rows)):
             for j in range(Self.cols):

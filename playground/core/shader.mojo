@@ -106,8 +106,8 @@ struct Shader(Copyable, Movable):
     fn use(self):
         gl.use_program(self.inner[].id)
 
-    fn set_uniform(mut self, owned name: String, texture: Texture):
-        self.set_uniform(name, texture.inner[].id)
+    fn set_uniform(mut self, owned name: String, texture_unit: gl.TextureUnit):
+        self.set_uniform(name, Int32(Int(texture_unit) - Int(gl.TextureUnit.TEXTURE0)))
 
     fn set_uniform[dtype: DType](mut self, owned name: String, value: Scalar[dtype]):
         self.set_uniform(name, Vec[dtype, 1](value))

@@ -62,16 +62,21 @@ fn app_init(mut state: AppState) raises:
     gl.viewport(0, 0, win_width, win_height)
     state.textures.append(Texture("glasses.png"))
     state.textures.append(Texture("wall.jpg"))
-    shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
-    shader.set_uniform("texture1", state.textures[0])
-    # shader.set_uniform("texture2", state.textures[1])
+    var shader = Shader(vertex_path="shaders/vertex.glsl", fragment_path="shaders/fragment.glsl")
+    shader.set_uniform("texture1", gl.TextureUnit.TEXTURE0)
+    shader.set_uniform("texture2", gl.TextureUnit.TEXTURE1)
     state.shaders.append(shader)
 
-    vbo = VertexBuffer[Vertex](vertices)
-    ebo = IndexBuffer(indices)
+    var vbo = VertexBuffer[Vertex](vertices)
+    var ebo = IndexBuffer(indices)
     state.vaos.append(VertexArray(Vertex.get_layout(), vbo, ebo))
 
     # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
+    state.shaders[0].use()
+    state.textures[0].bind(gl.TextureUnit.TEXTURE0)
+    state.textures[1].bind(gl.TextureUnit.TEXTURE1)
+
+
 
 
 fn update(mut state: AppState) raises:
@@ -80,11 +85,9 @@ fn update(mut state: AppState) raises:
     blue = Float32(math.cos(t_ms / 2000) / 2 + 0.5)
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
     
-    state.textures[0].bind()
-    state.textures[1].bind(gl.TextureUnit.TEXTURE1)
     state.shaders[0].set_uniform("myColor", Vec4f(0.0, green, blue, 1.0))
 
-    state.shaders[0].use()
+
     state.vaos[0].draw()
 
     state.window.swap()
