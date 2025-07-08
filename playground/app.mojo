@@ -30,13 +30,27 @@ struct Vertex(Copyable & Movable, WithVertexLayout, Writable):
 
 
 alias vertices = List[Vertex](
-    Vertex(position=Vec3f(-0.5, -0.5, 0.0), color=Vec4f(0.0, 0.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),  # Bottom-left
-    Vertex(position=Vec3f( 0.5, -0.5, 0.0), color=Vec4f(1.0, 0.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),  # Bottom-right
-    Vertex(position=Vec3f( 0.5,  0.5, 0.0), color=Vec4f(0.0, 1.0, 0.0, 1.0), tex_coords=Vec2f(1.0, 1.0)),  # Top-right
-    Vertex(position=Vec3f(-0.5,  0.5, 0.0), color=Vec4f(1.0, 1.0, 0.0, 1.0), tex_coords=Vec2f(0.0, 1.0)),  # Top-left
+    Vertex(position=Vec3f(-0.5, -0.5, -0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),
+    Vertex(position=Vec3f( 0.5, -0.5, -0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),
+    Vertex(position=Vec3f( 0.5,  0.5, -0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(1.0, 1.0)),
+    Vertex(position=Vec3f(-0.5,  0.5, -0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 1.0)),
+
+    Vertex(position=Vec3f(-0.5, -0.5,  0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 0.0)),
+    Vertex(position=Vec3f( 0.5, -0.5,  0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(1.0, 0.0)),
+    Vertex(position=Vec3f( 0.5,  0.5,  0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(1.0, 1.0)),
+    Vertex(position=Vec3f(-0.5,  0.5,  0.5), color=Vec4f(1.0, 1.0, 1.0, 1.0), tex_coords=Vec2f(0.0, 1.0)),
 )
 
-alias indices = List[UInt32](0, 1, 2, 2, 3, 0)
+alias indices = List[UInt32](
+    1, 5, 6,
+    6, 2, 1,
+
+    3, 7, 6,
+    6, 2, 3,
+
+    4, 5, 6,
+    6, 7, 4
+)
 
 
 @fieldwise_init
@@ -75,6 +89,16 @@ fn app_init(mut state: AppState) raises:
     state.shaders[0].use()
     state.textures[0].bind(gl.TextureUnit.TEXTURE0)
     state.textures[1].bind(gl.TextureUnit.TEXTURE1)
+
+    var model = Mat4f.diag(1.0)
+    model = translate(model, Vec3f(0.0, 0.0, -3.0))
+    var view = Mat4f.diag(1.0)
+    view = translate(view, Vec3f(0.0, 0.0, -3.0))
+    var projection = Mat4f.diag(1.0)
+    projection = perspective(projection, math.pi/4, Float32(win_width) / Float32(win_height), 0.1, 100.0)
+    state.shaders[0].set_uniform("model", model)
+    state.shaders[0].set_uniform("view", view)
+    state.shaders[0].set_uniform("projection", projection)
 
 
 

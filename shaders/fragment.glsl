@@ -8,5 +8,9 @@ out vec4 FragColor;
 
 void main()
 {
-    FragColor = mix(texture(texture1, vTexCoord), texture(texture2, vTexCoord), 0.6);
+    vec4 overlayTexture = texture(texture1, vTexCoord);
+    vec4 baseTexture = texture(texture2, vTexCoord);
+    float alpha = overlayTexture.a;
+    vec3 resultColor = overlayTexture.rgb * alpha + baseTexture.rgb * (1.0 - alpha);
+    FragColor = vec4(resultColor, 1.0);
 }

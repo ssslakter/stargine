@@ -134,7 +134,6 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
                 self.buf[i, j] = self.buf[i, j] % other
         return self
 
-
 alias Mat2 = Matrix[_, 2, 2]
 alias Mat3 = Matrix[_, 3, 3]
 alias Mat4 = Matrix[_, 4, 4]

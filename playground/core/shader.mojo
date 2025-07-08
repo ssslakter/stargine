@@ -70,6 +70,7 @@ struct Shader(Copyable, Movable):
     var vertex_paths: List[String]
     var uniforms: Dict[String, UniformValue]
     var uniforms_SIMD16: Dict[String, UniformValueSIMD16]
+    var uniform_matrices: Dict[String, Matrix[DType.float32, 4, 4]]
 
     fn __init__(out self):
         self.inner = ArcPointer[_ShaderInner](_ShaderInner())
@@ -77,6 +78,8 @@ struct Shader(Copyable, Movable):
         self.vertex_paths = []
         self.uniforms = {}
         self.uniforms_SIMD16 = {}
+        self.uniform_matrices = {}
+
     fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, fragment_path: PathLike, vertex_path: PathLike) raises:
         self = Self([fragment_path], [vertex_path])
 
@@ -88,12 +91,14 @@ struct Shader(Copyable, Movable):
         self.vertex_paths = [String(path) for path in vertex_paths]
         self.uniforms = {}
         self.uniforms_SIMD16 = {}
-    
+        self.uniform_matrices = {}
+
     fn reload(owned self) raises:
         print("reloading shader", self.inner[].id)
 
         var uniforms = self.uniforms.copy()
         var uniforms_SIMD16 = self.uniforms_SIMD16.copy()
+        var uniform_matrices = self.uniform_matrices.copy()
         self.inner[].reload(self.fragment_paths, self.vertex_paths)
 
         for el in uniforms.items():
@@ -101,7 +106,9 @@ struct Shader(Copyable, Movable):
 
         for el in uniforms_SIMD16.items():
             self.set_uniform(el.key, el.value)
-        
+
+        for el in uniform_matrices.items():
+            self.set_uniform(el.key, el.value)
 
     fn use(self):
         gl.use_program(self.inner[].id)
@@ -114,13 +121,13 @@ struct Shader(Copyable, Movable):
 
     fn set_uniform[N: Int, dtype: DType, //](mut self, owned name: String, value: Vec[dtype, N]):
         @parameter
-        if N in [1,2]:
+        if N in [1, 2]:
             self.uniforms[name] = UniformValue(value)
-        elif N in [3,4]:
+        elif N in [3, 4]:
             self.uniforms_SIMD16[name] = UniformValueSIMD16(value)
         else:
             print("Error: unsupported vector size. Uniform value will be ignored.")
-        
+
         self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 
@@ -196,3 +203,36 @@ struct Shader(Copyable, Movable):
             self.set_uniform(name, value[Vec4u])
         elif value.isa[Vec3u]():
             self.set_uniform(name, value[Vec3u])
+
+    fn set_uniform[cols: Int, rows: Int](mut self, owned name: String, value: Matrix[DType.float32, rows, cols]):
+        var location = gl.get_uniform_location(self.inner[].id, name)
+
+        @parameter
+        if rows == 4:
+
+            @parameter
+            if cols == 4:
+                self.uniform_matrices[name] = rebind[Matrix[DType.float32, 4, 4]](value)
+                gl.uniform_matrix4fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 3:
+                gl.uniform_matrix4x3fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 2:
+                gl.uniform_matrix4x2fv(location, 1, False, value.data.unsafe_ptr())
+        elif rows == 3:
+
+            @parameter
+            if cols == 4:
+                gl.uniform_matrix3x4fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 3:
+                gl.uniform_matrix3fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 2:
+                gl.uniform_matrix3x2fv(location, 1, False, value.data.unsafe_ptr())
+        elif rows == 2:
+
+            @parameter
+            if cols == 4:
+                gl.uniform_matrix2x4fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 3:
+                gl.uniform_matrix2x3fv(location, 1, False, value.data.unsafe_ptr())
+            elif cols == 2:
+                gl.uniform_matrix2fv(location, 1, False, value.data.unsafe_ptr())
