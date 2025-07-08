@@ -45,12 +45,12 @@ alias UniformValue = Variant[
     Vec2f,
     Vec2i,
     Vec2u,
-    Vec[1, DType.float32],
-    Vec[1, DType.int32],
-    Vec[1, DType.int64],
-    Vec[1, DType.uint8],
-    Vec[1, DType.uint16],
-    Vec[1, DType.uint32],
+    Vec[DType.float32, 1],
+    Vec[DType.int32, 1],
+    Vec[DType.int64, 1],
+    Vec[DType.uint8, 1],
+    Vec[DType.uint16, 1],
+    Vec[DType.uint32, 1],
 ]
 
 # TODO: group with UniformValue when https://github.com/modular/modular/issues/4578 is fixed
@@ -110,9 +110,9 @@ struct Shader(Copyable, Movable):
         self.set_uniform(name, texture.inner[].id)
 
     fn set_uniform[dtype: DType](mut self, owned name: String, value: Scalar[dtype]):
-        self.set_uniform(name, Vec[1, dtype](value))
+        self.set_uniform(name, Vec[dtype, 1](value))
 
-    fn set_uniform[N: Int, dtype: DType, //](mut self, owned name: String, value: Vec[N, dtype]):
+    fn set_uniform[N: Int, dtype: DType, //](mut self, owned name: String, value: Vec[dtype, N]):
         @parameter
         if N in [1,2]:
             self.uniforms[name] = UniformValue(value)
@@ -126,7 +126,7 @@ struct Shader(Copyable, Movable):
 
         @parameter
         if dtype == DType.float32:
-            var v = rebind[Vec[N, DType.float32]](value)
+            var v = rebind[Vec[DType.float32, N]](value)
 
             @parameter
             if N == 1:
@@ -138,7 +138,7 @@ struct Shader(Copyable, Movable):
             elif N == 4:
                 gl.uniform4f(location, v.x(), v.y(), v.z(), v.w())
         elif dtype == DType.int32:
-            var v = rebind[Vec[N, DType.int32]](value)
+            var v = rebind[Vec[DType.int32, N]](value)
 
             @parameter
             if N == 1:
@@ -150,7 +150,7 @@ struct Shader(Copyable, Movable):
             elif N == 4:
                 gl.uniform4i(location, v.x(), v.y(), v.z(), v.w())
         elif dtype == DType.uint32:
-            var v = rebind[Vec[N, DType.uint32]](value)
+            var v = rebind[Vec[DType.uint32, N]](value)
 
             @parameter
             if N == 1:
@@ -170,18 +170,18 @@ struct Shader(Copyable, Movable):
             self.set_uniform(name, value[Vec2i])
         elif value.isa[Vec2u]():
             self.set_uniform(name, value[Vec2u])
-        elif value.isa[Vec[1, DType.float32]]():
-            self.set_uniform(name, value[Vec[1, DType.float32]])
-        elif value.isa[Vec[1, DType.int32]]():
-            self.set_uniform(name, value[Vec[1, DType.int32]])
-        elif value.isa[Vec[1, DType.int64]]():
-            self.set_uniform(name, value[Vec[1, DType.int64]])
-        elif value.isa[Vec[1, DType.uint8]]():
-            self.set_uniform(name, value[Vec[1, DType.uint8]])
-        elif value.isa[Vec[1, DType.uint16]]():
-            self.set_uniform(name, value[Vec[1, DType.uint16]])
-        elif value.isa[Vec[1, DType.uint32]]():
-            self.set_uniform(name, value[Vec[1, DType.uint32]])
+        elif value.isa[Vec[DType.float32, 1]]():
+            self.set_uniform(name, value[Vec[DType.float32, 1]])
+        elif value.isa[Vec[DType.int32, 1]]():
+            self.set_uniform(name, value[Vec[DType.int32, 1]])
+        elif value.isa[Vec[DType.int64, 1]]():
+            self.set_uniform(name, value[Vec[DType.int64, 1]])
+        elif value.isa[Vec[DType.uint8, 1]]():
+            self.set_uniform(name, value[Vec[DType.uint8, 1]])
+        elif value.isa[Vec[DType.uint16, 1]]():
+            self.set_uniform(name, value[Vec[DType.uint16, 1]])
+        elif value.isa[Vec[DType.uint32, 1]]():
+            self.set_uniform(name, value[Vec[DType.uint32, 1]])
 
     fn set_uniform(mut self, owned name: String, value: UniformValueSIMD16):
         if value.isa[Vec4f]():

@@ -2,19 +2,7 @@ from python import PythonConvertible
 from .imports import *
 from .utils import *
 
-
-def load_image_bytes[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> List[UInt8]:
-    np = Python.import_module("numpy")
-    pil = Python.import_module("PIL.Image")
-    img = pil.open(path.to_python_object())
-    img = img.transpose(pil.FLIP_TOP_BOTTOM)
-    img = img.convert("RGBA")
-    arr = np.array(img)
-    bytes = arr.tobytes()
-    
-
-
-def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> NDBuffer[DType.uint8, 3, MutableAnyOrigin]:
+def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: PathLike) -> NDArray[DType.uint8, 3]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
     img = pil.open(path.to_python_object())
@@ -22,12 +10,7 @@ def load_image[PathLike: os.PathLike & PythonConvertible & ListElement](path: Pa
     img = img.convert("RGBA")
     arr = np.array(img)
     arr = np.flipud(arr)
-    arr = np.ascontiguousarray(arr)
-    if arr.ndim == 2:
-        arr = np.expand_dims(arr, axis=-1)
-    res = from_numpy[DType.uint8, 3](arr)
-    return res
-    
+    return NDArray[DType.uint8, 3](arr)
 
 
 struct _TextureInner(Movable):
