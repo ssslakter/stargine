@@ -27,7 +27,22 @@ struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
             self.data[i] = items[i]
 
     @always_inline("nodebug")
-    fn __init__[other_dtype: DType, //](out self, value: Vec[other_dtype, N]):
+    fn __init__(out self: Vec[dtype, N], other: Vec[dtype, N-1], w: Scalar[dtype], /):
+        self = Self()
+        for i in range(N-1):
+            self.data[i] = other.data[i]
+        self.data[N-1] = w
+
+    @always_inline("nodebug")
+    fn __init__(out self: Vec[dtype, N], other: Vec[dtype, N-2], z: Scalar[dtype], w: Scalar[dtype], /):
+        self = Self()
+        for i in range(N-2):
+            self.data[i] = other.data[i]
+        self.data[N-2] = z
+        self.data[N-1] = w
+
+    @always_inline("nodebug")
+    fn __init__(out self, value: Vec[_, N]):
         self = Self(data=value.data.cast[dtype]())
 
     @always_inline
@@ -43,8 +58,24 @@ struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
         return Self(self.data + other.data)
 
     @always_inline
+    fn __iadd__(mut self, other: Self):
+        self = self + other
+
+    @always_inline
+    fn __isub__(mut self, other: Self):
+        self = self - other
+
+    @always_inline
     fn __mul__(self, other: Scalar[dtype]) -> Self:
         return Self(self.data * other)
+
+    @always_inline
+    fn __imul__(mut self, other: Scalar[dtype]):
+        self = self * other
+
+    @always_inline
+    fn __imul__(mut self, other: Self):
+        self = self * other
 
     @always_inline
     fn __sub__(self, other: Self) -> Self:

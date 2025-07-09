@@ -7,3 +7,4 @@ from .vertex_array import *
 from .texture import *
 from .event_handler import *
 from .window import *
+from .transform import *

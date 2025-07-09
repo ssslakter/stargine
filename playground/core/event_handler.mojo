@@ -57,7 +57,7 @@ struct EventHandler:
         if Int(event.scancode) == Int(Scancode.SCANCODE_ESCAPE):
             return False
         if Int(event.scancode) == Int(Scancode.SCANCODE_R):
-            app_state.shaders[0].reload()
+            app_state.cubes[0].material.value().shader.reload()
 
         if Int(event.scancode) == Int(Scancode.SCANCODE_F11):
             app_state.window.toggle_fullscreen()

@@ -4,22 +4,33 @@ from buffer import *
 
 struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
     alias rank = 2
+    # TODO: maybe use SIMD to speed up
     alias Data = InlineArray[Scalar[dtype], rows * cols]
     alias Buffer = NDBuffer[dtype, Self.rank, MutableAnyOrigin]
     var buf: Self.Buffer
     var data: Self.Data
 
-    fn __init__(out self):
-        self.data = Self.Data(fill=0.0)
+    fn __init__(out self, value: Scalar[dtype] = 0.0):
+        self.data = Self.Data(fill=value)
         self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
 
-    fn __init__(out self, value: Scalar[dtype]):
-        self = Self()
-        self.fill(value)
+    fn __init__(out self: Mat3[dtype], rows: Tuple[Vec3[dtype], Vec3[dtype], Vec3[dtype]]):
+        alias dims = 3
+        self = Mat3[dtype]()
+        @parameter
+        for i in range(dims):
+            for j in range(dims):
+                self.buf[i, j] = rows[i][j]
 
-    fn __init__(out self, rows: List[Vec[dtype, cols]]) raises:
-        if len(rows) != Self.rows:
-            raise Error("Number of rows must match")
+    fn __init__(out self: Mat4[dtype], rows: Tuple[Vec4[dtype], Vec4[dtype], Vec4[dtype], Vec4[dtype]]):
+        alias dims = 4
+        self = Mat4[dtype]()
+        @parameter
+        for i in range(dims):
+            for j in range(dims):
+                self.buf[i, j] = rows[i][j]
+
+    fn __init__(out self, rows: List[Vec[dtype, cols]]):
         self = Self()
         for i in range(len(rows)):
             for j in range(Self.cols):
@@ -27,6 +38,10 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
 
     fn __copyinit__(out self, other: Self):
         self.data = other.data
+        self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
+
+    fn __moveinit__(out self, owned other: Self):
+        self.data = other.data^
         self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
 
     fn write_to[W: Writer](self, mut writer: W):
@@ -51,18 +66,21 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
 
     fn fill(self, value: Scalar[dtype]):
         self.buf.fill(value)
+    
+    @staticmethod
+    fn id() -> Matrix[dtype, rows, rows]:
+        return Self.diag(1.0)
 
     @staticmethod
-    fn diag(value: Vec[dtype, rows]) -> Self:
-        constrained[rows == cols, "Matrix must be square"]()
-        var self = Self(0.0)
+    fn diag(value: Vec[dtype, rows]) -> Matrix[dtype, rows, rows]:
+        var self = Matrix[dtype, rows, rows](0.0)
         for i in range(rows):
             self.buf[i, i] = value[i]
 
         return self
 
     @staticmethod
-    fn diag(value: Scalar[dtype]) -> Self:
+    fn diag(value: Scalar[dtype]) -> Matrix[dtype, rows, rows]:
         return Self.diag(Vec[dtype, rows](value))
 
     fn transpose(owned self) -> Matrix[dtype, cols, rows]:

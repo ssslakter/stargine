@@ -4,8 +4,28 @@ from .utils import *
 from ..linalg import *
 
 
-def compile_shader[PathLike: os.PathLike & ListElement](paths: List[PathLike], shader_type: ShaderType) -> Id:
-    src = [read_file(path) for path in paths]
+def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -> Tuple[String, String]:
+    lines = read_file(path).splitlines()
+    vertex_lines, fragment_lines = List[String](), List[String]()
+    current: String = ""
+
+    for line in lines:
+        line_stripped = String(line.strip())
+        if line_stripped in [String("#shader vertex"), String("#shader fragment")]:
+            current = line_stripped.split(" ")[1]
+            continue
+
+        if current == "vertex":
+            vertex_lines.append(line)
+        elif current == "fragment":
+            fragment_lines.append(line)
+
+    vertex_code = String("\n".join(vertex_lines).strip())
+    fragment_code = String("\n".join(fragment_lines).strip())
+    return vertex_code, fragment_code
+
+
+def compile_shader(owned src: List[String], shader_type: ShaderType) -> Id:
     shader = gl.create_shader(shader_type)
     gl.shader_source(shader, len(src), src, UnsafePointer[Int32]())
     gl.compile_shader(shader)
@@ -18,13 +38,10 @@ struct _ShaderInner(Movable):
     fn __init__(out self):
         self.id = 0
 
-    fn __init__[PathLike: os.PathLike & ListElement](out self, fragment_path: PathLike, vertex_path: PathLike) raises:
-        self = Self([fragment_path], [vertex_path])
-
-    fn __init__[PathLike: os.PathLike & ListElement](out self, fragment_paths: List[PathLike], vertex_paths: List[PathLike]) raises:
+    fn __init__(out self, owned vertex_src: List[String], owned fragment_src: List[String]) raises:
         self.id = gl.create_program()
-        vertex_shader = compile_shader(vertex_paths, ShaderType.VERTEX_SHADER)
-        fragment_shader = compile_shader(fragment_paths, ShaderType.FRAGMENT_SHADER)
+        vertex_shader = compile_shader(vertex_src, ShaderType.VERTEX_SHADER)
+        fragment_shader = compile_shader(fragment_src, ShaderType.FRAGMENT_SHADER)
         gl.attach_shader(self.id, vertex_shader)
         gl.attach_shader(self.id, fragment_shader)
         gl.link_program(self.id)
@@ -35,99 +52,58 @@ struct _ShaderInner(Movable):
         print("deleting shader", self.id)
         gl.delete_program(self.id)
 
-    fn reload[PathLike: os.PathLike & ListElement](mut self, fragment_paths: List[PathLike], vertex_paths: List[PathLike]) raises:
-        gl.delete_program(self.id)
-        self = Self(fragment_paths, vertex_paths)
-
-
-# TODO: use list comprehensions with parameters when they are supported
-alias UniformValue = Variant[
-    Vec2f,
-    Vec2i,
-    Vec2u,
-    Vec[DType.float32, 1],
-    Vec[DType.int32, 1],
-    Vec[DType.int64, 1],
-    Vec[DType.uint8, 1],
-    Vec[DType.uint16, 1],
-    Vec[DType.uint32, 1],
-]
-
-# TODO: group with UniformValue when https://github.com/modular/modular/issues/4578 is fixed
-alias UniformValueSIMD16 = Variant[
-    Vec4f,
-    Vec3f,
-    Vec4i,
-    Vec3i,
-    Vec4u,
-    Vec3u,
-]
-
 
 struct Shader(Copyable, Movable):
     var inner: ArcPointer[_ShaderInner]
     var fragment_paths: List[String]
     var vertex_paths: List[String]
-    var uniforms: Dict[String, UniformValue]
-    var uniforms_SIMD16: Dict[String, UniformValueSIMD16]
-    var uniform_matrices: Dict[String, Matrix[DType.float32, 4, 4]]
+    var combined_path: Optional[String]
 
     fn __init__(out self):
         self.inner = ArcPointer[_ShaderInner](_ShaderInner())
         self.fragment_paths = []
         self.vertex_paths = []
-        self.uniforms = {}
-        self.uniforms_SIMD16 = {}
-        self.uniform_matrices = {}
+        self.combined_path = None
 
-    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, fragment_path: PathLike, vertex_path: PathLike) raises:
-        self = Self([fragment_path], [vertex_path])
+    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, combined_path: PathLike) raises:
+        vertex_src, fragment_src = parse_combined_shader(combined_path)
+        self = Self(vertex_src=[vertex_src], fragment_src=[fragment_src])
+        self.combined_path = String(combined_path)
 
-    fn __init__[
-        PathLike: os.PathLike & ListElement & Stringable
-    ](out self, fragment_paths: List[PathLike], vertex_paths: List[PathLike]) raises:
-        self.inner = ArcPointer[_ShaderInner](_ShaderInner(fragment_paths, vertex_paths))
-        self.fragment_paths = [String(path) for path in fragment_paths]
+    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, vertex_path: PathLike, fragment_path: PathLike) raises:
+        self = Self([vertex_path], [fragment_path])
+
+    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, vertex_paths: List[PathLike], fragment_paths: List[PathLike]) raises:
+        vertex_src = [read_file(path) for path in vertex_paths]
+        fragment_src = [read_file(path) for path in fragment_paths]
+        self = Self(vertex_src=vertex_src, fragment_src=fragment_src)
         self.vertex_paths = [String(path) for path in vertex_paths]
-        self.uniforms = {}
-        self.uniforms_SIMD16 = {}
-        self.uniform_matrices = {}
+        self.fragment_paths = [String(path) for path in fragment_paths]
 
-    fn reload(owned self) raises:
+    fn __init__(out self, *, owned vertex_src: List[String], owned fragment_src: List[String]) raises:
+        self.inner = ArcPointer[_ShaderInner](_ShaderInner(vertex_src, fragment_src))
+        self.fragment_paths = []
+        self.vertex_paths = []
+        self.combined_path = None
+
+    fn reload(mut self) raises:
+        if not (self.vertex_paths and self.fragment_paths or self.combined_path):
+            return
         print("reloading shader", self.inner[].id)
-
-        var uniforms = self.uniforms.copy()
-        var uniforms_SIMD16 = self.uniforms_SIMD16.copy()
-        var uniform_matrices = self.uniform_matrices.copy()
-        self.inner[].reload(self.fragment_paths, self.vertex_paths)
-
-        for el in uniforms.items():
-            self.set_uniform(el.key, el.value)
-
-        for el in uniforms_SIMD16.items():
-            self.set_uniform(el.key, el.value)
-
-        for el in uniform_matrices.items():
-            self.set_uniform(el.key, el.value)
+        if self.combined_path:
+            self = Self(self.combined_path.value())
+        else: self = Self(self.vertex_paths, self.fragment_paths)
 
     fn use(self):
         gl.use_program(self.inner[].id)
 
-    fn set_uniform(mut self, owned name: String, texture_unit: gl.TextureUnit):
+    fn set_uniform(self, owned name: String, texture_unit: gl.TextureUnit):
         self.set_uniform(name, Int32(Int(texture_unit) - Int(gl.TextureUnit.TEXTURE0)))
 
-    fn set_uniform[dtype: DType](mut self, owned name: String, value: Scalar[dtype]):
+    fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]):
         self.set_uniform(name, Vec[dtype, 1](value))
 
-    fn set_uniform[N: Int, dtype: DType, //](mut self, owned name: String, value: Vec[dtype, N]):
-        @parameter
-        if N in [1, 2]:
-            self.uniforms[name] = UniformValue(value)
-        elif N in [3, 4]:
-            self.uniforms_SIMD16[name] = UniformValueSIMD16(value)
-        else:
-            print("Error: unsupported vector size. Uniform value will be ignored.")
-
+    fn set_uniform[N: Int, dtype: DType, //](self, owned name: String, value: Vec[dtype, N]):
         self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 
@@ -169,42 +145,8 @@ struct Shader(Copyable, Movable):
             elif N == 4:
                 gl.uniform4ui(location, v.x(), v.y(), v.z(), v.w())
 
-    fn set_uniform(mut self, owned name: String, value: UniformValue):
-        # TODO this looks like a hack
-        if value.isa[Vec2f]():
-            self.set_uniform(name, value[Vec2f])
-        elif value.isa[Vec2i]():
-            self.set_uniform(name, value[Vec2i])
-        elif value.isa[Vec2u]():
-            self.set_uniform(name, value[Vec2u])
-        elif value.isa[Vec[DType.float32, 1]]():
-            self.set_uniform(name, value[Vec[DType.float32, 1]])
-        elif value.isa[Vec[DType.int32, 1]]():
-            self.set_uniform(name, value[Vec[DType.int32, 1]])
-        elif value.isa[Vec[DType.int64, 1]]():
-            self.set_uniform(name, value[Vec[DType.int64, 1]])
-        elif value.isa[Vec[DType.uint8, 1]]():
-            self.set_uniform(name, value[Vec[DType.uint8, 1]])
-        elif value.isa[Vec[DType.uint16, 1]]():
-            self.set_uniform(name, value[Vec[DType.uint16, 1]])
-        elif value.isa[Vec[DType.uint32, 1]]():
-            self.set_uniform(name, value[Vec[DType.uint32, 1]])
-
-    fn set_uniform(mut self, owned name: String, value: UniformValueSIMD16):
-        if value.isa[Vec4f]():
-            self.set_uniform(name, value[Vec4f])
-        elif value.isa[Vec3f]():
-            self.set_uniform(name, value[Vec3f])
-        elif value.isa[Vec4i]():
-            self.set_uniform(name, value[Vec4i])
-        elif value.isa[Vec3i]():
-            self.set_uniform(name, value[Vec3i])
-        elif value.isa[Vec4u]():
-            self.set_uniform(name, value[Vec4u])
-        elif value.isa[Vec3u]():
-            self.set_uniform(name, value[Vec3u])
-
-    fn set_uniform[cols: Int, rows: Int](mut self, owned name: String, value: Matrix[DType.float32, rows, cols]):
+    fn set_uniform[cols: Int, rows: Int](self, owned name: String, value: Matrix[DType.float32, rows, cols]):
+        self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 
         @parameter
@@ -212,27 +154,26 @@ struct Shader(Copyable, Movable):
 
             @parameter
             if cols == 4:
-                self.uniform_matrices[name] = rebind[Matrix[DType.float32, 4, 4]](value)
-                gl.uniform_matrix4fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix4fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 3:
-                gl.uniform_matrix4x3fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix4x3fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 2:
-                gl.uniform_matrix4x2fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix4x2fv(location, 1, True, value.data.unsafe_ptr())
         elif rows == 3:
 
             @parameter
             if cols == 4:
-                gl.uniform_matrix3x4fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix3x4fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 3:
-                gl.uniform_matrix3fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix3fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 2:
-                gl.uniform_matrix3x2fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix3x2fv(location, 1, True, value.data.unsafe_ptr())
         elif rows == 2:
 
             @parameter
             if cols == 4:
-                gl.uniform_matrix2x4fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix2x4fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 3:
-                gl.uniform_matrix2x3fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix2x3fv(location, 1, True, value.data.unsafe_ptr())
             elif cols == 2:
-                gl.uniform_matrix2fv(location, 1, False, value.data.unsafe_ptr())
+                gl.uniform_matrix2fv(location, 1, True, value.data.unsafe_ptr())
