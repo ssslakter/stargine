@@ -54,17 +54,38 @@ struct EventHandler:
                     self.text_input_state.text = self.text_input_state.text[:-1]
             return True
 
-        if Int(event.scancode) == Int(Scancode.SCANCODE_ESCAPE):
+        alias move_dist = 1.0
+        alias rot_angle = 5.0
+
+        if Int(event.scancode) == Int(Scancode.SCANCODE_W):
+            app_state.camera.move(app_state.camera.get_forward() * move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_S):
+            app_state.camera.move(app_state.camera.get_forward() * -move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_A):
+            app_state.camera.move(app_state.camera.get_right() * move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_D):
+            app_state.camera.move(app_state.camera.get_right() * -move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_SPACE):
+            app_state.camera.move(Vec3f(0.0, 1.0, 0.0) * move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_LSHIFT):
+            app_state.camera.move(Vec3f(0.0, -1.0, 0.0) * move_dist)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_UP):
+            app_state.camera.rotate(0.0, rot_angle)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_DOWN):
+            app_state.camera.rotate(0.0, -rot_angle)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_LEFT):
+            app_state.camera.rotate(rot_angle, 0.0)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_RIGHT):
+            app_state.camera.rotate(-rot_angle, 0.0)
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_ESCAPE):
             return False
-        if Int(event.scancode) == Int(Scancode.SCANCODE_R):
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_R):
             app_state.cubes[0].material.value().shader.reload()
-
-        if Int(event.scancode) == Int(Scancode.SCANCODE_F11):
+        elif Int(event.scancode) == Int(Scancode.SCANCODE_F11):
             app_state.window.toggle_fullscreen()
-            
-
-        if Int(event.scancode) in [Int(Scancode.SCANCODE_T), Int(Scancode.SCANCODE_RETURN)]:
+        elif Int(event.scancode) in [Int(Scancode.SCANCODE_T), Int(Scancode.SCANCODE_RETURN)]:
             self.text_input_state.start_text_input(app_state)
+            
         return True
 
     fn handle_window_resized(mut self, mut app_state: AppState, event: WindowEvent):

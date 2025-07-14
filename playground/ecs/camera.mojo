@@ -1,4 +1,4 @@
-from .linalg import *
+from ..core import *
 
 
 struct Camera(Copyable, Movable):
@@ -35,6 +35,9 @@ struct Camera(Copyable, Movable):
             sin(self.pitch),
             sin(self.yaw) * cos(self.pitch),
         )
+
+    fn get_right(self) -> Vec3f:
+        return self.get_forward().cross(self.world_up).normalize()
 
     fn look_at(mut self, target: Vec3f):
         var forward = target - self.position

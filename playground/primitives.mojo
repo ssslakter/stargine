@@ -1,6 +1,4 @@
-from .core import Transform
-from .material import *
-from .mesh import *
+from .ecs import *
 
 fn unit_cube_vertices[dim: Int, dtype: DType = DType.float32]() -> List[Vec[dtype, dim]]:
     alias num_vertices = 1 << dim
@@ -14,6 +12,14 @@ fn unit_cube_vertices[dim: Int, dtype: DType = DType.float32]() -> List[Vec[dtyp
 
     return vertices
 
+fn square_uvs() -> List[Vec2f]:
+    return [
+        Vec2f(0.0, 0.0),
+        Vec2f(1.0, 0.0),
+        Vec2f(0.0, 1.0),
+        Vec2f(1.0, 1.0),
+    ]
+
 struct Cube(Movable, Copyable):
     var mesh: Mesh
     var transform: Transform
@@ -22,16 +28,15 @@ struct Cube(Movable, Copyable):
     fn __init__(out self, material: Optional[Material] = None) raises:
         self.transform = Transform()
         self.material = material
-        vertices = [Vertex(v) for v in unit_cube_vertices[3]()]
-        indices: List[UInt32] = [
-            0, 1, 2,    1, 3, 2,
-            4, 6, 5,    5, 6, 7,
-            0, 4, 1,    1, 4, 5,
-            2, 3, 6,    3, 7, 6,
-            0, 2, 4,    2, 6, 4,
-            1, 5, 3,    3, 5, 7
-            ]
-        self.mesh = Mesh(vertices, indices)
+        
+        var positions = List[Vec3f](
+            Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5), 
+        )
+        var uvs = List[Vec2f](
+            Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0), 
+        )
+
+        self.mesh = Mesh(positions, uvs=uvs)
 
     fn draw(mut self):
         if self.material:

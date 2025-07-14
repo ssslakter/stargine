@@ -70,6 +70,7 @@ struct _TextureInner(Movable):
             )
 
     fn __del__(var self):
+        print('deleting texture')
         gl.delete_textures(1, Ptr(to=self.id))
 
 
@@ -89,7 +90,6 @@ struct Texture(Copyable, Movable):
         self.set_parameter(gl.TextureParameterName.TEXTURE_MAG_FILTER, Int(gl.TextureMagFilter.NEAREST))
 
     fn bind(self, texture_unit: gl.TextureUnit = gl.TextureUnit.TEXTURE0):
-        print("bind texture, unit:", Int(texture_unit), "id:", self.inner[].id)
         gl.active_texture(texture_unit)
         gl.bind_texture(gl.TextureTarget.TEXTURE_2D, self.inner[].id)
 

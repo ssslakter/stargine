@@ -1,7 +1,7 @@
 from utils import Variant
 from opengl import ShaderType
 from .utils import *
-from ..linalg import *
+from .linalg import *
 
 
 def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -> Tuple[String, String]:

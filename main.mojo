@@ -37,7 +37,6 @@ def main():
     gl.init_opengl(sdl.gl_get_proc_address)
     state = AppState(window^)
 
-    app_init(state)
     main_loop(state)
 
     sdl.quit()

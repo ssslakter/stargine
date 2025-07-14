@@ -1,5 +1,5 @@
-from ..core.shader import *
-from ..core.texture import *
+from ...core.shader import *
+from ...core.texture import *
 
 # TODO: use list comprehensions with parameters when they are supported
 alias UniformValue = Variant[
