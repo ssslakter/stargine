@@ -56,21 +56,16 @@ struct GraphicsBuffer[index_dtype: DType = DType.uint32](Copyable, Movable):
         normals: Optional[List[Vec3f]] = None,
         indices: Optional[List[Scalar[index_dtype]]] = None,
     ):
-        print(layout)
-        self.vao = VertexArray(layout)
-        self.vbo = VertexBuffer(layout.stride, create_interleaved_buffer(layout, len(positions), positions, colors, uvs, normals))
+        self.vbo = VertexBuffer(create_interleaved_buffer(layout, len(positions), positions, colors, uvs, normals), UInt(layout.stride))
         if indices:
-            print('creating ebo')
             self.ebo = IndexBuffer(indices.value())
         else: self.ebo = None
+        self.vao = VertexArray(layout)
 
     fn draw(self):
-        self.vbo.bind()
         self.vao.bind()
         if not self.ebo:
             self.vbo.draw()
         else:
             ebo = self.ebo.value()
             ebo.draw()
-        self.vbo.unbind()
-        self.vao.unbind()

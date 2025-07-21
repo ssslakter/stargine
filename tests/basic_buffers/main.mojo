@@ -1,4 +1,6 @@
 from sdl import InitFlags, WindowFlags
+from os import env
+from pathlib import Path
 from sdl.sdl_events import *
 import opengl as gl
 from playground.core.linalg import *
@@ -49,13 +51,17 @@ def main():
 
     layout = VertexLayout(VertexAttribute(VertexAttributeType.POSITION))
     vbo = GraphicsBuffer(layout, positions = positions, indices = indices)
-    shader = Shader('./shader.glsl')
+    shader = Shader(Path(env.getenv("ROOT_DIR"))/'shader.glsl')
+    shader.set_uniform('color', Vec4f(0.3,0.5,0.7,1))
 
     while running:
         running = event_handler.poll_events()
         if not running:
             break
+        
+        renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
+        shader.use()
         vbo.draw()
+        window.swap()
 
-    _ = window^
     sdl.quit()

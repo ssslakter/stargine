@@ -2,31 +2,26 @@ from ..utils import *
 from .vertex_layout import *
 
 
-struct VertexBuffer(Copyable, Movable, Sized):
+struct VertexBuffer[T: Copyable & Movable = UInt8](Copyable, Movable, Sized):
     var id: ArcPointer[Id]
     var numel: UInt
 
-    fn __init__(out self, vertex_size: UInt, bytes: List[UInt8]):
-        print('creating vertex buffer')
+    fn __init__(out self, data: List[T], vertex_full_size: Optional[UInt] = None):
         # TODO: create buffer pool (with _Global) to reuse them instead of creating new ones
         self.id = ArcPointer(UInt32(0))
         gl.gen_buffers(1, self.id.unsafe_ptr())
-        self.numel = len(bytes) // vertex_size
-        for i in range(0, len(bytes), 4):
-            val = Ptr(to=bytes[i]).bitcast[Float32]()[]
-            print(val, end = ' ')
+        vertex_size = vertex_full_size.or_else(sizeof[T]())
+        self.numel = len(data)*sizeof[T]() // vertex_size
         self.bind()
         gl.buffer_data(
             gl.BufferTargetARB.ARRAY_BUFFER,
             vertex_size * self.numel,
-            bytes.unsafe_ptr().bitcast[NoneType](),
+            data.unsafe_ptr().bitcast[NoneType](),
             gl.BufferUsageARB.STATIC_DRAW,
         )
 
     fn __del__(owned self):
-        print("deleting vb ref")
         if self.id.count() == 1:
-            print("DELETING vb")
             gl.delete_buffers(1, self.id.unsafe_ptr())
 
     fn __len__(self) -> Int:

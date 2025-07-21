@@ -8,8 +8,12 @@ version = "0.1.0"
 [tasks]
 app = "mojo main.mojo"
 
+[tasks.test]
+args = [{"arg"="folder"}]
+cmd = "./tests/run_test.sh {{folder}}"
+
 [dependencies]
-max = "*"
+max = "==25.5.0.dev2025070705"
 sdl3 = ">=3.2.14,<4"
 ipykernel = ">=6.29.5,<7"
 llvm-tools = ">=20.1.5,<21"

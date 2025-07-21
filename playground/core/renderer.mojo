@@ -1,6 +1,6 @@
 from opengl import TriangleFace, PolygonMode
 from .imports import *
-from ..linalg import *
+from .linalg import *
 
 fn clear(color: Vec4f):
     gl.clear_color(color.x(), color.y(), color.z(), color.w())

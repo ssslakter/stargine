@@ -7,7 +7,6 @@ struct VertexArray(Copyable, Movable):
     var id: ArcPointer[Id]
 
     fn __init__(out self, layout: VertexLayout):
-        print('creating vertex array')
         self.id = ArcPointer(UInt32(0))
         gl.gen_vertex_arrays(1, self.id.unsafe_ptr())
         self.bind()
@@ -26,9 +25,7 @@ struct VertexArray(Copyable, Movable):
             idx += 1
 
     fn __del__(owned self):
-        print("deleting vao ref")
         if self.id.count() == 1:
-            print("DELETING vao")
             gl.delete_vertex_arrays(1, self.id.unsafe_ptr())
 
     fn bind(self):
