@@ -65,7 +65,7 @@ struct VertexAttributeType(EqualityComparable, Intable):
 
 
 @register_passable("trivial")
-struct VertexAttributeDescriptor(Copyable, Movable, Writable):
+struct VertexAttribute(Copyable, Movable, Writable):
     var num_components: Int
     var attr_type: VertexAttributeType
     var total_size: Int
@@ -83,7 +83,7 @@ struct VertexAttributeDescriptor(Copyable, Movable, Writable):
 
     fn write_to[W: Writer](self, mut writer: W):
         writer.write(
-            "VertexAttributeDescriptor(num_components=",
+            "VertexAttribute(num_components=",
             self.num_components,
             ", total_size=",
             self.total_size,
@@ -96,16 +96,16 @@ struct VertexAttributeDescriptor(Copyable, Movable, Writable):
 
 
 struct VertexLayout(Copyable, Movable, Writable):
-    var elements: List[VertexAttributeDescriptor]
+    var elements: List[VertexAttribute]
     var stride: Int
 
-    fn __init__(out self, *elements: VertexAttributeDescriptor):
+    fn __init__(out self, *elements: VertexAttribute):
         self.elements, self.stride = [], 0
         for el in elements:
             self.stride += el.total_size
             self.elements.append(el)
 
-    fn __init__(out self, elements: List[VertexAttributeDescriptor]):
+    fn __init__(out self, elements: List[VertexAttribute]):
         self.elements, self.stride = elements, 0
         for el in elements:
             self.stride += el.total_size

@@ -21,7 +21,6 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
         return self.numel
 
     fn __del__(owned self):
-        print("deleting ebo ref")
         if self.id.count() == 1:
             print("DELETING ebo")
             gl.delete_buffers(1, self.id.unsafe_ptr())
