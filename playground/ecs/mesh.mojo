@@ -33,11 +33,9 @@ struct Mesh(Copyable, Movable):
             elements.append(VertexAttribute(VertexAttributeType.NORMAL))
         if self.colors:
             elements.append(VertexAttribute(VertexAttributeType.COLOR))
-        print('got layout')
         return VertexLayout(elements)
 
     fn to_gpu(mut self):
-        print("creating graphics buffer")
         self.buf = GraphicsBuffer(self.get_layout(), self.positions, self.colors, self.uvs, self.normals, self.indices)
 
     fn draw(self):

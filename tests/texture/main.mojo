@@ -38,11 +38,22 @@ def main():
         0,1,2,
         0,2,3
     ]
+    var uvs = [
+        Vec2f(0,0),
+        Vec2f(1,0),
+        Vec2f(1,1),
+        Vec2f(0,1),
+    ]
 
-    layout = VertexLayout(VertexAttribute(VertexAttributeType.POSITION))
-    vbo = GraphicsBuffer(layout, positions = positions, indices = indices)
+    layout = VertexLayout(
+        VertexAttribute(VertexAttributeType.POSITION),
+        VertexAttribute(VertexAttributeType.UV),
+        )
+    vbo = GraphicsBuffer(layout, positions = positions, indices = indices, uvs=uvs)
     shader = Shader(Path(env.getenv("ROOT_DIR"))/'shader.glsl')
+    texture = Texture('wall.jpg')
     shader.set_uniform('color', Vec4f(0.3,0.5,0.7,1))
+    shader.set_uniform('texture', gl.TextureUnit.TEXTURE0)
 
     while running:
         running = dispatcher.poll_events()
@@ -51,6 +62,7 @@ def main():
         
         renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
         shader.use()
+        texture.bind(gl.TextureUnit.TEXTURE0)
         vbo.draw()
         window.swap()
 

@@ -8,10 +8,8 @@ from .vertex_array import *
 
 fn copy_or_zero[T: Copyable & Movable & Writable](dst: Ptr[UInt8], src_list: Optional[List[T]], index: Int):
     if src_list:
-        print('copying', src_list.value()[index], 'index', index)
         memcpy(dst, Ptr(to=src_list.value()[index]).bitcast[UInt8](), sizeof[T]())
     else:
-        print('setting zero in', dst)
         memset(dst, 0,  sizeof[T]())
 
 fn create_interleaved_buffer(
@@ -22,18 +20,17 @@ fn create_interleaved_buffer(
     uvs: Optional[List[Vec2f]] = None,
     normals: Optional[List[Vec3f]] = None,
 ) -> List[UInt8]:
-    print('creating interleaved')
     buffer = List[UInt8](length=layout.stride * vertex_count, fill=0)
     for i in range(vertex_count):
         dst = buffer.unsafe_ptr() + i * layout.stride
         for el in layout.elements:
             if el.attr_type == VertexAttributeType.POSITION:
                 copy_or_zero(dst, positions, i)
-            if el.attr_type == VertexAttributeType.UV:
+            elif el.attr_type == VertexAttributeType.UV:
                 copy_or_zero(dst, uvs, i)
-            if el.attr_type == VertexAttributeType.COLOR:
+            elif el.attr_type == VertexAttributeType.COLOR:
                 copy_or_zero(dst, colors, i)
-            if el.attr_type == VertexAttributeType.NORMAL:
+            elif el.attr_type == VertexAttributeType.NORMAL:
                 copy_or_zero(dst, normals, i)
             # add offset
             dst += el.total_size

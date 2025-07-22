@@ -22,14 +22,14 @@ alias square_uvs = List[Vec2f](
 )
 
 fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):   
-    var positions = List[Vec3f](
+    var positions = [
         Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0),
         Vec3f(1.0, 0.0, 1.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 1.0, 1.0), Vec3f(1.0, 1.0, 1.0),
         Vec3f(0.0, 0.0, 1.0), Vec3f(1.0, 0.0, 1.0), Vec3f(1.0, 0.0, 0.0), Vec3f(0.0, 0.0, 0.0),
         Vec3f(0.0, 1.0, 0.0), Vec3f(1.0, 1.0, 0.0), Vec3f(1.0, 1.0, 1.0), Vec3f(0.0, 1.0, 1.0),
         Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 1.0),
         Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 1.0), Vec3f(1.0, 1.0, 1.0), Vec3f(1.0, 1.0, 0.0),
-    )
+    ]
     var uvs = List[Vec2f]()
     for _ in range(6):
         uvs.extend(square_uvs)
@@ -83,6 +83,9 @@ struct Square(Copyable, Movable):
             Vec3f(0, 1, 0),
         ]
         var indices: List[UInt32] = [0, 1, 2, 0, 2, 3]
+        var uvs = [
+
+        ]
 
         self.mesh = Mesh(positions, indices=indices)
 

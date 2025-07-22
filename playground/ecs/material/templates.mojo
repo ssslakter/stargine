@@ -12,5 +12,5 @@ fn unlit_material(color: Vec4f = Vec4f(0.5, 0.5, 0.5, 1.0)) raises -> Material:
 
 fn texture_material(texture: Texture) raises -> Material:
     var material = Material("texture", Shader(get_shaders_path() / "texture.glsl"))
-    material.set_texture("texture", texture)
+    material.set_texture("texture1", texture)
     return material^

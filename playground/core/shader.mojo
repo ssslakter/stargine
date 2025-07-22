@@ -32,7 +32,7 @@ def compile_shader(owned src: List[String], shader_type: ShaderType) -> Id:
     var success = Int32(0)
     gl.get_shaderiv(shader, gl.ShaderParameterName.COMPILE_STATUS, Ptr(to=success))
     if not success:
-        log = String(capacity=512)
+        log = String(unsafe_uninit_length=512)
         gl.get_shader_info_log(shader, log.capacity(), Ptr(to=None).bitcast[Int32](), log)
         print("shader compile error: ", log)
     return shader
@@ -56,7 +56,7 @@ struct _ShaderInner(Movable):
         link_status = Int32(0)
         gl.get_programiv(self.id, gl.ProgramPropertyARB.LINK_STATUS, Ptr(to=link_status))
         if link_status == 0:
-            log = String(capacity=512)
+            log = String(unsafe_uninit_length=512)
             gl.get_program_info_log(self.id, log.capacity(), Ptr(to=None).bitcast[Int32](), log)
             print("program link error: ", log)
 
