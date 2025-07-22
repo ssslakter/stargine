@@ -50,20 +50,19 @@ fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):
 struct Cube(Copyable, Movable):
     var mesh: Mesh
     var transform: Transform
-    var material: Optional[Material]
+    var material: Material
 
     fn __init__(out self, material: Optional[Material] = None) raises:
         self.transform = Transform()
-        self.material = material
+        self.material = material.or_else(unlit_material())
 
         positions, uvs, indices = generate_cube_data()
 
-        self.mesh = Mesh(positions, indices=indices, uvs=uvs)
+        self.mesh = Mesh(positions, indices=indices, uvs=Optional(uvs) if self.material.textures else None)
 
     fn draw(mut self):
-        if self.material:
-            self.material.value().set_matrix("model", self.transform.local_to_world_matrix())
-            self.material.value().bind()
+        self.material.set_matrix("model", self.transform.local_to_world_matrix())
+        self.material.bind()
         self.mesh.draw()
 
 
@@ -83,9 +82,6 @@ struct Square(Copyable, Movable):
             Vec3f(0, 1, 0),
         ]
         var indices: List[UInt32] = [0, 1, 2, 0, 2, 3]
-        var uvs = [
-
-        ]
 
         self.mesh = Mesh(positions, indices=indices)
 

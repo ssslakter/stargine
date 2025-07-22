@@ -45,13 +45,13 @@ fn update(mut state: AppState) raises:
 
     for ref cube in state.cubes:
         cube.transform.rotate(0.0, Float32(delta_time) * (2 * math.pi / 5.0))
-        cube.material.value().set_matrix("view", state.camera.get_view_matrix())
-        cube.material.value().set_matrix("projection", state.camera.get_projection_matrix())
+        cube.material.set_matrix("view", state.camera.get_view_matrix())
+        cube.material.set_matrix("projection", state.camera.get_projection_matrix())
         cube.draw()
 
     state.window.swap()
 
 
 fn texture_reload(mut state: AppState, filename: String) raises:
-    fname = filename or state.cubes[0].material.value().textures["texture"].filename
-    state.cubes[0].material.value().textures["texture"] = Texture(fname)
+    fname = filename or state.cubes[0].material.textures["texture"].filename
+    state.cubes[0].material.textures["texture"] = Texture(fname)
