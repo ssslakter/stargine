@@ -1,15 +1,20 @@
 from sdl import InitFlags, WindowFlags
 from sdl.sdl_events import *
 import opengl as gl
+from playground.core.events import *
+from playground.event_handlers import *
 from playground import *
+from playground.app import *
 
 
 def main_loop(mut state: AppState):
     var running = True
-    var event_handler = EventHandler(texture_reload)
+    var dispatcher = EventDispatcher()
+    dispatcher.append(WindowHandler(state.window))
+    dispatcher.append(ControlsHandler(state.camera))
 
     while running:
-        running = event_handler.poll_events(state)
+        running = dispatcher.poll_events()
         if not running:
             break
         update(state)
@@ -29,11 +34,11 @@ def main():
         win_height,
         WindowFlags.WINDOW_RESIZABLE | WindowFlags.WINDOW_OPENGL,
     )
-    context = sdl.gl_create_context(window._handle)
+    context = sdl.gl_create_context(window._handle[])
     if not context:
         raise Error("Failed to create OpenGL context. Unsupported OpenGL version.")
 
-    sdl.gl_make_current(window._handle, context)
+    sdl.gl_make_current(window._handle[], context)
     gl.init_opengl(sdl.gl_get_proc_address)
     state = AppState(window^)
 

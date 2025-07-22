@@ -1,4 +1,5 @@
 from .core.linalg import *
+from .core.window import *
 from .core import *
 from .primitives import *
 from .ecs.camera import *
@@ -11,7 +12,6 @@ alias win_height = 768
 struct AppState(Movable):
     var window: Window
     var cubes: List[Cube]
-    var squares: List[Square]
     var camera: Camera
     var start_time: Float64  # start time in milliseconds
     var last_time: Float64
@@ -22,12 +22,12 @@ struct AppState(Movable):
         self.start_time = time.monotonic() / Float64(1e9)
         self.last_time = self.start_time
         self.window = window^
-        self.cubes=[]
-        # self.cubes = [Cube(material=texture_material(Texture("wall.jpg")))]
-        # self.cubes = [Cube(material=unlit_material())]
-        self.squares = [Square(material=unlit_material())]
-        for ref cube in self.squares:
-            cube.mesh.to_gpu()
+        # self.cubes=[]
+        self.cubes = [
+            Cube(material=texture_material(Texture("wall.jpg"))), 
+            Cube(material=unlit_material())
+            ]
+        self.cubes[1].transform.translate(Vec3f(0,2,0))
         for ref cube in self.cubes:
             cube.mesh.to_gpu()
 
@@ -44,12 +44,6 @@ fn update(mut state: AppState) raises:
     state.last_time = current_time
 
     for ref cube in state.cubes:
-        cube.transform.rotate(0.0, Float32(delta_time) * (2 * math.pi / 5.0))
-        cube.material.value().set_matrix("view", state.camera.get_view_matrix())
-        cube.material.value().set_matrix("projection", state.camera.get_projection_matrix())
-        cube.draw()
-
-    for ref cube in state.squares:
         cube.transform.rotate(0.0, Float32(delta_time) * (2 * math.pi / 5.0))
         cube.material.value().set_matrix("view", state.camera.get_view_matrix())
         cube.material.value().set_matrix("projection", state.camera.get_projection_matrix())

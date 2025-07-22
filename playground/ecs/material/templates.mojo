@@ -3,7 +3,7 @@ from .base import *
 from os import env
 
 fn get_shaders_path() raises -> Path:
-    return Path(env.getenv("ROOT_DIR")/'ecs/material/shaders')
+    return Path(env.getenv("ROOT_DIR"))/'ecs/material/shaders'
 
 fn unlit_material(color: Vec4f = Vec4f(0.5, 0.5, 0.5, 1.0)) raises -> Material:
     var material = Material("unlit", Shader(get_shaders_path() / "unlit.glsl"))

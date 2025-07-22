@@ -27,16 +27,17 @@ def main():
         win_height,
         WindowFlags.WINDOW_RESIZABLE | WindowFlags.WINDOW_OPENGL,
     )
-    context = sdl.gl_create_context(window._handle)
+    context = sdl.gl_create_context(window._handle[])
     if not context:
         raise Error("Failed to create OpenGL context. Unsupported OpenGL version.")
 
-    sdl.gl_make_current(window._handle, context)
+    sdl.gl_make_current(window._handle[], context)
     gl.init_opengl(sdl.gl_get_proc_address)
 
 
     var running = True
-    var event_handler = EventHandler()
+    var dispatcher = EventDispatcher()
+    dispatcher.append(WindowHandler(window))
 
     var positions = [
         Vec3f(0,0,0),
@@ -55,7 +56,7 @@ def main():
     shader.set_uniform('color', Vec4f(0.3,0.5,0.7,1))
 
     while running:
-        running = event_handler.poll_events()
+        running = dispatcher.poll_events()
         if not running:
             break
         

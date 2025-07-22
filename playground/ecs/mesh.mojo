@@ -1,23 +1,5 @@
 from ..core import *
 
-
-@fieldwise_init
-struct Vertex(Copyable & Movable, Writable):
-    var position: Vec3f
-
-    fn write_to[W: Writer](self, mut writer: W):
-        writer.write("Vertex(position=(", self.position[0], ", ", self.position[1], ", ", self.position[2], "))")
-
-    @staticmethod
-    fn get_layout() -> VertexLayout:
-        return VertexLayout(
-            elements=[
-                VertexAttributeDescriptor(VertexAttributeType.POSITION),
-            ],
-            stride=sizeof[Vertex](),
-        )
-
-
 struct Mesh(Copyable, Movable):
     var positions: List[Vec3f]
     var normals: Optional[List[Vec3f]]
@@ -43,14 +25,14 @@ struct Mesh(Copyable, Movable):
         self.buf = None
 
     fn get_layout(self) -> VertexLayout:
-        elements = List[VertexAttributeDescriptor]()
-        elements.append(VertexAttributeDescriptor(VertexAttributeType.POSITION))
+        elements = List[VertexAttribute]()
+        elements.append(VertexAttribute(VertexAttributeType.POSITION))
         if self.uvs:
-            elements.append(VertexAttributeDescriptor(VertexAttributeType.UV))
+            elements.append(VertexAttribute(VertexAttributeType.UV))
         if self.normals:
-            elements.append(VertexAttributeDescriptor(VertexAttributeType.NORMAL))
+            elements.append(VertexAttribute(VertexAttributeType.NORMAL))
         if self.colors:
-            elements.append(VertexAttributeDescriptor(VertexAttributeType.COLOR))
+            elements.append(VertexAttribute(VertexAttributeType.COLOR))
         print('got layout')
         return VertexLayout(elements)
 
