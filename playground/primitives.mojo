@@ -21,6 +21,7 @@ alias square_uvs = List[Vec2f](
     Vec2f(0.0, 1.0),
 )
 
+@always_inline
 fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):   
     var positions = [
         Vec3f(0.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0),
@@ -30,6 +31,9 @@ fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):
         Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 0.0), Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 1.0),
         Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 1.0), Vec3f(1.0, 1.0, 1.0), Vec3f(1.0, 1.0, 0.0),
     ]
+
+    for ref p in positions:
+        p -= Vec3f(0.5)
     var uvs = List[Vec2f]()
     for _ in range(6):
         uvs.extend(square_uvs)
@@ -47,18 +51,21 @@ fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):
     return positions, uvs, indices
 
 
-struct Cube(Copyable, Movable):
+struct Cube(Copyable, Movable, ExplicitlyCopyable):
     var mesh: Mesh
     var transform: Transform
     var material: Material
 
-    fn __init__(out self, material: Optional[Material] = None) raises:
+    fn __init__(out self, material: Optional[Material] = None, mesh_data: Optional[Mesh] = None) raises:
         self.transform = Transform()
         self.material = material.or_else(unlit_material())
 
         positions, uvs, indices = generate_cube_data()
 
-        self.mesh = Mesh(positions, indices=indices, uvs=Optional(uvs) if self.material.textures else None)
+        self.mesh = mesh_data.or_else(Mesh(positions, indices=indices, uvs=Optional(uvs) if self.material.textures else None))
+
+    fn copy(self) -> Self:
+        return self
 
     fn draw(mut self):
         self.material.set_matrix("model", self.transform.local_to_world_matrix())

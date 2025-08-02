@@ -5,17 +5,32 @@ struct Transform(Copyable, Movable):
     var yaw: Float32
     var roll: Float32
 
-    fn __init__(out self):
-        self.position = Vec3f(0.0, 0.0, 0.0)
-        self.scale = Vec3f(1.0, 1.0, 1.0)
+    fn __init__(out self, position: Vec3f = Vec3f(0), scale: Vec3f = Vec3f(1)):
+        self.position = position
+        self.scale = scale
         self.pitch = 0.0
         self.yaw = 0.0
         self.roll = 0.0
 
-    fn rotate(mut self, pitch_delta: Float32 = 0, yaw_delta: Float32 = 0, roll_delta: Float32 = 0):
+    fn rotate(
+        mut self,
+        pitch_delta: Float32 = 0,
+        yaw_delta: Float32 = 0,
+        roll_delta: Float32 = 0,
+    ):
         self.pitch += pitch_delta % (2.0 * math.pi)
         self.yaw += yaw_delta % (2.0 * math.pi)
         self.roll += roll_delta % (2.0 * math.pi)
+
+    fn rotate_deg(
+        mut self,
+        pitch_delta: Float32 = 0,
+        yaw_delta: Float32 = 0,
+        roll_delta: Float32 = 0,
+    ):
+        self.rotate(
+            radians(pitch_delta), radians(yaw_delta), radians(roll_delta)
+        )
 
     fn translate(mut self, position: Vec3f):
         self.position += position
@@ -33,6 +48,10 @@ struct Transform(Copyable, Movable):
         var model = self.local_to_world_matrix()
         res = model.matmul(Vec4f(vector, 1.0))
         return Vec3f(res[0], res[1], res[2])
+
+
+fn radians(degrees: Float32) -> Float32:
+    return degrees * math.pi / 180.0
 
 
 fn rotate_y(angle: Float32) -> Mat4f:

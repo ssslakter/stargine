@@ -13,23 +13,22 @@ struct AppState(Movable):
     var window: Window
     var cubes: List[Cube]
     var camera: Camera
-    var start_time: Float64  # start time in milliseconds
-    var last_time: Float64
+    var last_frame: Float64  # start time in milliseconds
+    var delta_time: Float64
 
     fn __init__(out self, owned window: Window) raises:
         self.camera = Camera(position=Vec3f(-10.0, 0.0, 0.0), aspect_ratio=Float32(win_width) / Float32(win_height))
-        self.camera.look_at(Vec3f(0.0, 0.0, 0.0))
-        self.start_time = time.monotonic() / Float64(1e9)
-        self.last_time = self.start_time
+        self.last_frame = self.delta_time = 0
         self.window = window^
-        # self.cubes=[]
-        self.cubes = [
-            Cube(material=texture_material(Texture("wall.jpg"))), 
-            Cube(material=unlit_material())
-            ]
-        self.cubes[1].transform.translate(Vec3f(0,2,0))
-        for ref cube in self.cubes:
-            cube.mesh.to_gpu()
+        # cube = Cube(material=unlit_material())
+        cube = Cube(material=texture_material(Texture("wall.jpg")))
+        cube.mesh.to_gpu()
+        positions = [Vec3f(i) for i in range(10)]
+        self.cubes = []
+        for p in positions:
+            new = cube.copy()
+            new.transform.translate(p)
+            self.cubes.append(new)
 
         renderer.init_blend()
         renderer.enable_depth_test()
@@ -40,14 +39,16 @@ struct AppState(Movable):
 fn update(mut state: AppState) raises:
     renderer.clear(Vec4f(0.0, 0.2, 0.2, 0.0))
     var current_time = time.monotonic() / 1e9
-    var delta_time = current_time - state.last_time
-    state.last_time = current_time
-
+    state.delta_time = current_time - state.last_frame
+    state.last_frame = current_time
+    var idx = 0
     for ref cube in state.cubes:
-        cube.transform.rotate(0.0, Float32(delta_time) * (2 * math.pi / 5.0))
+        if idx%3 == 0:
+            cube.transform.rotate(0.0, Float32(state.delta_time) * (2 * math.pi / 5.0))
         cube.material.set_matrix("view", state.camera.get_view_matrix())
         cube.material.set_matrix("projection", state.camera.get_projection_matrix())
         cube.draw()
+        idx+=1
 
     state.window.swap()
 

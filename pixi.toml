@@ -5,8 +5,9 @@ name = "mojo-playground"
 platforms = ["linux-64"]
 version = "0.1.0"
 
-[tasks]
-app = "mojo main.mojo"
+[tasks.app]
+cmd = "mojo main.mojo"
+env = { ROOT_DIR = "./playground", SDL_VIDEODRIVER="x11" }
 
 [tasks.test]
 args = [{"arg"="folder"}]
