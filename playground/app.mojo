@@ -31,7 +31,7 @@ struct AppState(Movable):
         # light
         light_cube = Cube(material=unlit_material())
         light_cube.mesh.to_gpu()
-        self.light = PointLight(light_cube, position=Vec3f(0, 3, 0))
+        self.light = PointLight(light_cube, position=Vec3f(2, 3, 2))
         self.light.transform[].set_scale(0.3)
 
         # objects

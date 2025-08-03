@@ -22,6 +22,7 @@ ambient: Float32 = 0.1) raises -> Material:
     var material = Material("lighted", Shader(get_shaders_path() / "lighted.glsl"))
     material.set_vec("lightColor", light.color)
     material.set_vec("objectColor", color)
+    material.set_vec("lightPos", light.transform[].position)
     material.set_scalar("ambient", ambient)
     return material^
 
