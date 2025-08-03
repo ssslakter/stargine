@@ -53,7 +53,7 @@ fn generate_cube_data() -> (List[Vec3f], List[Vec2f], List[UInt32]):
 
 struct Cube(Copyable, Movable, ExplicitlyCopyable):
     var mesh: Mesh
-    var transform: Transform
+    var transform: ArcPointer[Transform]
     var material: Material
 
     fn __init__(out self, material: Optional[Material] = None, mesh_data: Optional[Mesh] = None) raises:
@@ -68,7 +68,7 @@ struct Cube(Copyable, Movable, ExplicitlyCopyable):
         return self
 
     fn draw(mut self):
-        self.material.set_matrix("model", self.transform.local_to_world_matrix())
+        self.material.set_matrix("model", self.transform[].local_to_world_matrix())
         self.material.bind()
         self.mesh.draw()
 

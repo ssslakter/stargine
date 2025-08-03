@@ -1,4 +1,5 @@
 from pathlib import Path
+from ..light import *
 from .base import *
 from os import env
 
@@ -14,3 +15,16 @@ fn texture_material(texture: Texture) raises -> Material:
     var material = Material("texture", Shader(get_shaders_path() / "texture.glsl"))
     material.set_texture("texture1", texture)
     return material^
+
+fn lighted_material(ref light: PointLight, 
+color: Vec4f=Vec4f(1),
+ambient: Float32 = 0.1) raises -> Material:
+    var material = Material("lighted", Shader(get_shaders_path() / "lighted.glsl"))
+    material.set_vec("lightColor", light.color)
+    material.set_vec("objectColor", color)
+    material.set_scalar("ambient", ambient)
+    return material^
+
+fn custom_material(shader: Shader) -> Material:
+    return Material("custom", shader)
+    

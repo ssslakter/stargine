@@ -12,6 +12,9 @@ struct Transform(Copyable, Movable):
         self.yaw = 0.0
         self.roll = 0.0
 
+    fn set_scale(mut self, scale: Vec3f): self.scale = scale
+    fn set_scale(mut self, scale: Float32): self.set_scale(Vec3f(scale))
+
     fn rotate(
         mut self,
         pitch_delta: Float32 = 0,

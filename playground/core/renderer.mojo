@@ -2,7 +2,7 @@ from opengl import TriangleFace, PolygonMode
 from .imports import *
 from .linalg import *
 
-fn clear(color: Vec4f):
+fn clear(color: Vec4f = Vec4f(0)):
     gl.clear_color(color.x(), color.y(), color.z(), color.w())
     gl.clear(gl.ClearBufferMask.COLOR_BUFFER_BIT | gl.ClearBufferMask.DEPTH_BUFFER_BIT)
 
