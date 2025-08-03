@@ -26,71 +26,90 @@ alias square_uvs = List[Vec2f](
 
 @always_inline
 fn generate_cube_data() -> (
-    List[Vec3f],
-    List[Vec2f],
-    List[UInt32],
-    List[Vec3f],
+    List[Vec3f],  # positions
+    List[Vec2f],  # uvs
+    List[Vec3f],  # normals
 ):
-    var positions = [
-        Vec3f(0.0, 0.0, 0.0),
-        Vec3f(1.0, 0.0, 0.0),
-        Vec3f(1.0, 1.0, 0.0),
-        Vec3f(0.0, 1.0, 0.0),
-        Vec3f(1.0, 0.0, 1.0),
-        Vec3f(0.0, 0.0, 1.0),
-        Vec3f(0.0, 1.0, 1.0),
-        Vec3f(1.0, 1.0, 1.0),
-        Vec3f(0.0, 0.0, 1.0),
-        Vec3f(1.0, 0.0, 1.0),
-        Vec3f(1.0, 0.0, 0.0),
-        Vec3f(0.0, 0.0, 0.0),
-        Vec3f(0.0, 1.0, 0.0),
-        Vec3f(1.0, 1.0, 0.0),
-        Vec3f(1.0, 1.0, 1.0),
-        Vec3f(0.0, 1.0, 1.0),
-        Vec3f(0.0, 0.0, 1.0),
-        Vec3f(0.0, 0.0, 0.0),
-        Vec3f(0.0, 1.0, 0.0),
-        Vec3f(0.0, 1.0, 1.0),
-        Vec3f(1.0, 0.0, 0.0),
-        Vec3f(1.0, 0.0, 1.0),
-        Vec3f(1.0, 1.0, 1.0),
-        Vec3f(1.0, 1.0, 0.0),
-    ]
+    var positions = List[Vec3f](
+        # Back face (-Z)
+        Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5),
+        Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5), Vec3f(-0.5, 0.5, -0.5),
 
-    for ref p in positions:
-        p -= Vec3f(0.5)
+        # Front face (+Z)
+        Vec3f(0.5, -0.5, 0.5), Vec3f(-0.5, -0.5, 0.5), Vec3f(-0.5, 0.5, 0.5),
+        Vec3f(0.5, -0.5, 0.5), Vec3f(-0.5, 0.5, 0.5), Vec3f(0.5, 0.5, 0.5),
 
-    var uvs = List[Vec2f]()
-    for _ in range(6):
-        uvs.extend(square_uvs)
+        # Bottom face (-Y)
+        Vec3f(-0.5, -0.5, 0.5), Vec3f(0.5, -0.5, 0.5), Vec3f(0.5, -0.5, -0.5),
+        Vec3f(-0.5, -0.5, 0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(-0.5, -0.5, -0.5),
 
-    var normals = List[Vec3f]()
+        # Top face (+Y)
+        Vec3f(-0.5, 0.5, -0.5), Vec3f(0.5, 0.5, -0.5), Vec3f(0.5, 0.5, 0.5),
+        Vec3f(-0.5, 0.5, -0.5), Vec3f(0.5, 0.5, 0.5), Vec3f(-0.5, 0.5, 0.5),
 
-    var face_normals = [
-        Vec3f(0.0, 0.0, -1.0),
-        Vec3f(0.0, 0.0, 1.0),
-        Vec3f(0.0, -1.0, 0.0),
-        Vec3f(0.0, 1.0, 0.0),
-        Vec3f(-1.0, 0.0, 0.0),
-        Vec3f(1.0, 0.0, 0.0),
-    ]
+        # Left face (-X)
+        Vec3f(-0.5, -0.5, 0.5), Vec3f(-0.5, -0.5, -0.5), Vec3f(-0.5, 0.5, -0.5),
+        Vec3f(-0.5, -0.5, 0.5), Vec3f(-0.5, 0.5, -0.5), Vec3f(-0.5, 0.5, 0.5),
 
-    for i in range(6):
-        for _ in range(4):
-            normals.append(face_normals[i])
+        # Right face (+X)
+        Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, -0.5, 0.5), Vec3f(0.5, 0.5, 0.5),
+        Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, 0.5), Vec3f(0.5, 0.5, -0.5),
+    )
 
-    var indices = List[UInt32]()
-    for i in range(6):
-        base_index = i * 4
-        indices.append(base_index + 0)
-        indices.append(base_index + 1)
-        indices.append(base_index + 2)
-        indices.append(base_index + 0)
-        indices.append(base_index + 2)
-        indices.append(base_index + 3)
+    var uvs = List[Vec2f](
+        # Back face
+        Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0),
+        Vec2f(0.0, 0.0), Vec2f(1.0, 1.0), Vec2f(0.0, 1.0),
 
-    return positions, uvs, indices, normals
+        # Front face
+        Vec2f(1.0, 0.0), Vec2f(0.0, 0.0), Vec2f(0.0, 1.0),
+        Vec2f(1.0, 0.0), Vec2f(0.0, 1.0), Vec2f(1.0, 1.0),
+
+        # Bottom face
+        Vec2f(0.0, 1.0), Vec2f(1.0, 1.0), Vec2f(1.0, 0.0),
+        Vec2f(0.0, 1.0), Vec2f(1.0, 0.0), Vec2f(0.0, 0.0),
+
+        # Top face
+        Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0),
+        Vec2f(0.0, 0.0), Vec2f(1.0, 1.0), Vec2f(0.0, 1.0),
+
+        # Left face
+        Vec2f(1.0, 0.0), Vec2f(0.0, 0.0), Vec2f(0.0, 1.0),
+        Vec2f(1.0, 0.0), Vec2f(0.0, 1.0), Vec2f(1.0, 1.0),
+
+        # Right face
+        Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0),
+        Vec2f(0.0, 0.0), Vec2f(1.0, 1.0), Vec2f(0.0, 1.0),
+    )
+
+    var normals = List[Vec3f](
+        # Back face
+        Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0),
+        Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0),
+
+        # Front face
+        Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 1.0),
+        Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 1.0), Vec3f(0.0, 0.0, 1.0),
+
+        # Bottom face
+        Vec3f(0.0, -1.0, 0.0), Vec3f(0.0, -1.0, 0.0), Vec3f(0.0, -1.0, 0.0),
+        Vec3f(0.0, -1.0, 0.0), Vec3f(0.0, -1.0, 0.0), Vec3f(0.0, -1.0, 0.0),
+
+        # Top face
+        Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0),
+        Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0), Vec3f(0.0, 1.0, 0.0),
+
+        # Left face
+        Vec3f(-1.0, 0.0, 0.0), Vec3f(-1.0, 0.0, 0.0), Vec3f(-1.0, 0.0, 0.0),
+        Vec3f(-1.0, 0.0, 0.0), Vec3f(-1.0, 0.0, 0.0), Vec3f(-1.0, 0.0, 0.0),
+
+        # Right face
+        Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0),
+        Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0),
+    )
+
+    return positions, uvs, normals
+
 
 
 struct Cube(Copyable, ExplicitlyCopyable, Movable):
@@ -106,12 +125,11 @@ struct Cube(Copyable, ExplicitlyCopyable, Movable):
         self.transform = Transform()
         self.material = material.or_else(unlit_material())
 
-        positions, uvs, indices, normals = generate_cube_data()
+        positions, uvs, normals = generate_cube_data()
 
         self.mesh = mesh_data.or_else(
             Mesh(
                 positions,
-                indices=indices,
                 uvs=Optional(uvs) if self.material.textures else None,
                 normals=normals,
             )
@@ -123,6 +141,9 @@ struct Cube(Copyable, ExplicitlyCopyable, Movable):
     fn draw(mut self):
         self.material.set_matrix(
             "model", self.transform[].local_to_world_matrix()
+        )
+        self.material.set_matrix(
+            "normalMatrix", self.transform[].normal_matrix()
         )
         self.material.bind()
         self.mesh.draw()

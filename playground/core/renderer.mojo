@@ -15,3 +15,6 @@ fn init_blend():
 
 fn enable_depth_test():
     gl.enable(gl.EnableCap.DEPTH_TEST)
+    gl.front_face(gl.FrontFaceDirection.CCW)
+    gl.enable(gl.EnableCap.CULL_FACE)
+    gl.cull_face(gl.TriangleFace.BACK)

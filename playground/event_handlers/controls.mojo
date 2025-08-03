@@ -64,6 +64,15 @@ struct ControlsHandler[origin: Origin[True]](EventHandler):
             controls.up = is_pressed
         elif Int(event.scancode) == Int(Scancode.SCANCODE_LSHIFT):
             controls.down = is_pressed
+        
+        if Int(event.scancode) == Int(Scancode.SCANCODE_UP):
+            self.game_state[].cubes[0].transform[].rotate(0.05)
+        if Int(event.scancode) == Int(Scancode.SCANCODE_DOWN):
+            self.game_state[].cubes[0].transform[].rotate(-0.05)
+        if Int(event.scancode) == Int(Scancode.SCANCODE_LEFT):
+            self.game_state[].cubes[0].transform[].rotate(0,0.05)
+        if Int(event.scancode) == Int(Scancode.SCANCODE_RIGHT):
+            self.game_state[].cubes[0].transform[].rotate(0,-0.05)
 
 
     fn handle_mouse_event(mut self, event: MouseMotionEvent):

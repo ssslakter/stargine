@@ -78,9 +78,9 @@ struct Material(Movable, Copyable):
         else:
             print("Error: unsupported vector size. Uniform value will be ignored.")
 
-    fn set_matrix[cols: Int, rows: Int](mut self, owned name: String, value: Matrix[DType.float32, rows, cols]):
+    fn set_matrix[dim: Int](mut self, owned name: String, value: Matrix[DType.float32, dim, dim]):
         @parameter
-        if rows == 4 and cols == 4:
+        if dim == 4:
             var m = rebind[Mat4f](value)
             self.uniform_matrices[name] = m
         else:

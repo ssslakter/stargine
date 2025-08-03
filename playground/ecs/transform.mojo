@@ -47,6 +47,9 @@ struct Transform(Copyable, Movable):
             .matmul(scale(self.scale))
         )
 
+    fn normal_matrix(self) -> Mat4f:
+        return Mat4f(Mat3f(self.local_to_world_matrix()).inverse().transpose())
+
     fn transform_vector(self, vector: Vec3f) -> Vec3f:
         var model = self.local_to_world_matrix()
         res = model.matmul(Vec4f(vector, 1.0))
