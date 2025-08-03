@@ -10,13 +10,15 @@ from playground.app import *
 def main_loop(mut state: AppState):
     var running = True
     var dispatcher = EventDispatcher()
+    var controls_handler = ArcPointer(ControlsHandler(state))
     dispatcher.append(WindowHandler(state.window))
-    dispatcher.append(ControlsHandler(state))
+    dispatcher.append(controls_handler)
 
     while running:
         running = dispatcher.poll_events()
         if not running:
             break
+        controls_handler[].update_movement()
         update(state)
 
 
@@ -30,10 +32,7 @@ def main():
         WindowFlags.WINDOW_RESIZABLE | WindowFlags.WINDOW_OPENGL,
     )
     init_opengl(window)
-    res = String(unsafe_from_utf8_ptr=sdl.get_current_video_driver())
-    print(res)
     state = AppState(window)
-    print("Relative mode: ", sdl.get_window_relative_mouse_mode(window._handle[]))
 
     main_loop(state)
 

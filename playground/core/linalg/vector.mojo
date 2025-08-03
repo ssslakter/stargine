@@ -27,19 +27,30 @@ struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
             self.data[i] = items[i]
 
     @always_inline("nodebug")
-    fn __init__(out self: Vec[dtype, N], other: Vec[dtype, N-1], w: Scalar[dtype], /):
+    fn __init__(
+        out self: Vec[dtype, N],
+        other: Vec[dtype, N - 1],
+        w: Scalar[dtype] = 0,
+        /,
+    ):
         self = Self()
-        for i in range(N-1):
+        for i in range(N - 1):
             self.data[i] = other.data[i]
-        self.data[N-1] = w
+        self.data[N - 1] = w
 
     @always_inline("nodebug")
-    fn __init__(out self: Vec[dtype, N], other: Vec[dtype, N-2], z: Scalar[dtype], w: Scalar[dtype], /):
+    fn __init__(
+        out self: Vec[dtype, N],
+        other: Vec[dtype, N - 2],
+        z: Scalar[dtype] = 0,
+        w: Scalar[dtype] = 0,
+        /,
+    ):
         self = Self()
-        for i in range(N-2):
+        for i in range(N - 2):
             self.data[i] = other.data[i]
-        self.data[N-2] = z
-        self.data[N-1] = w
+        self.data[N - 2] = z
+        self.data[N - 1] = w
 
     @always_inline("nodebug")
     fn __init__(out self, value: Vec[_, N]):
@@ -134,7 +145,9 @@ struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
 
     @always_inline
     fn y(self) -> Scalar[dtype]:
-        constrained[N > 1, "Y is only defined for vectors with at least 2 elements."]()
+        constrained[
+            N > 1, "Y is only defined for vectors with at least 2 elements."
+        ]()
         return self.data[1]
 
     @always_inline

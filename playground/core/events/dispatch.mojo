@@ -7,13 +7,16 @@ struct EventDispatcher:
     fn __init__(out self):
         self.handlers = []
 
-    fn __init__[T: EventHandler](out self, *handlers: T):
-        self = Self()
-        for h in handlers:
-            self.append(h)
+    # fn __init__[T: EventHandler](out self, owned *handlers: T):
+    #     self = Self()
+    #     for h in handlers:
+    #         self.append(h^)
 
-    fn append[T: EventHandler](mut self, handler: T):
-        self.handlers.append(DynEventHandler(ArcPointer(handler)))
+    fn append[T: EventHandler](mut self, owned handler: T):
+        self.handlers.append(DynEventHandler(ArcPointer(handler^)))
+
+    fn append[T: EventHandler](mut self, handler: ArcPointer[T]):
+        self.handlers.append(DynEventHandler(handler))
 
     fn poll_events(mut self) raises -> Bool:
         var event = Event(UInt32(0))

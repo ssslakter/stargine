@@ -18,9 +18,9 @@ struct Transform(Copyable, Movable):
         yaw_delta: Float32 = 0,
         roll_delta: Float32 = 0,
     ):
-        self.pitch += pitch_delta % (2.0 * math.pi)
-        self.yaw += yaw_delta % (2.0 * math.pi)
-        self.roll += roll_delta % (2.0 * math.pi)
+        self.pitch = normalize_angle(self.pitch + pitch_delta)
+        self.yaw = normalize_angle(self.yaw + yaw_delta)
+        self.roll = normalize_angle(self.roll + roll_delta)
 
     fn rotate_deg(
         mut self,
@@ -52,6 +52,10 @@ struct Transform(Copyable, Movable):
 
 fn radians(degrees: Float32) -> Float32:
     return degrees * math.pi / 180.0
+
+
+fn normalize_angle(angle: Float32) -> Float32:
+    return (angle + math.pi) % math.tau - math.pi
 
 
 fn rotate_y(angle: Float32) -> Mat4f:

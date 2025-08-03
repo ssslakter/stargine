@@ -35,11 +35,8 @@ struct Camera(Copyable, Movable):
         return self.world_up.cross(self.get_forward()).normalize()
 
     fn rotate_deg(mut self, yaw: Float32, pitch: Float32):
-        self.transform.rotate_deg(min(max(pitch, -89), 89), yaw)
-
-    # var forward = target - self.position
-    # self.yaw = atan2(forward.z(), forward.x())
-    # self.pitch = atan2(forward.y(), Vec2f(forward.x(), forward.z()).length())
+        self.transform.rotate_deg(pitch, yaw)
+        self.transform.pitch = max(min(self.transform.pitch, radians(89)), radians(-89))
 
     fn get_view_matrix(self) -> Mat4f:
         return look_at(

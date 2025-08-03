@@ -2,7 +2,7 @@ from ...imports import *
 from sdl import Event, poll_event
 
 
-trait EventHandler(Copyable, Movable):
+trait EventHandler(Movable):
     fn handle(mut self, event: Event) raises -> Bool: ...
     # fn disable(mut self): ...
     # fn enable(mut self): ...
@@ -20,7 +20,7 @@ fn handle_event[T: EventHandler](ptr: ArcPointer[NoneType], event: Event) raises
 #     var data = rebind[ArcPointer[T]](ptr)
 #     data[].disable()
 
-struct DynEventHandler(EventHandler):
+struct DynEventHandler(EventHandler, Copyable):
     var data: ArcPointer[NoneType]
     var handle_func: fn(ArcPointer[NoneType], Event) raises -> Bool
     # var enable_func: fn(ArcPointer[NoneType])
