@@ -30,9 +30,10 @@ def main():
         WindowFlags.WINDOW_RESIZABLE | WindowFlags.WINDOW_OPENGL,
     )
     init_opengl(window)
-    res = String(cstr_ptr=sdl.get_current_video_driver())
+    res = String(unsafe_from_utf8_ptr=sdl.get_current_video_driver())
     print(res)
-    state = AppState(window^)
+    state = AppState(window)
+    print("Relative mode: ", sdl.get_window_relative_mouse_mode(window._handle[]))
 
     main_loop(state)
 

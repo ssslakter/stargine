@@ -8,7 +8,6 @@ fn init_opengl(mut window: Window) raises:
     sdl.gl_set_attribute(sdl.GLAttr.GL_CONTEXT_MINOR_VERSION, 2)
     sdl.gl_set_attribute(sdl.GLAttr.GL_DOUBLEBUFFER, 1)
 
-    sdl.set_window_relative_mouse_mode(window._handle[], True)
     context = sdl.gl_create_context(window._handle[])
     if not context:
         raise Error("Failed to create OpenGL context. Unsupported OpenGL version.")

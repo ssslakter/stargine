@@ -7,7 +7,7 @@ version = "0.1.0"
 
 [tasks.app]
 cmd = "mojo main.mojo"
-env = { ROOT_DIR = "./playground", SDL_VIDEODRIVER="x11" }
+env = { ROOT_DIR = "./playground", SDL_VIDEODRIVER="wayland" }
 
 [tasks.test]
 args = [{"arg"="folder"}]
