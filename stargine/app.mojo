@@ -68,14 +68,14 @@ fn update(mut state: AppState) raises:
         cube.material.set_matrix(
             "projection", state.camera.get_projection_matrix()
         )
-        cube.draw()
+        cube.draw(state.camera)
     state.light.gizmo.material.set_matrix(
         "view", state.camera.get_view_matrix()
     )
     state.light.gizmo.material.set_matrix(
         "projection", state.camera.get_projection_matrix()
     )
-    state.light.gizmo.draw()
+    state.light.gizmo.draw(state.camera)
     state.window.swap()
 
 

@@ -24,9 +24,12 @@ void main()
 #version 330 core
 
 uniform float ambient;
+uniform float specularStrength;
+
 uniform vec4 objectColor;
 uniform vec3 lightColor;
 uniform vec3 lightPos;
+uniform vec3 cameraPos;
 
 out vec4 FragColor;
 in vec3 Normal;
@@ -34,10 +37,18 @@ in vec3 FragPos;
 
 void main()
 {
+    // ambient
+    vec3 amb = ambient*lightColor;
+    // diffuse
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0); 
     vec3 diffuse = diff * lightColor;
-    vec3 amb = ambient*lightColor;
-    FragColor = vec4(amb + diffuse, 1.0)*objectColor;
+    // specular
+    vec3 viewDir = normalize(cameraPos - FragPos); 
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128); 
+    vec3 specular = specularStrength * spec * lightColor;
+
+    FragColor = vec4(amb + diffuse + specular, 1.0)*objectColor;
 }

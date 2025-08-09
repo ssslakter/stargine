@@ -138,7 +138,8 @@ struct Cube(Copyable, ExplicitlyCopyable, Movable):
     fn copy(self) -> Self:
         return self
 
-    fn draw(mut self):
+    fn draw(mut self, camera: Camera):
+        self.material.set_vec("cameraPos", camera.transform.position)
         self.material.set_matrix(
             "model", self.transform[].local_to_world_matrix()
         )
