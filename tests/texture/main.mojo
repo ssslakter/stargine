@@ -3,10 +3,10 @@ from os import env
 from pathlib import Path
 from sdl.sdl_events import *
 import opengl as gl
-from playground.core.linalg import *
-from playground.core import *
-from playground.core.window import *
-from playground.core.gpu import *
+from stargine.core.linalg import *
+from stargine.core import *
+from stargine.core.window import *
+from stargine.core.gpu import *
 
 
 alias win_width = 1024

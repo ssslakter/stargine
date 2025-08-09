@@ -41,7 +41,7 @@ struct AppState(Movable):
 
         # little fun with shaders
         # material = custom_material(
-        #     Shader("./playground/custom_shaders/random.glsl")
+        #     Shader("./stargine/custom_shaders/random.glsl")
         # )
         # material.set_vec("light", Vec4f(1))
         # material.set_vec("color", Vec4f(0.4, 0,0,1))

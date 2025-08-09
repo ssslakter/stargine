@@ -1,10 +1,10 @@
 from sdl import InitFlags, WindowFlags
 from sdl.sdl_events import *
 import opengl as gl
-from playground.core.events import *
-from playground.event_handlers import *
-from playground import *
-from playground.app import *
+from stargine.core.events import *
+from stargine.event_handlers import *
+from stargine import *
+from stargine.app import *
 
 
 def main_loop(mut state: AppState):
