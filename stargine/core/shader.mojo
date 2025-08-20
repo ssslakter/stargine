@@ -29,13 +29,34 @@ def compile_shader(owned src: List[String], shader_type: ShaderType) -> Id:
     shader = gl.create_shader(shader_type)
     gl.shader_source(shader, len(src), src, UnsafePointer[Int32]())
     gl.compile_shader(shader)
-    var success = Int32(0)
-    gl.get_shaderiv(shader, gl.ShaderParameterName.COMPILE_STATUS, Ptr(to=success))
-    if not success:
-        log = String(unsafe_uninit_length=512)
-        gl.get_shader_info_log(shader, log.capacity(), Ptr(to=None).bitcast[Int32](), log)
-        print("shader compile error: ", log)
+    check_errors(
+        gl.get_shaderiv,
+        gl.get_shader_info_log,
+        shader,
+        gl.ShaderParameterName.COMPILE_STATUS,
+        gl.ShaderParameterName.INFO_LOG_LENGTH,
+    )
     return shader
+
+
+alias GL_GET_IV_FN[pnameT: Intable] = fn (obj_id: UInt32, pname: pnameT, params: Ptr[Int32, mut=True])
+alias GL_LOG_FN = fn (obj_id: UInt32, buf_size: gl.GLsizei, length: Ptr[gl.GLsizei, mut=True], var info_log: String)
+
+
+fn check_errors[
+    pnameT: Intable
+](get_iv: GL_GET_IV_FN[pnameT], log_fn: GL_LOG_FN, obj_id: UInt32, pname: pnameT, log_pname: pnameT):
+    var success = Int32(0)
+    get_iv(obj_id, pname, Ptr(to=success))
+    if success:
+        return
+    var log_length = Int32(0)
+    get_iv(obj_id, log_pname, Ptr(to=log_length))
+    if not log_length:
+        return
+    log = String(unsafe_uninit_length=UInt(log_length))
+    log_fn(obj_id, log.capacity(), Ptr(to=log_length), log)
+    print("error: ", log)
 
 
 struct _ShaderInner(Movable):
@@ -53,12 +74,13 @@ struct _ShaderInner(Movable):
         gl.link_program(self.id)
         gl.delete_shader(vertex_shader)
         gl.delete_shader(fragment_shader)
-        link_status = Int32(0)
-        gl.get_programiv(self.id, gl.ProgramPropertyARB.LINK_STATUS, Ptr(to=link_status))
-        if link_status == 0:
-            log = String(unsafe_uninit_length=512)
-            gl.get_program_info_log(self.id, log.capacity(), Ptr(to=None).bitcast[Int32](), log)
-            print("program link error: ", log)
+        check_errors(
+            gl.get_programiv,
+            gl.get_program_info_log,
+            self.id,
+            gl.ProgramPropertyARB.LINK_STATUS,
+            gl.ProgramPropertyARB.INFO_LOG_LENGTH,
+        )
 
     fn __del__(owned self):
         gl.delete_program(self.id)
@@ -81,10 +103,14 @@ struct Shader(Copyable, Movable):
         self = Self(vertex_src=[vertex_src], fragment_src=[fragment_src])
         self.combined_path = String(combined_path)
 
-    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, vertex_path: PathLike, fragment_path: PathLike) raises:
+    fn __init__[
+        PathLike: os.PathLike & ListElement & Stringable
+    ](out self, vertex_path: PathLike, fragment_path: PathLike) raises:
         self = Self([vertex_path], [fragment_path])
 
-    fn __init__[PathLike: os.PathLike & ListElement & Stringable](out self, vertex_paths: List[PathLike], fragment_paths: List[PathLike]) raises:
+    fn __init__[
+        PathLike: os.PathLike & ListElement & Stringable
+    ](out self, vertex_paths: List[PathLike], fragment_paths: List[PathLike]) raises:
         vertex_src = [read_file(path) for path in vertex_paths]
         fragment_src = [read_file(path) for path in fragment_paths]
         self = Self(vertex_src=vertex_src, fragment_src=fragment_src)
@@ -103,7 +129,8 @@ struct Shader(Copyable, Movable):
         print("reloading shader", self.inner[].id)
         if self.combined_path:
             self = Self(self.combined_path.value())
-        else: self = Self(self.vertex_paths, self.fragment_paths)
+        else:
+            self = Self(self.vertex_paths, self.fragment_paths)
 
     fn use(self):
         gl.use_program(self.inner[].id)
