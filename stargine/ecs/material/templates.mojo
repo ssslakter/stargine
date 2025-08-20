@@ -17,15 +17,19 @@ fn texture_material(texture: Texture) raises -> Material:
     return material^
 
 fn lighted_material(ref light: PointLight, 
-color: Vec4f=Vec4f(1),
-ambient: Float32 = 0.1,
-specular_strength: Float32 = 0.5) raises -> Material:
+ambient: Vec3f = Vec3f(0.1),
+diffuse: Vec3f = Vec3f(0.5),
+specular: Vec3f = Vec3f(0.5),
+shininess: Float32 = 32) raises -> Material:
     var material = Material("lighted", Shader(get_shaders_path() / "lighted.glsl"))
-    material.set_vec("lightColor", light.color)
-    material.set_vec("objectColor", color)
-    material.set_vec("lightPos", light.transform[].position)
-    material.set_scalar("ambient", ambient)
-    material.set_scalar("specularStrength", specular_strength)
+    material.set_vec("light.ambient", light.ambient)
+    material.set_vec("light.diffuse", light.diffuse)
+    material.set_vec("light.specular", light.specular)
+    material.set_vec("light.position", light.transform[].position)
+    material.set_vec("material.diffuse", diffuse)
+    material.set_vec("material.ambient", ambient)
+    material.set_vec("material.specular", specular)
+    material.set_scalar("material.shininess", shininess)
     return material^
 
 fn custom_material(shader: Shader) -> Material:

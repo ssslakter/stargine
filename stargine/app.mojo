@@ -35,7 +35,13 @@ struct AppState(Movable):
         self.light.transform[].set_scale(0.3)
 
         # objects
-        cube = Cube(material=lighted_material(self.light, Vec4f(1, 0.5, 0.31, 1)))
+        cube = Cube(
+            material=lighted_material(
+                self.light,
+                ambient=Vec3f(1, 0.5, 0.31),
+                diffuse=Vec3f(1, 0.5, 0.31),
+            )
+        )
         # cube = Cube(material=texture_material(Texture("wall.jpg")))
         cube.mesh.to_gpu()
 
@@ -62,13 +68,18 @@ fn update(mut state: AppState) raises:
     state.delta_time = current_time - state.last_frame
     state.last_frame = current_time
     # state.cubes[-1].material.set_scalar('seed', Float32(random_float64()))
-
+    var light_color = Vec3f(math.sin((Vec3f(2, 0.7, 1.3)*Float32(current_time)).data))
     for ref cube in state.cubes:
         cube.material.set_matrix("view", state.camera.get_view_matrix())
         cube.material.set_matrix(
             "projection", state.camera.get_projection_matrix()
         )
+        cube.material.set_vec("light.ambient", light_color)
         cube.draw(state.camera)
+
+    state.light.gizmo.material.set_vec(
+        "color", Vec4f(light_color, 1.0)
+    )        
     state.light.gizmo.material.set_matrix(
         "view", state.camera.get_view_matrix()
     )
