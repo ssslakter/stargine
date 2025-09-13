@@ -1,8 +1,11 @@
-# Stargine: A Mojo Game Engine Proof of Concept
 
-![alt text](textures/preview.png)
-
+# Stargine: A Mojo Game Engine
 Stargine is a proof-of-concept game engine written entirely in [Mojo](https://www.modular.com/mojo), using OpenGL for graphics rendering. The goal of this project is to explore Mojo's potential for high-performance game development and its interoperability with existing graphics APIs.
+
+<p align="center">
+<img src="textures/preview.png" alt="A picture of a cube and a light source" width="400">
+</p>
+
 
 ## Current Status
 
