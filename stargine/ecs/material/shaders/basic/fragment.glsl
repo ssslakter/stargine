@@ -1,21 +1,34 @@
-#version 330 core
-
 struct Material { 
     sampler2D diffuse;
     sampler2D specular;
     float shininess;
     };
 
-uniform Material material;
-
-struct Light {
-    vec3 position;
+struct DirLight {
+    bool enabled;
+    vec3 direction; 
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
     }; 
 
-uniform Light light;
+
+struct PointLight { 
+    bool enabled;
+    vec3 position;
+    float constant;
+    float linear;
+    float quadratic;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+};
+
+
+uniform Material material;
+uniform PointLight pointLight;
+uniform DirLight dirLight;
+
 
 uniform vec3 cameraPos;
 
@@ -24,20 +37,23 @@ in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
 
-void main()
-{
-    // ambient
-    vec3 amb = light.ambient * vec3(texture(material.diffuse, TexCoords));
-    // diffuse
-    vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
-    float diff = max(dot(norm, lightDir), 0.0); 
-    vec3 diffuse = light.diffuse * (diff * vec3(texture(material.diffuse, TexCoords)));
-    // specular
-    vec3 viewDir = normalize(cameraPos - FragPos); 
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess); 
-    vec3 specular = light.specular * (spec * vec3(texture(material.specular, TexCoords)));
+vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir);
+vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
-    FragColor = vec4(amb + diffuse + specular, 1.0);
+
+void main() {  
+    vec3 norm = normalize(Normal);
+    vec3 viewDir = normalize(cameraPos - FragPos);
+    vec3 result = vec3(0.0);
+    // phase 1: Directional lighting
+    if (dirLight.enabled) {
+        result += CalcDirLight(dirLight, norm, viewDir);
+    }
+    // phase 2: Point lights 
+    if (pointLight.enabled) {
+        result += CalcPointLight(pointLight, norm, FragPos, viewDir);
+    }
+    // phase 3: Spot light
+    //result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
+    FragColor = vec4(result, 1.0);
 }

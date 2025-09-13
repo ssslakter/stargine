@@ -50,10 +50,10 @@ struct VertexAttributeType(EqualityComparable, Intable):
 
     fn get_size(self) -> Int:
         if self == Self.UV:
-            return sizeof[Vec2f]()
+            return size_of[Vec2f]()
         if self == Self.COLOR:
-            return sizeof[Vec4f]()
-        return sizeof[Vec3f]()
+            return size_of[Vec4f]()
+        return size_of[Vec3f]()
     
     fn num_components(self) -> Int:
         if self == Self.UV:
@@ -76,7 +76,7 @@ struct VertexAttribute(Copyable, Movable, Writable):
     fn __init__(out self, attr_type: VertexAttributeType,  normalized: Bool = False):
         self.attr_type = attr_type
         self.num_components = attr_type.num_components()
-        self.dtype_size = DType.float32.sizeof() # TODO check if other types are supported
+        self.dtype_size = DType.float32.size_of() # TODO check if other types are supported
         self.total_size = attr_type.get_size()
         self.dtype = dtype_to_enum(DType.float32)
         self.normalized = normalized

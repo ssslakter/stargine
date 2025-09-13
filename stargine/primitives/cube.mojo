@@ -122,7 +122,7 @@ struct Cube(Copyable, ExplicitlyCopyable, Movable):
         material: Optional[Material] = None,
         mesh_data: Optional[Mesh] = None,
     ) raises:
-        self.transform = Transform()
+        self.transform = ArcPointer(Transform())
         self.material = material.or_else(unlit_material())
 
         positions, uvs, normals = generate_cube_data()

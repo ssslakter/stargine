@@ -12,7 +12,7 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
         self.bind()
         gl.buffer_data(
             gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER,
-            dtype.sizeof() * len(data),
+            dtype.size_of() * len(data),
             data.unsafe_ptr().bitcast[NoneType](),
             gl.BufferUsageARB.STATIC_DRAW,
         )
@@ -20,7 +20,7 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
     fn __len__(self) -> Int:
         return self.numel
 
-    fn __del__(owned self):
+    fn __del__(deinit self):
         if self.id.count() == 1:
             gl.delete_buffers(1, self.id.unsafe_ptr())
 

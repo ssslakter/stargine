@@ -34,32 +34,27 @@ struct AppState(Movable):
         self.light = PointLight(light_cube, position=Vec3f(2, 3, 2))
         self.light.transform[].set_scale(0.3)
 
+        dir_light = DirectionalLight(
+            light_cube,
+            direction = Vec3f(0, -1, 0)
+        )
         # objects
         cube = Cube(
             material=basic_material(
-                self.light,
-                diffuse=Texture('textures/box.png'),
-                specular=Texture('textures/box_specular.png'),
+                Texture('textures/box.png'),
+                Texture('textures/box_specular.png'),
+                point_light=self.light,
+                dir_light=dir_light
             )
         )
         # cube = Cube(material=texture_material(Texture("wall.jpg")))
         cube.mesh.to_gpu()
-
-        # little fun with shaders
-        # material = custom_material(
-        #     Shader("./stargine/custom_shaders/random.glsl")
-        # )
-        # material.set_vec("light", Vec4f(1))
-        # material.set_vec("color", Vec4f(0.4, 0,0,1))
-        # custom_cube = Cube(material=material^, mesh_data=cube.mesh)
-        # custom_cube.transform[].translate(Vec3f(3, 0, 0))
         self.cubes = [cube]
 
         # post processing
         renderer.init_blend()
         renderer.enable_depth_test()
         gl.viewport(0, 0, win_width, win_height)
-        # renderer.polygon_mode(gl.TriangleFace.FRONT_AND_BACK, gl.PolygonMode.LINE)
 
 
 fn update(mut state: AppState) raises:

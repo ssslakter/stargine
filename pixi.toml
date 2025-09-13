@@ -13,9 +13,13 @@ env = { ROOT_DIR = "./stargine", SDL_VIDEODRIVER="wayland" }
 args = [{"arg"="folder"}]
 cmd = "./tests/run_test.sh {{folder}}"
 
+[tasks.build-deps]
+cmd = "mojo package \"./sdl-mojo/out/\" -o sdl.mojopkg && mojo package \"./opengl-mojo/out/\" -o opengl.mojopkg"
+
 [dependencies]
-max = "==25.5.0.dev2025070705"
+mojo = "*"
 sdl3 = ">=3.2.14,<4"
 ipykernel = ">=6.29.5,<7"
 llvm-tools = ">=20.1.5,<21"
+numpy = "*"
 pillow = "*"

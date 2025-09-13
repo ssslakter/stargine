@@ -7,12 +7,12 @@ struct EventDispatcher:
     fn __init__(out self):
         self.handlers = []
 
-    # fn __init__[T: EventHandler](out self, owned *handlers: T):
+    # fn __init__[T: EventHandler](out self, var *handlers: T):
     #     self = Self()
     #     for h in handlers:
     #         self.append(h^)
 
-    fn append[T: EventHandler](mut self, owned handler: T):
+    fn append[T: EventHandler](mut self, var handler: T):
         self.handlers.append(DynEventHandler(ArcPointer(handler^)))
 
     fn append[T: EventHandler](mut self, handler: ArcPointer[T]):

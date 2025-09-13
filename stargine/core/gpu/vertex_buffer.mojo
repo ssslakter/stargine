@@ -10,8 +10,8 @@ struct VertexBuffer[T: Copyable & Movable = UInt8](Copyable, Movable, Sized):
         # TODO: create buffer pool (with _Global) to reuse them instead of creating new ones
         self.id = ArcPointer(UInt32(0))
         gl.gen_buffers(1, self.id.unsafe_ptr())
-        vertex_size = vertex_full_size.or_else(sizeof[T]())
-        self.numel = len(data)*sizeof[T]() // vertex_size
+        vertex_size = vertex_full_size.or_else(size_of[T]())
+        self.numel = len(data)*size_of[T]() // vertex_size
         self.bind()
         gl.buffer_data(
             gl.BufferTargetARB.ARRAY_BUFFER,
@@ -20,7 +20,7 @@ struct VertexBuffer[T: Copyable & Movable = UInt8](Copyable, Movable, Sized):
             gl.BufferUsageARB.STATIC_DRAW,
         )
 
-    fn __del__(owned self):
+    fn __del__(deinit self):
         if self.id.count() == 1:
             gl.delete_buffers(1, self.id.unsafe_ptr())
 

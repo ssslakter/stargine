@@ -8,9 +8,9 @@ from .vertex_array import *
 
 fn copy_or_zero[T: Copyable & Movable & Writable](dst: Ptr[UInt8], src_list: Optional[List[T]], index: Int):
     if src_list:
-        memcpy(dst, Ptr(to=src_list.value()[index]).bitcast[UInt8](), sizeof[T]())
+        memcpy(dst, Ptr(to=src_list.value()[index]).bitcast[UInt8](), size_of[T]())
     else:
-        memset(dst, 0,  sizeof[T]())
+        memset(dst, 0,  size_of[T]())
 
 fn create_interleaved_buffer(
     layout: VertexLayout,

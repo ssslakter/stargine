@@ -24,7 +24,7 @@ struct VertexArray(Copyable, Movable):
             offset += element.total_size
             idx += 1
 
-    fn __del__(owned self):
+    fn __del__(deinit self):
         if self.id.count() == 1:
             gl.delete_vertex_arrays(1, self.id.unsafe_ptr())
 

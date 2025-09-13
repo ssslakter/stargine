@@ -12,7 +12,7 @@ def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -
     for line in lines:
         line_stripped = String(line.strip())
         if line_stripped in [String("#shader vertex"), String("#shader fragment")]:
-            current = line_stripped.split(" ")[1]
+            current = String(line_stripped.split(" ")[1])
             continue
 
         if current == "vertex":
@@ -25,9 +25,16 @@ def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -
     return vertex_code, fragment_code
 
 
-def compile_shader(owned src: List[String], shader_type: ShaderType) -> Id:
+def compile_shader(var src: List[String], shader_type: ShaderType) -> Id:
     shader = gl.create_shader(shader_type)
-    gl.shader_source(shader, len(src), src, UnsafePointer[Int32]())
+    # TODO find better solution to merge opengl shaders
+    var res = [String()]
+    for s in src:
+        res[0] += s
+        res[0] += '\n'
+    if not res[0].startswith("#version"):
+        res[0] = "#version 330 core\n" + res[0]
+    gl.shader_source(shader, 1, res, UnsafePointer[Int32]())
     gl.compile_shader(shader)
     check_errors(
         gl.get_shaderiv,
@@ -40,7 +47,7 @@ def compile_shader(owned src: List[String], shader_type: ShaderType) -> Id:
 
 
 alias GL_GET_IV_FN[pnameT: Intable] = fn (obj_id: UInt32, pname: pnameT, params: Ptr[Int32, mut=True])
-alias GL_LOG_FN = fn (obj_id: UInt32, buf_size: gl.GLsizei, length: Ptr[gl.GLsizei, mut=True], var info_log: String)
+alias GL_LOG_FN = fn (obj_id: UInt32, buf_size: gl.GLsizei, length: Ptr[gl.GLsizei, mut=True], mut info_log: String)
 
 
 fn check_errors[
@@ -65,7 +72,7 @@ struct _ShaderInner(Movable):
     fn __init__(out self):
         self.id = 0
 
-    fn __init__(out self, owned vertex_src: List[String], owned fragment_src: List[String]) raises:
+    fn __init__(out self, var vertex_src: List[String], var fragment_src: List[String]) raises:
         self.id = gl.create_program()
         vertex_shader = compile_shader(vertex_src, ShaderType.VERTEX_SHADER)
         fragment_shader = compile_shader(fragment_src, ShaderType.FRAGMENT_SHADER)
@@ -82,7 +89,7 @@ struct _ShaderInner(Movable):
             gl.ProgramPropertyARB.INFO_LOG_LENGTH,
         )
 
-    fn __del__(owned self):
+    fn __del__(deinit self):
         gl.delete_program(self.id)
 
 
@@ -117,7 +124,7 @@ struct Shader(Copyable, Movable):
         self.vertex_paths = [String(path) for path in vertex_paths]
         self.fragment_paths = [String(path) for path in fragment_paths]
 
-    fn __init__(out self, *, owned vertex_src: List[String], owned fragment_src: List[String]) raises:
+    fn __init__(out self, *, var vertex_src: List[String], var fragment_src: List[String]) raises:
         self.inner = ArcPointer[_ShaderInner](_ShaderInner(vertex_src, fragment_src))
         self.fragment_paths = []
         self.vertex_paths = []
@@ -135,13 +142,13 @@ struct Shader(Copyable, Movable):
     fn use(self):
         gl.use_program(self.inner[].id)
 
-    fn set_uniform(self, owned name: String, texture_unit: gl.TextureUnit = gl.TextureUnit.TEXTURE0):
+    fn set_uniform(self, var name: String, texture_unit: gl.TextureUnit = gl.TextureUnit.TEXTURE0):
         self.set_uniform(name, Int32(Int(texture_unit) - Int(gl.TextureUnit.TEXTURE0)))
 
-    fn set_uniform[dtype: DType](self, owned name: String, value: Scalar[dtype]):
+    fn set_uniform[dtype: DType](self, var name: String, value: Scalar[dtype]):
         self.set_uniform(name, Vec[dtype, 1](value))
 
-    fn set_uniform[N: Int, dtype: DType, //](self, owned name: String, value: Vec[dtype, N]):
+    fn set_uniform[N: Int, dtype: DType, //](self, var name: String, value: Vec[dtype, N]):
         self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 
@@ -183,7 +190,7 @@ struct Shader(Copyable, Movable):
             elif N == 4:
                 gl.uniform4ui(location, v.x(), v.y(), v.z(), v.w())
 
-    fn set_uniform[cols: Int, rows: Int](self, owned name: String, value: Matrix[DType.float32, rows, cols]):
+    fn set_uniform[cols: Int, rows: Int](self, var name: String, value: Matrix[DType.float32, rows, cols]):
         self.use()
         var location = gl.get_uniform_location(self.inner[].id, name)
 

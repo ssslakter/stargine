@@ -33,7 +33,7 @@ struct Material(Movable, Copyable):
     var uniforms_SIMD16: Dict[String, UniformValueSIMD16]
     var uniform_matrices: Dict[String, Mat4f]
 
-    fn __init__(out self, owned name: String, shader: Shader):
+    fn __init__(out self, var name: String, shader: Shader):
         self.name = name
         self.shader = shader
         self.uniforms = {}
@@ -63,13 +63,16 @@ struct Material(Movable, Copyable):
             self.shader.set_uniform(el.key, unit)
             idx += 1
 
-    fn set_texture(mut self, owned name: String, texture: Texture):
+    fn set_texture(mut self, var name: String, texture: Texture):
         self.textures[name] = texture
 
-    fn set_scalar[dtype: DType](mut self, owned name: String, value: Scalar[dtype]):
+    fn set_scalar[dtype: DType](mut self, var name: String, value: Scalar[dtype]):
         self.set_vec(name, Vec[dtype, 1](value))
 
-    fn set_vec[N: Int, dtype: DType](mut self, owned name: String, value: Vec[dtype, N]):
+    fn set_bool(mut self, var name: String, value: Bool):
+        self.shader.set_uniform(name, Int32(Int(value)))
+
+    fn set_vec[N: Int, dtype: DType](mut self, var name: String, value: Vec[dtype, N]):
         @parameter
         if N in [1, 2]:
             self.uniforms[name] = UniformValue(value)
@@ -78,7 +81,7 @@ struct Material(Movable, Copyable):
         else:
             print("Error: unsupported vector size. Uniform value will be ignored.")
 
-    fn set_matrix[dim: Int](mut self, owned name: String, value: Matrix[DType.float32, dim, dim]):
+    fn set_matrix[dim: Int](mut self, var name: String, value: Matrix[DType.float32, dim, dim]):
         @parameter
         if dim == 4:
             var m = rebind[Mat4f](value)
@@ -86,7 +89,7 @@ struct Material(Movable, Copyable):
         else:
             print("Error: unsupported matrix size. Uniform value will be ignored.")
 
-    fn _set_uniform(self, owned name: String, value: UniformValue):
+    fn _set_uniform(self, var name: String, value: UniformValue):
         # TODO this looks like a hack
         if value.isa[Vec2f]():
             self.shader.set_uniform(name, value[Vec2f])
@@ -107,7 +110,7 @@ struct Material(Movable, Copyable):
         elif value.isa[Vec[DType.uint32, 1]]():
             self.shader.set_uniform(name, value[Vec[DType.uint32, 1]])
 
-    fn _set_uniform(self, owned name: String, value: UniformValueSIMD16):
+    fn _set_uniform(self, var name: String, value: UniformValueSIMD16):
         if value.isa[Vec4f]():
             self.shader.set_uniform(name, value[Vec4f])
         elif value.isa[Vec3f]():

@@ -59,7 +59,7 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         self.data = other.data
         self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
 
-    fn __moveinit__(out self, owned other: Self):
+    fn __moveinit__(out self, deinit other: Self):
         self.data = other.data^
         self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
 
@@ -102,14 +102,14 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
     fn diag(value: Scalar[dtype]) -> Matrix[dtype, rows, rows]:
         return Self.diag(Vec[dtype, rows](value))
 
-    fn transpose(owned self) -> Matrix[dtype, cols, rows]:
+    fn transpose(var self) -> Matrix[dtype, cols, rows]:
         var out = Matrix[dtype, cols, rows]()
         for i in range(self.rows):
             for j in range(self.cols):
                 out.buf[j, i] = self.buf[i, j]
         return out
 
-    fn __add__(owned self, other: Self) -> Self:
+    fn __add__(var self, other: Self) -> Self:
         constrained[
             self.rows == other.rows and self.cols == other.cols,
             "Matrices must have the same dimensions",
@@ -120,22 +120,22 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
 
         return self
 
-    fn __neg__(owned self) -> Self:
+    fn __neg__(var self) -> Self:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.buf[i, j] = -self.buf[i, j]
         return self
 
-    fn __sub__(owned self, owned other: Self) -> Self:
+    fn __sub__(var self, var other: Self) -> Self:
         return self + (-other)
 
-    fn __mul__(owned self, other: Scalar[dtype]) -> Self:
+    fn __mul__(var self, other: Scalar[dtype]) -> Self:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.buf[i, j] = self.buf[i, j] * other
         return self
 
-    fn __mul__(owned self, owned other: Self) -> Self:
+    fn __mul__(var self, var other: Self) -> Self:
         constrained[
             self.cols == other.cols and self.rows == other.rows,
             "Matrices must have the same dimensions",
@@ -167,23 +167,23 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
                 out[i] = out[i] + self.buf[i, j] * other[j]
         return out
 
-    fn __truediv__(owned self, other: Scalar[dtype]) -> Self:
+    fn __truediv__(var self, other: Scalar[dtype]) -> Self:
         return self * (1.0 / other)
 
-    fn __pow__(owned self, other: Int) -> Self:
+    fn __pow__(var self, other: Int) -> Self:
         var out = Self()
         for i in range(self.rows):
             for j in range(self.cols):
                 out.buf[i, j] = self.buf[i, j] ** other
         return out
 
-    fn __mod__(owned self, other: Scalar[dtype]) -> Self:
+    fn __mod__(var self, other: Scalar[dtype]) -> Self:
         for i in range(self.rows):
             for j in range(self.cols):
                 self.buf[i, j] = self.buf[i, j] % other
         return self
 
-    fn inverse(owned self: Mat2[dtype]) -> Mat2[dtype]:
+    fn inverse(var self: Mat2[dtype]) -> Mat2[dtype]:
         var a = self.buf[0, 0]
         var b = self.buf[0, 1]
         var c = self.buf[1, 0]
@@ -197,7 +197,7 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         out.buf[1, 1] = a * inv_det
         return out
 
-    fn inverse(owned self: Mat3[dtype]) -> Mat3[dtype]:
+    fn inverse(var self: Mat3[dtype]) -> Mat3[dtype]:
         var a = self.buf[0, 0]
         var b = self.buf[0, 1]
         var c = self.buf[0, 2]
@@ -223,7 +223,7 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         out.buf[2, 2] = (a * e - b * d) * inv_det
         return out
 
-    fn inverse(owned self: Mat4[dtype]) -> Mat4[dtype]:
+    fn inverse(var self: Mat4[dtype]) -> Mat4[dtype]:
         # Extract elements for readability:
         var a = self.buf[0, 0]
         var b = self.buf[0, 1]

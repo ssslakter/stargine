@@ -14,7 +14,7 @@ struct Window(Movable, Copyable):
         self.height = height
         self._handle = ArcPointer(video.create_window(window_title, width, height, window_flags))
 
-    fn __del__(owned self):
+    fn __del__(deinit self):
         if self._handle.count() == 1:
             print("releasing window")
             video.destroy_window(self._handle[])
