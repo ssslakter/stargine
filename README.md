@@ -19,35 +19,15 @@ The engine is in an early experimental stage. Here's what's currently implemente
 
 To start you need to have [Pixi](https://pixi.sh/latest/) and Git installed
 
-### Installation and Setup
-
-1.  **Clone the required repositories:**
-    Dependencies should be located inside the repository directory.
-
-    ```
-    stargine/           <-- This repository
-    ├── opengl-mojo/    <-- Dependency
-    └── sdl-mojo/       <-- Dependency
-    ```
+### Installation
 
     ```bash
     git clone https://github.com/ssslakter/stargine.git
     cd stargine
-    git clone https://github.com/ssslakter/opengl-mojo.git
-    git clone https://github.com/ssslakter/sdl-mojo.git
-    ```
-
-2.  **Build dependencies:**
-    ```bash
-    pixi run build-deps
-    ```
-    This command compiles the `sdl-mojo` and `opengl-mojo` bindings into `.mojopkg` files needed by the engine.
-
-3.  **Run the application:**
-    ```bash
     pixi run app
     ```
-    *Note: The `pixi.toml` file sets `SDL_VIDEODRIVER="wayland"` by default. You may need to change this depending on the desktop environment*
+
+*Note: The `pixi.toml` file sets `SDL_VIDEODRIVER="wayland"` by default. You may need to change this depending on the desktop environment*
 
 ## Project Structure
 

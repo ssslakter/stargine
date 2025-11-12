@@ -26,7 +26,7 @@ struct AppState(Movable):
             aspect_ratio=Float32(win_width) / Float32(win_height),
         )
         self.last_frame = self.delta_time = 0
-        self.window = window
+        self.window = window.copy()
 
         # light
         light_cube = Cube(material=unlit_material())
@@ -43,13 +43,13 @@ struct AppState(Movable):
             material=basic_material(
                 Texture('textures/box.png'),
                 Texture('textures/box_specular.png'),
-                point_light=self.light,
-                dir_light=dir_light
+                point_light=self.light.copy(),
+                dir_light=dir_light.copy()
             )
         )
         # cube = Cube(material=texture_material(Texture("wall.jpg")))
         cube.mesh.to_gpu()
-        self.cubes = [cube]
+        self.cubes = [cube.copy()]
 
         # post processing
         renderer.init_blend()

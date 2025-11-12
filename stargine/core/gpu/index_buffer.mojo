@@ -12,7 +12,7 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
         self.bind()
         gl.buffer_data(
             gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER,
-            dtype.size_of() * len(data),
+            size_of[dtype]()* len(data),
             data.unsafe_ptr().bitcast[NoneType](),
             gl.BufferUsageARB.STATIC_DRAW,
         )

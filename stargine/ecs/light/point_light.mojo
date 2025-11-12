@@ -26,6 +26,6 @@ struct PointLight(Copyable, Movable):
         self.constant = constant
         self.linear = linear
         self.quadratic = quadratic
-        self.gizmo = gizmo
+        self.gizmo = gizmo.copy()
         self.gizmo.transform = self.transform
         self.gizmo.material.set_vec("color", Vec4(self.specular, 1))

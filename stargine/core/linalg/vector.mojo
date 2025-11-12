@@ -5,7 +5,7 @@ from utils.static_tuple import StaticTuple
 
 @fieldwise_init
 @register_passable("trivial")
-struct Vec[dtype: DType, N: Int](Copyable, Movable, Writable):
+struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
     var data: SIMD[dtype, next_power_of_two(N)]
 
     @always_inline("nodebug")

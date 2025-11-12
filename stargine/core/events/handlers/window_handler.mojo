@@ -14,8 +14,8 @@ struct WindowHandler(EventHandler):
     # fn disable(mut self):
     #     self.active = False
 
-    fn __init__(out self, window: Window):
-        self.window = window
+    fn __init__(out self, var window: Window):
+        self.window = window^
 
     fn handle(mut self, event: Event) raises -> Bool:
         var event_type = event[CommonEvent].type

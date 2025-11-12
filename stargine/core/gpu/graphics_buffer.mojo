@@ -35,7 +35,7 @@ fn create_interleaved_buffer(
             # add offset
             dst += el.total_size
 
-    return buffer
+    return buffer^
 
 
 struct GraphicsBuffer[index_dtype: DType = DType.uint32](Copyable, Movable):
@@ -47,13 +47,13 @@ struct GraphicsBuffer[index_dtype: DType = DType.uint32](Copyable, Movable):
     fn __init__(
         out self,
         layout: VertexLayout,
-        positions: List[Vec3f],
+        var positions: List[Vec3f],
         colors: Optional[List[Vec4f]] = None,
         uvs: Optional[List[Vec2f]] = None,
         normals: Optional[List[Vec3f]] = None,
         indices: Optional[List[Scalar[index_dtype]]] = None,
     ):
-        self.vbo = VertexBuffer(create_interleaved_buffer(layout, len(positions), positions, colors, uvs, normals), UInt(layout.stride))
+        self.vbo = VertexBuffer(create_interleaved_buffer(layout, len(positions), positions^, colors, uvs, normals), UInt(layout.stride))
         if indices:
             self.ebo = IndexBuffer(indices.value())
         else: self.ebo = None
@@ -64,5 +64,4 @@ struct GraphicsBuffer[index_dtype: DType = DType.uint32](Copyable, Movable):
         if not self.ebo:
             self.vbo.draw()
         else:
-            ebo = self.ebo.value()
-            ebo.draw()
+            self.ebo.value().draw()

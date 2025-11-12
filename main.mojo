@@ -11,7 +11,7 @@ def main_loop(mut state: AppState):
     var running = True
     var dispatcher = EventDispatcher()
     var controls_handler = ArcPointer(ControlsHandler(state))
-    dispatcher.append(WindowHandler(state.window))
+    dispatcher.append(WindowHandler(state.window.copy()))
     dispatcher.append(controls_handler)
 
     while running:

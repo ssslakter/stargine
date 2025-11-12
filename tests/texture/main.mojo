@@ -26,7 +26,7 @@ def main():
 
     var running = True
     var dispatcher = EventDispatcher()
-    dispatcher.append(WindowHandler(window))
+    dispatcher.append(WindowHandler(window.copy()))
 
     var positions = [
         Vec3f(0,0,0),
@@ -49,9 +49,9 @@ def main():
         VertexAttribute(VertexAttributeType.POSITION),
         VertexAttribute(VertexAttributeType.UV),
         )
-    vbo = GraphicsBuffer(layout, positions = positions, indices = indices, uvs=uvs)
+    vbo = GraphicsBuffer(layout, positions = positions^, indices = indices^, uvs=uvs^)
     shader = Shader(Path(env.getenv("ROOT_DIR"))/'shader.glsl')
-    texture = Texture('wall.jpg')
+    texture = Texture('textures/wall.jpg')
     shader.set_uniform('color', Vec4f(0.3,0.5,0.7,1))
     shader.set_uniform('texture', gl.TextureUnit.TEXTURE0)
 

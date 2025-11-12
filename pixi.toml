@@ -1,4 +1,5 @@
-[project]
+[workspace]
+preview = ["pixi-build"]
 authors = ["Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"]
 channels = ["https://conda.modular.com/max-nightly", "https://conda.modular.com/max", "https://repo.prefix.dev/modular-community", "conda-forge"]
 name = "stargine"
@@ -13,13 +14,10 @@ env = { ROOT_DIR = "./stargine", SDL_VIDEODRIVER="wayland" }
 args = [{"arg"="folder"}]
 cmd = "./tests/run_test.sh {{folder}}"
 
-[tasks.build-deps]
-cmd = "mojo package \"./sdl-mojo/out/\" -o sdl.mojopkg && mojo package \"./opengl-mojo/out/\" -o opengl.mojopkg"
-
 [dependencies]
 mojo = "*"
-sdl3 = ">=3.2.14,<4"
+opengl-mojo = {git = "https://github.com/ssslakter/opengl-mojo"}
+sdl-mojo = {git = "https://github.com/ssslakter/sdl-mojo"}
 ipykernel = ">=6.29.5,<7"
-llvm-tools = ">=20.1.5,<21"
-numpy = "*"
 pillow = "*"
+numpy = "*"

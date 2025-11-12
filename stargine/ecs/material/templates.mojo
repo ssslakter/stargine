@@ -40,7 +40,7 @@ fn basic_material(
         ),
     )
     if point_light:
-        var light = point_light.value()
+        var light = point_light.value().copy()
         material.set_bool("pointLight.enabled", True)
         material.set_vec("pointLight.ambient", light.ambient)
         material.set_vec("pointLight.diffuse", light.diffuse)
@@ -52,7 +52,7 @@ fn basic_material(
     else:
         material.set_bool("pointLight.enabled", False)
     if dir_light:
-        var light = dir_light.value()
+        var light = dir_light.value().copy()
         material.set_bool("dirLight.enabled", True)
         material.set_vec("dirLight.direction", light.direction)
         material.set_vec("dirLight.ambient", light.ambient)
@@ -61,8 +61,8 @@ fn basic_material(
     else:
         material.set_bool("dirLight.enabled", False)
 
-    material.set_texture("material.diffuse", diffuse)
-    material.set_texture("material.specular", specular)
+    material.set_texture("material.diffuse", diffuse.copy())
+    material.set_texture("material.specular", specular.copy())
     material.set_scalar("material.shininess", shininess)
     return material^
 

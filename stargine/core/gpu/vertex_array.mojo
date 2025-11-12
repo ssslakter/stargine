@@ -18,7 +18,7 @@ struct VertexArray(Copyable, Movable):
                 element.dtype,
                 element.normalized,
                 layout.stride,
-                UnsafePointer[UInt8]().offset(offset).bitcast[NoneType](),
+                LegacyUnsafePointer[UInt8]().offset(offset).bitcast[NoneType](),
             )
             gl.enable_vertex_attrib_array(idx)
             offset += element.total_size

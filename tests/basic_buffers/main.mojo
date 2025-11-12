@@ -26,7 +26,7 @@ def main():
 
     var running = True
     var dispatcher = EventDispatcher()
-    dispatcher.append(WindowHandler(window))
+    dispatcher.append(WindowHandler(window.copy()))
 
     var positions = [
         Vec3f(0,0,0),
@@ -40,7 +40,7 @@ def main():
     ]
 
     layout = VertexLayout(VertexAttribute(VertexAttributeType.POSITION))
-    vbo = GraphicsBuffer(layout, positions = positions, indices = indices)
+    vbo = GraphicsBuffer(layout, positions = positions^, indices = indices^)
     shader = Shader(Path(env.getenv("ROOT_DIR"))/'shader.glsl')
     shader.set_uniform('color', Vec4f(0.3,0.5,0.7,1))
 

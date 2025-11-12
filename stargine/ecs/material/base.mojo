@@ -33,9 +33,9 @@ struct Material(Movable, Copyable):
     var uniforms_SIMD16: Dict[String, UniformValueSIMD16]
     var uniform_matrices: Dict[String, Mat4f]
 
-    fn __init__(out self, var name: String, shader: Shader):
+    fn __init__(out self, var name: String, var shader: Shader):
         self.name = name
-        self.shader = shader
+        self.shader = shader^
         self.uniforms = {}
         self.uniforms_SIMD16 = {}
         self.uniform_matrices = {}
@@ -63,8 +63,8 @@ struct Material(Movable, Copyable):
             self.shader.set_uniform(el.key, unit)
             idx += 1
 
-    fn set_texture(mut self, var name: String, texture: Texture):
-        self.textures[name] = texture
+    fn set_texture(mut self, var name: String, var texture: Texture):
+        self.textures[name] = texture^
 
     fn set_scalar[dtype: DType](mut self, var name: String, value: Scalar[dtype]):
         self.set_vec(name, Vec[dtype, 1](value))

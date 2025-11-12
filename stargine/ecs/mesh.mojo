@@ -17,7 +17,7 @@ struct Mesh(Copyable, Movable):
         colors: Optional[List[Vec4f]] = None,
         indices: Optional[List[UInt32]] = None,
     ):
-        self.positions = positions
+        self.positions = positions.copy()
         self.normals = normals
         self.uvs = uvs
         self.colors = colors
@@ -33,10 +33,10 @@ struct Mesh(Copyable, Movable):
             elements.append(VertexAttribute(VertexAttributeType.NORMAL))
         if self.colors:
             elements.append(VertexAttribute(VertexAttributeType.COLOR))
-        return VertexLayout(elements)
+        return VertexLayout(elements^)
 
     fn to_gpu(mut self):
-        self.buf = GraphicsBuffer(self.get_layout(), self.positions, self.colors, self.uvs, self.normals, self.indices)
+        self.buf = GraphicsBuffer(self.get_layout(), self.positions.copy(), self.colors, self.uvs, self.normals, self.indices)
 
     fn draw(self):
         if not self.buf:

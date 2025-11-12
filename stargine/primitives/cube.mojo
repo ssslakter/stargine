@@ -25,11 +25,11 @@ alias square_uvs = List[Vec2f](
 
 
 @always_inline
-fn generate_cube_data() -> (
+fn generate_cube_data() -> Tuple[
     List[Vec3f],  # positions
     List[Vec2f],  # uvs
     List[Vec3f],  # normals
-):
+]:
     var positions = List[Vec3f](
         # Back face (-Z)
         Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5),
@@ -108,11 +108,11 @@ fn generate_cube_data() -> (
         Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0),
     )
 
-    return positions, uvs, normals
+    return positions^, uvs^, normals^
 
 
 
-struct Cube(Copyable, ExplicitlyCopyable, Movable):
+struct Cube(Copyable, Movable):
     var mesh: Mesh
     var transform: ArcPointer[Transform]
     var material: Material
@@ -125,18 +125,18 @@ struct Cube(Copyable, ExplicitlyCopyable, Movable):
         self.transform = ArcPointer(Transform())
         self.material = material.or_else(unlit_material())
 
-        positions, uvs, normals = generate_cube_data()
+        res = generate_cube_data()
+        positions = res[0].copy()
+        uvs = res[1].copy()
+        normals = res[2].copy()
 
         self.mesh = mesh_data.or_else(
             Mesh(
-                positions,
-                uvs=Optional(uvs) if self.material.textures else None,
-                normals=normals,
+                positions^,
+                uvs=Optional(uvs^) if self.material.textures else None,
+                normals=normals^,
             )
         )
-
-    fn copy(self) -> Self:
-        return self
 
     fn draw(mut self, camera: Camera):
         self.material.set_vec("cameraPos", camera.transform.position)

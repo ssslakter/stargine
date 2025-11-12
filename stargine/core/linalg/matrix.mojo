@@ -2,17 +2,17 @@ from .vector import *
 from buffer import *
 
 
-struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
+struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable, Writable):
     alias rank = 2
     # TODO: maybe use SIMD to speed up
-    alias Data = InlineArray[Scalar[dtype], rows * cols]
+    alias Data = InlineArray[Scalar[dtype], nrows * ncols]
     alias Buffer = NDBuffer[dtype, Self.rank, MutableAnyOrigin]
     var buf: Self.Buffer
     var data: Self.Data
 
     fn __init__(out self, value: Scalar[dtype] = 0.0):
         self.data = Self.Data(fill=value)
-        self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
+        self.buf = Self.Buffer(self.data.unsafe_ptr(), (nrows, ncols))
 
     fn __init__(
         out self: Mat3[dtype],
@@ -30,8 +30,8 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         self = Self()
 
         @parameter
-        for i in range(rows):
-            for j in range(cols):
+        for i in range(nrows):
+            for j in range(ncols):
                 if i < r and j < c:
                     self.buf[i, j] = other.buf[i, j]
                 else:
@@ -49,27 +49,27 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
             for j in range(dims):
                 self.buf[i, j] = rows[i][j]
 
-    fn __init__(out self, rows: List[Vec[dtype, cols]]):
+    fn __init__(out self, rows: List[Vec[dtype, ncols]]):
         self = Self()
         for i in range(len(rows)):
-            for j in range(Self.cols):
+            for j in range(Self.ncols):
                 self.buf[i, j] = rows[i][j]
 
     fn __copyinit__(out self, other: Self):
         self.data = other.data
-        self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
+        self.buf = Self.Buffer(self.data.unsafe_ptr(), (nrows, ncols))
 
     fn __moveinit__(out self, deinit other: Self):
         self.data = other.data^
-        self.buf = Self.Buffer(self.data.unsafe_ptr(), (rows, cols))
+        self.buf = Self.Buffer(self.data.unsafe_ptr(), (nrows, ncols))
 
     fn write_to[W: Writer](self, mut writer: W):
         writer.write("Matrix(\n")
-        for i in range(self.rows):
+        for i in range(self.nrows):
             writer.write("    [")
-            for j in range(self.cols):
+            for j in range(self.ncols):
                 writer.write(self.buf[i, j])
-                if j < self.cols - 1:
+                if j < self.ncols - 1:
                     writer.write(", ")
             writer.write("]\n")
         writer.write(")")
@@ -87,42 +87,42 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         self.buf.fill(value)
 
     @staticmethod
-    fn id() -> Matrix[dtype, rows, rows]:
+    fn id() -> Matrix[dtype, nrows, nrows]:
         return Self.diag(1.0)
 
     @staticmethod
-    fn diag(value: Vec[dtype, rows]) -> Matrix[dtype, rows, rows]:
-        var self = Matrix[dtype, rows, rows](0.0)
-        for i in range(rows):
+    fn diag(value: Vec[dtype, nrows]) -> Matrix[dtype, nrows, nrows]:
+        var self = Matrix[dtype, nrows, nrows](0.0)
+        for i in range(nrows):
             self.buf[i, i] = value[i]
 
         return self
 
     @staticmethod
-    fn diag(value: Scalar[dtype]) -> Matrix[dtype, rows, rows]:
-        return Self.diag(Vec[dtype, rows](value))
+    fn diag(value: Scalar[dtype]) -> Matrix[dtype, nrows, nrows]:
+        return Self.diag(Vec[dtype, nrows](value))
 
-    fn transpose(var self) -> Matrix[dtype, cols, rows]:
-        var out = Matrix[dtype, cols, rows]()
-        for i in range(self.rows):
-            for j in range(self.cols):
+    fn transpose(var self) -> Matrix[dtype, ncols, nrows]:
+        var out = Matrix[dtype, ncols, nrows]()
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 out.buf[j, i] = self.buf[i, j]
         return out
 
     fn __add__(var self, other: Self) -> Self:
         constrained[
-            self.rows == other.rows and self.cols == other.cols,
+            self.nrows == other.nrows and self.ncols == other.ncols,
             "Matrices must have the same dimensions",
         ]()
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 self.buf[i, j] = self.buf[i, j] + other.buf[i, j]
 
         return self
 
     fn __neg__(var self) -> Self:
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 self.buf[i, j] = -self.buf[i, j]
         return self
 
@@ -130,40 +130,40 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
         return self + (-other)
 
     fn __mul__(var self, other: Scalar[dtype]) -> Self:
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 self.buf[i, j] = self.buf[i, j] * other
         return self
 
     fn __mul__(var self, var other: Self) -> Self:
         constrained[
-            self.cols == other.cols and self.rows == other.rows,
+            self.ncols == other.ncols and self.nrows == other.nrows,
             "Matrices must have the same dimensions",
         ]()
         var out = Self()
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 out.buf[i, j] = self.buf[i, j] * other.buf[i, j]
         return out
 
     fn matmul[
         other_cols: Int
-    ](self, other: Matrix[dtype, cols, other_cols]) -> Matrix[
-        dtype, rows, other_cols
+    ](self, other: Matrix[dtype, ncols, other_cols]) -> Matrix[
+        dtype, nrows, other_cols
     ]:
-        var out = Matrix[dtype, rows, other_cols](0.0)
-        for i in range(self.rows):
-            for j in range(other.cols):
-                for k in range(self.cols):
+        var out = Matrix[dtype, nrows, other_cols](0.0)
+        for i in range(self.nrows):
+            for j in range(other.ncols):
+                for k in range(self.ncols):
                     out.buf[i, j] = (
                         out.buf[i, j] + self.buf[i, k] * other.buf[k, j]
                     )
         return out
 
-    fn matmul(self, other: Vec[dtype, cols]) -> Vec[dtype, rows]:
-        var out = Vec[dtype, rows]()
-        for i in range(self.rows):
-            for j in range(self.cols):
+    fn matmul(self, other: Vec[dtype, ncols]) -> Vec[dtype, nrows]:
+        var out = Vec[dtype, nrows]()
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 out[i] = out[i] + self.buf[i, j] * other[j]
         return out
 
@@ -172,14 +172,14 @@ struct Matrix[dtype: DType, rows: Int, cols: Int](Copyable, Movable, Writable):
 
     fn __pow__(var self, other: Int) -> Self:
         var out = Self()
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 out.buf[i, j] = self.buf[i, j] ** other
         return out
 
     fn __mod__(var self, other: Scalar[dtype]) -> Self:
-        for i in range(self.rows):
-            for j in range(self.cols):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
                 self.buf[i, j] = self.buf[i, j] % other
         return self
 

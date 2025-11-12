@@ -6,7 +6,8 @@ from .linalg import *
 
 def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -> Tuple[String, String]:
     lines = read_file(path).splitlines()
-    vertex_lines, fragment_lines = List[String](), List[String]()
+    vertex_lines = List[String]()
+    fragment_lines =  List[String]()
     current: String = ""
 
     for line in lines:
@@ -16,9 +17,9 @@ def parse_combined_shader[PathLike: os.PathLike & ListElement](path: PathLike) -
             continue
 
         if current == "vertex":
-            vertex_lines.append(line)
+            vertex_lines.append(String(line))
         elif current == "fragment":
-            fragment_lines.append(line)
+            fragment_lines.append(String(line))
 
     vertex_code = String("\n".join(vertex_lines).strip())
     fragment_code = String("\n".join(fragment_lines).strip())
@@ -34,7 +35,7 @@ def compile_shader(var src: List[String], shader_type: ShaderType) -> Id:
         res[0] += '\n'
     if not res[0].startswith("#version"):
         res[0] = "#version 330 core\n" + res[0]
-    gl.shader_source(shader, 1, res, UnsafePointer[Int32]())
+    gl.shader_source(shader, 1, res, LegacyUnsafePointer[Int32]())
     gl.compile_shader(shader)
     check_errors(
         gl.get_shaderiv,
@@ -74,8 +75,8 @@ struct _ShaderInner(Movable):
 
     fn __init__(out self, var vertex_src: List[String], var fragment_src: List[String]) raises:
         self.id = gl.create_program()
-        vertex_shader = compile_shader(vertex_src, ShaderType.VERTEX_SHADER)
-        fragment_shader = compile_shader(fragment_src, ShaderType.FRAGMENT_SHADER)
+        vertex_shader = compile_shader(vertex_src^, ShaderType.VERTEX_SHADER)
+        fragment_shader = compile_shader(fragment_src^, ShaderType.FRAGMENT_SHADER)
         gl.attach_shader(self.id, vertex_shader)
         gl.attach_shader(self.id, fragment_shader)
         gl.link_program(self.id)
@@ -113,19 +114,19 @@ struct Shader(Copyable, Movable):
     fn __init__[
         PathLike: os.PathLike & ListElement & Stringable
     ](out self, vertex_path: PathLike, fragment_path: PathLike) raises:
-        self = Self([vertex_path], [fragment_path])
+        self = Self([vertex_path.copy()], [fragment_path.copy()])
 
     fn __init__[
         PathLike: os.PathLike & ListElement & Stringable
     ](out self, vertex_paths: List[PathLike], fragment_paths: List[PathLike]) raises:
         vertex_src = [read_file(path) for path in vertex_paths]
         fragment_src = [read_file(path) for path in fragment_paths]
-        self = Self(vertex_src=vertex_src, fragment_src=fragment_src)
+        self = Self(vertex_src=vertex_src^, fragment_src=fragment_src^)
         self.vertex_paths = [String(path) for path in vertex_paths]
         self.fragment_paths = [String(path) for path in fragment_paths]
 
     fn __init__(out self, *, var vertex_src: List[String], var fragment_src: List[String]) raises:
-        self.inner = ArcPointer[_ShaderInner](_ShaderInner(vertex_src, fragment_src))
+        self.inner = ArcPointer[_ShaderInner](_ShaderInner(vertex_src^, fragment_src^))
         self.fragment_paths = []
         self.vertex_paths = []
         self.combined_path = None
@@ -137,7 +138,7 @@ struct Shader(Copyable, Movable):
         if self.combined_path:
             self = Self(self.combined_path.value())
         else:
-            self = Self(self.vertex_paths, self.fragment_paths)
+            self = Self(self.vertex_paths^, self.fragment_paths^)
 
     fn use(self):
         gl.use_program(self.inner[].id)

@@ -5,7 +5,7 @@ from .utils import *
 def load_image[PathLike: os.PathLike & ConvertibleToPython & ListElement](path: PathLike) -> NDArray[DType.uint8, 3]:
     np = Python.import_module("numpy")
     pil = Python.import_module("PIL.Image")
-    img = pil.open(path.to_python_object())
+    img = pil.open(path.copy().to_python_object())
     # TODO Maybe this can be optimized for non-RGBA images
     img = img.convert("RGBA")
     arr = np.array(img)
@@ -37,8 +37,8 @@ struct _TextureInner(Movable):
                 4: gl.InternalFormat.RGBA,
                 1: gl.InternalFormat.R8 
             }
-            pixel_format = channels_to_format[channels]
-            internal_format = channels_to_internal_format[channels]
+            pixel_format = materialize[channels_to_format]()[channels]
+            internal_format = materialize[channels_to_internal_format]()[channels]
 
             gl.pixel_storei(gl.PixelStoreParameter.UNPACK_ALIGNMENT, 1)
             gl.tex_image_2d(

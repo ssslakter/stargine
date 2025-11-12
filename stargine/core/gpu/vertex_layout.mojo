@@ -65,7 +65,7 @@ struct VertexAttributeType(EqualityComparable, Intable):
 
 
 @register_passable("trivial")
-struct VertexAttribute(Copyable, Movable, Writable):
+struct VertexAttribute(ImplicitlyCopyable, Movable, Writable):
     var num_components: Int
     var attr_type: VertexAttributeType
     var total_size: Int
@@ -76,7 +76,7 @@ struct VertexAttribute(Copyable, Movable, Writable):
     fn __init__(out self, attr_type: VertexAttributeType,  normalized: Bool = False):
         self.attr_type = attr_type
         self.num_components = attr_type.num_components()
-        self.dtype_size = DType.float32.size_of() # TODO check if other types are supported
+        self.dtype_size = size_of[DType.float32]() # TODO check if other types are supported
         self.total_size = attr_type.get_size()
         self.dtype = dtype_to_enum(DType.float32)
         self.normalized = normalized
@@ -100,14 +100,16 @@ struct VertexLayout(Copyable, Movable, Writable):
     var stride: Int
 
     fn __init__(out self, *elements: VertexAttribute):
-        self.elements, self.stride = [], 0
+        self.elements = []
+        self.stride = 0
         for el in elements:
             self.stride += el.total_size
             self.elements.append(el)
 
-    fn __init__(out self, elements: List[VertexAttribute]):
-        self.elements, self.stride = elements, 0
-        for el in elements:
+    fn __init__(out self, var elements: List[VertexAttribute]):
+        self.elements = elements^
+        self.stride = 0
+        for el in self.elements:
             self.stride += el.total_size
     
     fn write_to[W: Writer](self, mut writer: W):
