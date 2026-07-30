@@ -2,7 +2,7 @@ from ...core.shader import *
 from ...core.texture import *
 
 # TODO: use list comprehensions with parameters when they are supported
-alias UniformValue = Variant[
+comptime UniformValue = Variant[
     Vec2f,
     Vec2i,
     Vec2u,
@@ -15,7 +15,7 @@ alias UniformValue = Variant[
 ]
 
 # TODO: group with UniformValue when https://github.com/modular/modular/issues/4578 is fixed
-alias UniformValueSIMD16 = Variant[
+comptime UniformValueSIMD16 = Variant[
     Vec4f,
     Vec3f,
     Vec4i,
@@ -33,7 +33,7 @@ struct Material(Movable, Copyable):
     var uniforms_SIMD16: Dict[String, UniformValueSIMD16]
     var uniform_matrices: Dict[String, Mat4f]
 
-    fn __init__(out self, var name: String, var shader: Shader):
+    def __init__(out self, var name: String, var shader: Shader):
         self.name = name
         self.shader = shader^
         self.uniforms = {}
@@ -41,7 +41,7 @@ struct Material(Movable, Copyable):
         self.uniform_matrices = {}
         self.textures = {}
 
-    fn bind(self):
+    def bind(self) raises:
         # TODO: optimize this to not bind every frame
         self.shader.use()
         for el in self.uniforms.items():
@@ -55,25 +55,25 @@ struct Material(Movable, Copyable):
 
         idx = 0
         for el in self.textures.items():
-            unit = gl.TextureUnit(Int(gl.TextureUnit.TEXTURE0) + idx)
-            if Int(unit) > Int(gl.TextureUnit.TEXTURE31):
+            unit = gl.TextureUnit(UInt32(Int(gl.TextureUnit.GL_TEXTURE0) + idx))
+            if Int(unit) > Int(gl.TextureUnit.GL_TEXTURE31):
                 print("Error: too many textures. Texture", el.key, "will be ignored.")
                 break
             el.value.bind(unit)
             self.shader.set_uniform(el.key, unit)
             idx += 1
 
-    fn set_texture(mut self, var name: String, var texture: Texture):
+    def set_texture(mut self, var name: String, var texture: Texture):
         self.textures[name] = texture^
 
-    fn set_scalar[dtype: DType](mut self, var name: String, value: Scalar[dtype]):
+    def set_scalar[dtype: DType](mut self, var name: String, value: Scalar[dtype]):
         self.set_vec(name, Vec[dtype, 1](value))
 
-    fn set_bool(mut self, var name: String, value: Bool):
+    def set_bool(mut self, var name: String, value: Bool) raises:
         self.shader.set_uniform(name, Int32(Int(value)))
 
-    fn set_vec[N: Int, dtype: DType](mut self, var name: String, value: Vec[dtype, N]):
-        @parameter
+    def set_vec[N: Int, dtype: DType](mut self, var name: String, value: Vec[dtype, N]):
+        comptime
         if N in [1, 2]:
             self.uniforms[name] = UniformValue(value)
         elif N in [3, 4]:
@@ -81,15 +81,15 @@ struct Material(Movable, Copyable):
         else:
             print("Error: unsupported vector size. Uniform value will be ignored.")
 
-    fn set_matrix[dim: Int](mut self, var name: String, value: Matrix[DType.float32, dim, dim]):
-        @parameter
+    def set_matrix[dim: Int](mut self, var name: String, value: Matrix[DType.float32, dim, dim]):
+        comptime
         if dim == 4:
             var m = rebind[Mat4f](value)
             self.uniform_matrices[name] = m
         else:
             print("Error: unsupported matrix size. Uniform value will be ignored.")
 
-    fn _set_uniform(self, var name: String, value: UniformValue):
+    def _set_uniform(self, var name: String, value: UniformValue) raises:
         # TODO this looks like a hack
         if value.isa[Vec2f]():
             self.shader.set_uniform(name, value[Vec2f])
@@ -110,7 +110,7 @@ struct Material(Movable, Copyable):
         elif value.isa[Vec[DType.uint32, 1]]():
             self.shader.set_uniform(name, value[Vec[DType.uint32, 1]])
 
-    fn _set_uniform(self, var name: String, value: UniformValueSIMD16):
+    def _set_uniform(self, var name: String, value: UniformValueSIMD16) raises:
         if value.isa[Vec4f]():
             self.shader.set_uniform(name, value[Vec4f])
         elif value.isa[Vec3f]():

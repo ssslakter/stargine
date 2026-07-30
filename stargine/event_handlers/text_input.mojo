@@ -11,7 +11,7 @@ struct TextInputHandler(EventHandler):
     var text_input_active: Bool
     var window: Window
 
-    fn start_text_input(mut self) raises:
+    def start_text_input(mut self) raises:
         self.text = ""
         self.cursor = 0
         var area = Rect(10, 10, 200, 30)
@@ -20,19 +20,19 @@ struct TextInputHandler(EventHandler):
         self.text_input_active = True
         print("Text input started. Press ENTER or ESC to stop.")
 
-    fn stop_text_input(mut self) raises:
+    def stop_text_input(mut self) raises:
         sdl.stop_text_input(self.window._handle[])
         self.text_input_active = False
         print("Entered text: ", self.text)
 
-    fn handle_text_input(mut self, event: TextInputEvent):
+    def handle_text_input(mut self, event: TextInputEvent):
         if not self.text_input_active:
             return
         self.text += String(unsafe_from_utf8_ptr=event.text)
         self.cursor += len(self.text)
 
-    fn handle(mut self, event: Event) raises -> Bool:
-        var key_event = event[KeyboardEvent]
+    def handle(mut self, event: Event) raises -> Bool:
+        var key_event = event.unsafe_get[KeyboardEvent]()
         if self.text_input_active:
             if Int(key_event.scancode) == Int(Scancode.SCANCODE_RETURN) or Int(key_event.scancode) == Int(Scancode.SCANCODE_ESCAPE):
                 self.stop_text_input()
@@ -40,6 +40,6 @@ struct TextInputHandler(EventHandler):
                 self.text = self.text[:-1]
         elif Int(key_event.scancode) in [Int(Scancode.SCANCODE_T), Int(Scancode.SCANCODE_RETURN)]:
             self.start_text_input()
-        if event[CommonEvent].type == Int(EventType.EVENT_TEXT_INPUT):
-                self.handle_text_input(event[TextInputEvent])
+        if Int(event.unsafe_get[CommonEvent]().type) == Int(sdl.EventType.EVENT_TEXT_INPUT):
+                self.handle_text_input(event.unsafe_get[TextInputEvent]())
         return True

@@ -1,4 +1,5 @@
 from ...core import *
+from ..transform import Transform
 
 
 struct PointLight(Copyable, Movable):
@@ -9,9 +10,8 @@ struct PointLight(Copyable, Movable):
     var constant: Float32
     var linear: Float32
     var quadratic: Float32
-    var gizmo: Cube
 
-    fn __init__(out self, mut gizmo: Cube, position: Vec3f = Vec3f(0),
+    def __init__(out self, position: Vec3f = Vec3f(0),
         ambient: Vec3f = Vec3f(0.2),
         diffuse: Vec3f = Vec3f(0.5),
         specular: Vec3f = Vec3f(1),
@@ -26,6 +26,3 @@ struct PointLight(Copyable, Movable):
         self.constant = constant
         self.linear = linear
         self.quadratic = quadratic
-        self.gizmo = gizmo.copy()
-        self.gizmo.transform = self.transform
-        self.gizmo.material.set_vec("color", Vec4(self.specular, 1))

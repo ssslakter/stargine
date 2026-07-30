@@ -1,8 +1,9 @@
-import math
-import time
-import os
-from python import Python
+import std.math
+import std.time
+import std.os as os
+from std.python import Python
 import opengl as gl
-from sys import size_of
+from std.sys import size_of
 import sdl
-from memory import ArcPointer
+from std.memory import ArcPointer, UnsafePointer
+from std.utils import Variant

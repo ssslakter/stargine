@@ -4,8 +4,8 @@ from ..core import *
 from ..core.events import *
 
 struct ControlsState(Copyable & Movable):
-    alias move_speed = 5.0
-    alias mouse_sensivity = 0.1
+    comptime move_speed = 5.0
+    comptime mouse_sensivity = 0.1
 
     var offset: Vec2f
     var forward: Bool
@@ -15,7 +15,7 @@ struct ControlsState(Copyable & Movable):
     var up: Bool
     var down: Bool
 
-    fn __init__(out self):
+    def __init__(out self):
         self.offset = Vec2f(0)
         self.forward = False
         self.backward = False
@@ -25,31 +25,31 @@ struct ControlsState(Copyable & Movable):
         self.down = False
 
 
-struct ControlsHandler[origin: Origin[True]](EventHandler):
+struct ControlsHandler[origin: Origin[mut=True]](EventHandler):
     # var camera: Pointer[Camera, origin=origin]
-    var game_state: Pointer[AppState, origin=origin]
+    var game_state: Pointer[AppState, origin=Self.origin]
     var controls_state: ControlsState
 
-    fn __init__(out self, ref [origin] game_state: AppState):
+    def __init__(out self, ref[Self.origin] game_state: AppState):
         # self.camera = Pointer(to=camera)
         self.game_state = Pointer(to=game_state)
         self.controls_state = ControlsState()
 
-    fn handle(mut self, event: Event) raises -> Bool:
-        var event_type = event[CommonEvent].type
-        if event_type == Int(EventType.EVENT_WINDOW_FOCUS_GAINED):
+    def handle(mut self, event: Event) raises -> Bool:
+        var event_type = Int(event.unsafe_get[CommonEvent]().type)
+        if event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_GAINED):
             sdl.set_window_relative_mouse_mode(self.game_state[].window._handle[], True)
             res = sdl.get_error()
             print(String(unsafe_from_utf8_ptr=res))
-        elif event_type == Int(EventType.EVENT_WINDOW_FOCUS_LOST):
+        elif event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_LOST):
             sdl.set_window_relative_mouse_mode(self.game_state[].window._handle[], False)
-        elif event_type == Int(EventType.EVENT_MOUSE_MOTION):
-            self.handle_mouse_event(event[MouseMotionEvent])
-        if event_type == Int(EventType.EVENT_KEY_DOWN) or event_type == Int(EventType.EVENT_KEY_UP):
-            self.handle_key_event(event[KeyboardEvent])
+        elif event_type == Int(sdl.EventType.EVENT_MOUSE_MOTION):
+            self.handle_mouse_event(event.unsafe_get[MouseMotionEvent]())
+        if event_type == Int(sdl.EventType.EVENT_KEY_DOWN) or event_type == Int(sdl.EventType.EVENT_KEY_UP):
+            self.handle_key_event(event.unsafe_get[KeyboardEvent]())
         return True
 
-    fn handle_key_event(mut self, event: KeyboardEvent):
+    def handle_key_event(mut self, event: KeyboardEvent):
         ref controls = self.controls_state
         var is_pressed = event.down
         if Int(event.scancode) == Int(Scancode.SCANCODE_W):
@@ -75,11 +75,11 @@ struct ControlsHandler[origin: Origin[True]](EventHandler):
             self.game_state[].cubes[0].transform[].rotate(0,-0.05)
 
 
-    fn handle_mouse_event(mut self, event: MouseMotionEvent):
+    def handle_mouse_event(mut self, event: MouseMotionEvent):
         offset = Vec2f(event.xrel, event.yrel)
         self.controls_state.offset -= offset*ControlsState.mouse_sensivity
 
-    fn update_movement(mut self):
+    def update_movement(mut self):
         ref cam = self.game_state[].camera
         delta_time = self.game_state[].delta_time
         pos_delta = Float32(delta_time * ControlsState.move_speed)

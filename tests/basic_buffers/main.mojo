@@ -1,5 +1,5 @@
 from sdl import InitFlags, WindowFlags
-from os import env
+from std.os import env
 from pathlib import Path
 from sdl.sdl_events import *
 import opengl as gl
@@ -9,8 +9,8 @@ from stargine.core.window import *
 from stargine.core.gpu import *
 
 
-alias win_width = 1024
-alias win_height = 768
+comptime win_width = 1024
+comptime win_height = 768
 
 
 def main():

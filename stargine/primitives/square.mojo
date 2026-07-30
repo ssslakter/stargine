@@ -6,7 +6,7 @@ struct Square(Copyable, Movable):
     var transform: Transform
     var material: Optional[Material]
 
-    fn __init__(out self, material: Optional[Material] = None) raises:
+    def __init__(out self, material: Optional[Material] = None) raises:
         self.transform = Transform()
         self.material = material
 
@@ -20,7 +20,7 @@ struct Square(Copyable, Movable):
 
         self.mesh = Mesh(positions, indices=indices)
 
-    fn draw(mut self):
+    def draw(mut self):
         if self.material:
             self.material.value().set_matrix(
                 "model", self.transform.local_to_world_matrix()

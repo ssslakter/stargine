@@ -2,19 +2,19 @@ from opengl import TriangleFace, PolygonMode
 from .imports import *
 from .linalg import *
 
-fn clear(color: Vec4f = Vec4f(0)):
+def clear(color: Vec4f = Vec4f(0)) raises:
     gl.clear_color(color.x(), color.y(), color.z(), color.w())
-    gl.clear(gl.ClearBufferMask.COLOR_BUFFER_BIT | gl.ClearBufferMask.DEPTH_BUFFER_BIT)
+    gl.clear(gl.ClearBufferMask.GL_COLOR_BUFFER_BIT | gl.ClearBufferMask.GL_DEPTH_BUFFER_BIT)
 
-fn polygon_mode(face: TriangleFace, mode: PolygonMode):
+def polygon_mode(face: TriangleFace, mode: PolygonMode) raises:
     gl.polygon_mode(face, mode)
 
-fn init_blend():
-    gl.enable(gl.EnableCap.BLEND)
-    gl.blend_func(gl.BlendingFactor.SRC_ALPHA, gl.BlendingFactor.ONE_MINUS_SRC_ALPHA)
+def init_blend() raises:
+    gl.enable(gl.EnableCap.GL_BLEND)
+    gl.blend_func(gl.BlendingFactor.GL_SRC_ALPHA, gl.BlendingFactor.GL_ONE_MINUS_SRC_ALPHA)
 
-fn enable_depth_test():
-    gl.enable(gl.EnableCap.DEPTH_TEST)
-    gl.front_face(gl.FrontFaceDirection.CCW)
-    gl.enable(gl.EnableCap.CULL_FACE)
-    gl.cull_face(gl.TriangleFace.BACK)
+def enable_depth_test() raises:
+    gl.enable(gl.EnableCap.GL_DEPTH_TEST)
+    gl.front_face(gl.FrontFaceDirection.GL_CCW)
+    gl.enable(gl.EnableCap.GL_CULL_FACE)
+    gl.cull_face(gl.TriangleFace.GL_BACK)

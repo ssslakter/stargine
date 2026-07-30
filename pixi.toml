@@ -15,9 +15,9 @@ args = [{"arg"="folder"}]
 cmd = "./tests/run_test.sh {{folder}}"
 
 [dependencies]
-mojo = "*"
-opengl-mojo = {git = "https://github.com/ssslakter/opengl-mojo"}
-sdl-mojo = {git = "https://github.com/ssslakter/sdl-mojo"}
+mojo = ">=1.0.0b1.dev2026042717"
+opengl-mojo = {path = "../opengl-mojo"}
+sdl-mojo = {path = "../sdl-mojo"}
 ipykernel = ">=6.29.5,<7"
-pillow = "*"
-numpy = "*"
+pillow = ">=12.1.0,<13"
+numpy = ">=2.4.0,<3"

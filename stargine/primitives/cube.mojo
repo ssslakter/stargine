@@ -1,10 +1,14 @@
-from ..ecs import *
+from ..core import *
+from ..ecs.camera import Camera
+from ..ecs.mesh import Mesh
+from ..ecs.transform import Transform
+from ..ecs.material import Material, unlit_material
 
 
-fn unit_cube_vertices[
+def unit_cube_vertices[
     dim: Int, dtype: DType = DType.float32
 ]() -> List[Vec[dtype, dim]]:
-    alias num_vertices = 1 << dim
+    comptime num_vertices = 1 << dim
     var vertices = List[Vec[dtype, dim]]()
 
     for i in range(num_vertices):
@@ -16,21 +20,21 @@ fn unit_cube_vertices[
     return vertices
 
 
-alias square_uvs = List[Vec2f](
+comptime square_uvs = [
     Vec2f(0.0, 0.0),
     Vec2f(1.0, 0.0),
     Vec2f(1.0, 1.0),
     Vec2f(0.0, 1.0),
-)
+]
 
 
 @always_inline
-fn generate_cube_data() -> Tuple[
+def generate_cube_data() -> Tuple[
     List[Vec3f],  # positions
     List[Vec2f],  # uvs
     List[Vec3f],  # normals
 ]:
-    var positions = List[Vec3f](
+    var positions: List[Vec3f] = [
         # Back face (-Z)
         Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5),
         Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5), Vec3f(-0.5, 0.5, -0.5),
@@ -54,9 +58,9 @@ fn generate_cube_data() -> Tuple[
         # Right face (+X)
         Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, -0.5, 0.5), Vec3f(0.5, 0.5, 0.5),
         Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, 0.5), Vec3f(0.5, 0.5, -0.5),
-    )
+    ]
 
-    var uvs = List[Vec2f](
+    var uvs: List[Vec2f] = [
         # Back face
         Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0),
         Vec2f(0.0, 0.0), Vec2f(1.0, 1.0), Vec2f(0.0, 1.0),
@@ -80,9 +84,9 @@ fn generate_cube_data() -> Tuple[
         # Right face
         Vec2f(0.0, 0.0), Vec2f(1.0, 0.0), Vec2f(1.0, 1.0),
         Vec2f(0.0, 0.0), Vec2f(1.0, 1.0), Vec2f(0.0, 1.0),
-    )
+    ]
 
-    var normals = List[Vec3f](
+    var normals: List[Vec3f] = [
         # Back face
         Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0),
         Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0), Vec3f(0.0, 0.0, -1.0),
@@ -106,7 +110,7 @@ fn generate_cube_data() -> Tuple[
         # Right face
         Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0),
         Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0), Vec3f(1.0, 0.0, 0.0),
-    )
+    ]
 
     return positions^, uvs^, normals^
 
@@ -117,28 +121,33 @@ struct Cube(Copyable, Movable):
     var transform: ArcPointer[Transform]
     var material: Material
 
-    fn __init__(
+    def __init__(
         out self,
         material: Optional[Material] = None,
         mesh_data: Optional[Mesh] = None,
     ) raises:
         self.transform = ArcPointer(Transform())
-        self.material = material.or_else(unlit_material())
+        if material:
+            self.material = material.value().copy()
+        else:
+            self.material = unlit_material()
 
         res = generate_cube_data()
         positions = res[0].copy()
         uvs = res[1].copy()
         normals = res[2].copy()
 
-        self.mesh = mesh_data.or_else(
-            Mesh(
+        if mesh_data:
+            self.mesh = mesh_data.value().copy()
+        else:
+            self.mesh = Mesh(
                 positions^,
                 uvs=Optional(uvs^) if self.material.textures else None,
                 normals=normals^,
             )
-        )
 
-    fn draw(mut self, camera: Camera):
+
+    def draw(mut self, camera: Camera) raises:
         self.material.set_vec("cameraPos", camera.transform.position)
         self.material.set_matrix(
             "model", self.transform[].local_to_world_matrix()

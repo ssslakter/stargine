@@ -1,4 +1,4 @@
-from memory import ArcPointer
+from std.memory import ArcPointer
 from .vertex_layout import VertexLayout 
 from ..utils import *
 
@@ -6,30 +6,35 @@ from ..utils import *
 struct VertexArray(Copyable, Movable):
     var id: ArcPointer[Id]
 
-    fn __init__(out self, layout: VertexLayout):
+    def __init__(out self, layout: VertexLayout) raises:
         self.id = ArcPointer(UInt32(0))
-        gl.gen_vertex_arrays(1, self.id.unsafe_ptr())
+        gl.gen_vertex_arrays(1, UnsafePointer[UInt32, MutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
         self.bind()
-        offset, idx = Int(0), UInt(0)
+        offset, idx = Int(0), UInt32(0)
         for element in layout.elements:
             gl.vertex_attrib_pointer(
                 idx,
-                element.num_components,
+                Int32(element.num_components),
                 element.dtype,
                 element.normalized,
-                layout.stride,
-                LegacyUnsafePointer[UInt8]().offset(offset).bitcast[NoneType](),
+                Int32(layout.stride),
+                UnsafePointer[UInt8, ImmutAnyOrigin](unsafe_from_address=offset).bitcast[NoneType](),
             )
             gl.enable_vertex_attrib_array(idx)
             offset += element.total_size
             idx += 1
 
-    fn __del__(deinit self):
-        if self.id.count() == 1:
-            gl.delete_vertex_arrays(1, self.id.unsafe_ptr())
+    def __del__(deinit self):
+        if self.id.count() == 1 and self.id[]:
+            try:
+                # TODO(upstream-opengl): delete_vertex_arrays should accept a pointer with any origin/mutability.
+                gl.delete_vertex_arrays(1, UnsafePointer[UInt32, ImmutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
+            except err:
+                # TODO(upstream-opengl): destruction should not expose a fallible API.
+                print("Failed to delete vertex array:", err)
 
-    fn bind(self):
+    def bind(self) raises:
         gl.bind_vertex_array(self.id[])
 
-    fn unbind(self):
+    def unbind(self) raises:
         gl.bind_vertex_array(0)

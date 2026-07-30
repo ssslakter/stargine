@@ -4,38 +4,37 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
     var id: ArcPointer[Id]
     var numel: UInt
 
-    fn __init__(out self, data: List[Scalar[dtype]]):
+    def __init__(out self, data: List[Scalar[Self.dtype]]) raises:
         self.id = ArcPointer(UInt32(0))
-        gl.gen_buffers(1, self.id.unsafe_ptr())
-        constrained[dtype.is_unsigned(), "dtype must be unsigned"]()
-        self.numel = len(data)
+        gl.gen_buffers(1, UnsafePointer[UInt32, MutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
+        comptime assert Self.dtype.is_unsigned(), "dtype must be unsigned"
+        self.numel = UInt(len(data))
         self.bind()
         gl.buffer_data(
-            gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER,
-            size_of[dtype]()* len(data),
-            data.unsafe_ptr().bitcast[NoneType](),
-            gl.BufferUsageARB.STATIC_DRAW,
+            gl.BufferTargetARB.GL_ELEMENT_ARRAY_BUFFER,
+            size_of[Self.dtype]()* len(data),
+            UnsafePointer[NoneType, ImmutAnyOrigin](unsafe_from_address=Int(data.unsafe_ptr())),
+            gl.BufferUsageARB.GL_STATIC_DRAW,
         )
 
-    fn __len__(self) -> Int:
-        return self.numel
+    def __len__(self) -> Int:
+        return Int(self.numel)
 
-    fn __del__(deinit self):
-        if self.id.count() == 1:
-            gl.delete_buffers(1, self.id.unsafe_ptr())
+    def __del__(deinit self):
+        if self.id.count() == 1 and self.id[]:
+            try:
+                gl.delete_buffers(1, UnsafePointer[UInt32, ImmutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
+            except err:
+                # TODO(upstream-opengl): destruction should not expose a fallible API.
+                print("Failed to delete index buffer:", err)
 
-    fn bind(self):
-        gl.bind_buffer(gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER, self.id[])
+    def bind(self) raises:
+        gl.bind_buffer(gl.BufferTargetARB.GL_ELEMENT_ARRAY_BUFFER, self.id[])
 
-    fn unbind(self):
-        gl.bind_buffer(gl.BufferTargetARB.ELEMENT_ARRAY_BUFFER, 0)
+    def unbind(self) raises:
+        gl.bind_buffer(gl.BufferTargetARB.GL_ELEMENT_ARRAY_BUFFER, 0)
 
-    fn draw(self):
-        self.bind()
-        gl.draw_elements(
-            gl.PrimitiveType.TRIANGLES,
-            len(self),
-            gl.DrawElementsType.UNSIGNED_INT,
-            Ptr[NoneType](),
-        )
-        self.unbind()
+    def draw(self) raises:
+        # TODO(upstream-opengl): expose glDrawElements' nullable index-offset
+        # pointer. Passing a fabricated non-null pointer would be unsafe.
+        raise Error("indexed drawing is unavailable until opengl-mojo supports a null EBO offset")

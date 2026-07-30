@@ -7,9 +7,9 @@ struct Mesh(Copyable, Movable):
     var colors: Optional[List[Vec4f]]
     var indices: Optional[List[UInt32]]
 
-    var buf: Optional[GraphicsBuffer]
+    var buf: Optional[GraphicsBuffer[DType.uint32]]
 
-    fn __init__(
+    def __init__(
         out self,
         positions: List[Vec3f],
         normals: Optional[List[Vec3f]] = None,
@@ -18,13 +18,13 @@ struct Mesh(Copyable, Movable):
         indices: Optional[List[UInt32]] = None,
     ):
         self.positions = positions.copy()
-        self.normals = normals
-        self.uvs = uvs
-        self.colors = colors
-        self.indices = indices
+        self.normals = normals.copy()
+        self.uvs = uvs.copy()
+        self.colors = colors.copy()
+        self.indices = indices.copy()
         self.buf = None
 
-    fn get_layout(self) -> VertexLayout:
+    def get_layout(self) -> VertexLayout:
         elements = List[VertexAttribute]()
         elements.append(VertexAttribute(VertexAttributeType.POSITION))
         if self.uvs:
@@ -35,10 +35,10 @@ struct Mesh(Copyable, Movable):
             elements.append(VertexAttribute(VertexAttributeType.COLOR))
         return VertexLayout(elements^)
 
-    fn to_gpu(mut self):
+    def to_gpu(mut self) raises:
         self.buf = GraphicsBuffer(self.get_layout(), self.positions.copy(), self.colors, self.uvs, self.normals, self.indices)
 
-    fn draw(self):
+    def draw(self) raises:
         if not self.buf:
             print("ERROR: VertexArray not bound, skipping draw")
             return
