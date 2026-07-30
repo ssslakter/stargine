@@ -1,0 +1,215 @@
+stargine/core/gpu/graphics_buffer.mojo
+  s_a88eff9569d5d6::t_c787fde3930aa2 9
+  s_a88eff9569d5d6::t_edbd620de85ecc 15,47
+  s_a88eff9569d5d6::t_099191abb8bd94 55-56,62
+  s_a88eff9569d5d6::t_be3efd43667e6e 43-44,54
+  s_a88eff9569d5d6::t_5e73254d1b5358 23
+  s_a88eff9569d5d6::t_2913d4c321a093 11,13
+  s_a88eff9569d5d6::t_3ddb4028508914 25
+  s_a88eff9569d5d6::t_f765ffc3fd18e8 28,30,32,34
+  s_a88eff9569d5d6::t_b94c9451baae64 1
+stargine/core/gpu/vertex_layout.mojo
+  s_a88eff9569d5d6::t_ac1cdf89fb49c4 112-115
+  s_a88eff9569d5d6::t_edbd620de85ecc 6,39,43,47,50,57,74,82,100,107,117
+  s_a88eff9569d5d6::t_eddc6b44325ad3 9,11,13,15,17,19,21,23,25-26,30
+  s_a88eff9569d5d6::t_eb797f2b84370f 33-36
+stargine/event_handlers/text_input.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 14,23,28,34
+  s_a88eff9569d5d6::t_0783b237a615b6 35,44
+  s_a88eff9569d5d6::t_5aa332c614d68f 43
+stargine/core/events/dispatch.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 7,10,15,18,21
+stargine/core/gpu/vertex_array.mojo
+  s_a88eff9569d5d6::t_b186b5c6203656 28
+  s_a88eff9569d5d6::t_b016bf8b75eda1 29-31
+  s_a88eff9569d5d6::t_668f513f1661bf 32-34
+  s_a88eff9569d5d6::t_edbd620de85ecc 1,27
+  s_a88eff9569d5d6::t_2847d95742ec92 9,11,13,21,36,39
+  s_a88eff9569d5d6::t_3ddb4028508914 20
+  s_a88eff9569d5d6::t_c787fde3930aa2 17
+stargine/core/shader.mojo
+  s_a88eff9569d5d6::t_3a12f4792b21f4 55-59,68-71
+  s_a88eff9569d5d6::t_edbd620de85ecc 77,80,91,106,117,122,131,137,159,163,175,187,202,205,214,223
+  s_a88eff9569d5d6::t_b186b5c6203656 92-97
+  s_a88eff9569d5d6::t_4f2e68cf7838f9 112,118,123
+  s_a88eff9569d5d6::t_1e18bc85ca9a12 150
+  s_a88eff9569d5d6::t_2d52a45863614b 42
+  s_a88eff9569d5d6::t_028b0c0e41c9f3 82-83
+  s_a88eff9569d5d6::t_c787fde3930aa2 7,46,50,62,89,146,149,152,155,197
+  s_a88eff9569d5d6::t_6885bd5ea41065 31,43,45
+  s_a88eff9569d5d6::t_37ceeebb20f427 39
+  s_a88eff9569d5d6::t_f7131e275dca4d 40
+  s_a88eff9569d5d6::t_5e73254d1b5358 29
+  s_a88eff9569d5d6::t_8ef828f89c154a 41
+  s_a88eff9569d5d6::t_3ddb4028508914 52,64,200,207,209,211,216,218,220,225,227,229
+  s_a88eff9569d5d6::t_a0d970f68a9af5 51
+  s_a88eff9569d5d6::t_fab3ad64a78836 53-54
+stargine/ecs/material/templates.mojo
+  s_a88eff9569d5d6::t_5e73254d1b5358 1
+  s_a88eff9569d5d6::t_edbd620de85ecc 4,7,11,15,21,27,70
+stargine/ecs/light/directional_light.mojo
+  s_a88eff9569d5d6::t_2a9822252f23d3 10
+main.mojo
+  s_a88eff9569d5d6::t_b8e70af5b5a374 10
+  s_a88eff9569d5d6::t_f74ad4a3a1574b 26,33,38-41
+  s_a88eff9569d5d6::t_fee34702a2e7a8 12-14,17-19,22
+stargine/core/window.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 11,17,26,29
+  s_a88eff9569d5d6::t_fee34702a2e7a8 9,35
+  s_a88eff9569d5d6::t_668f513f1661bf 22-24
+  s_a88eff9569d5d6::t_099191abb8bd94 20-21
+pixi.toml
+  s_a88eff9569d5d6::t_045aa6e488fc21 19-20
+  s_a88eff9569d5d6::t_206f4a57608615 18
+  s_a88eff9569d5d6::t_a483756df2126b 22-23
+stargine/core/renderer.mojo
+  s_a88eff9569d5d6::t_1e18bc85ca9a12 7,13-14,17-19
+  s_a88eff9569d5d6::t_f4af4b30d15435 5,9,12,16,20
+stargine/core/gpu/vertex_buffer.mojo
+  s_a88eff9569d5d6::t_3ddb4028508914 20
+  s_a88eff9569d5d6::t_028b0c0e41c9f3 12-14,17-18,35,38,41,43
+  s_a88eff9569d5d6::t_4f2e68cf7838f9 9
+  s_a88eff9569d5d6::t_b016bf8b75eda1 25-27
+  s_a88eff9569d5d6::t_c787fde3930aa2 19
+  s_a88eff9569d5d6::t_668f513f1661bf 28-30
+  s_a88eff9569d5d6::t_b186b5c6203656 24
+  s_a88eff9569d5d6::t_edbd620de85ecc 23,32
+  s_a88eff9569d5d6::t_636e7da1d6f434 33
+  s_a88eff9569d5d6::t_5e73254d1b5358 36,39
+stargine/core/gpu/opengl.mojo
+  s_a88eff9569d5d6::t_0ded0ba7fd87ae 46-49
+  s_a88eff9569d5d6::t_f219133a8271f5 38-40
+  s_a88eff9569d5d6::t_b94c9451baae64 26-28
+  s_a88eff9569d5d6::t_edecf6254d3149 20,31,42-45
+  s_a88eff9569d5d6::t_f0b0924ff5cc00 32-37
+  s_a88eff9569d5d6::t_f74ad4a3a1574b 5-19,41
+stargine/core/linalg/geom.mojo
+  s_a88eff9569d5d6::t_ac1cdf89fb49c4 52
+  s_a88eff9569d5d6::t_edbd620de85ecc 1,7,15,20,41,64
+  s_a88eff9569d5d6::t_dce986a7dd7c37 9-11,29-37,43-48,55-60
+stargine/ecs/transform.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 10,17-18,20,30,40,43,52,55,61,65,69,80,91
+  s_a88eff9569d5d6::t_636e7da1d6f434 1-2,62,66
+stargine/core/linalg/matrix.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 10,19-21,23-24,26,31,34,42-44,46-47,49,54,60,63,66,77,82,86,94-95,97,104,115,121,124,130,141,155,162,165,172
+  s_a88eff9569d5d6::t_e1ecb8eada5afe 13-18,71,78-79
+  s_a88eff9569d5d6::t_3ddb4028508914 178,185,206,218,250
+  s_a88eff9569d5d6::t_c787fde3930aa2 192
+  s_a88eff9569d5d6::t_dce986a7dd7c37 29,38,40,52,58,89,101,111,118,127,138,150-151,159,169,175,179-182,186-189,193-201,207-215,220-235,252-253,257,260,265-266,269,273,277-278,282,285,290-291,294,298
+  s_a88eff9569d5d6::t_ca05c7e973f37b 35-36
+  s_a88eff9569d5d6::t_b9cf7052dd9b78 87-88
+  s_a88eff9569d5d6::t_bb17def3d62cf6 98
+  s_a88eff9569d5d6::t_d3dbd5e5b0d302 156
+  s_a88eff9569d5d6::t_f1fe7c75478828 5,7,106,132,143-144,146,305-307,309-311,313-315
+.gitignore
+  h_cec284cdd16cba 1
+stargine/primitives/cube.mojo
+  s_a88eff9569d5d6::t_636e7da1d6f434 23,28,37,61,63,87,89,113
+  s_a88eff9569d5d6::t_c787fde3930aa2 131,141
+  s_a88eff9569d5d6::t_be3efd43667e6e 1-5
+  s_a88eff9569d5d6::t_8f944ade83033f 130,132-133,140,142-143,149-150
+  s_a88eff9569d5d6::t_edbd620de85ecc 8,32,124
+  s_a88eff9569d5d6::t_66036c05f39ca8 11
+stargine/ecs/light/point_light.mojo
+  s_a88eff9569d5d6::t_2a9822252f23d3 2,14
+tests/basic_buffers/main.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 2
+  s_a88eff9569d5d6::t_1422bcf6917f7b 12-13
+stargine/core/imports.mojo
+  s_a88eff9569d5d6::t_47b72507d33005 3,8-9
+  s_a88eff9569d5d6::t_edbd620de85ecc 1-2,4,6
+tests/texture/main.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 2
+  s_a88eff9569d5d6::t_2078daacf1fe71 12-13
+stargine/core/texture.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 21,74,88
+  s_a88eff9569d5d6::t_c787fde3930aa2 50-51,55,71,104
+  s_a88eff9569d5d6::t_b94c9451baae64 1,10
+  s_a88eff9569d5d6::t_3ddb4028508914 24,92-98
+  s_a88eff9569d5d6::t_2913d4c321a093 8-9
+  s_a88eff9569d5d6::t_1e18bc85ca9a12 27,32-35,37-39,45,47,54,57-58,63,65,69-70,101,107
+  s_a88eff9569d5d6::t_b186b5c6203656 5,40
+  s_a88eff9569d5d6::t_f4af4b30d15435 26,61,75-81,99,103,106
+stargine/app.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 26,65,88
+  s_a88eff9569d5d6::t_2a9822252f23d3 21,37,39-41,78,81,84
+  s_a88eff9569d5d6::t_8f944ade83033f 67
+  s_a88eff9569d5d6::t_4f2e68cf7838f9 1-3
+  s_a88eff9569d5d6::t_ba9cc6c6d059d0 12-13
+stargine/ecs/camera.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 12,26,34,37,41,48
+  s_a88eff9569d5d6::t_53d391363bac4c 5
+stargine/ecs/mesh.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 12,27
+  s_a88eff9569d5d6::t_099191abb8bd94 21-24,38,41
+  s_a88eff9569d5d6::t_fee34702a2e7a8 10
+stargine/core/events/handlers/window_handler.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 11,14,17,20
+  s_a88eff9569d5d6::t_c787fde3930aa2 21,25,29,36
+  s_a88eff9569d5d6::t_0783b237a615b6 22,24,26
+stargine/core/utils.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 1,10,57
+  s_a88eff9569d5d6::t_edecf6254d3149 17,48
+  s_a88eff9569d5d6::t_37a4cda3037070 59
+  s_a88eff9569d5d6::t_47b72507d33005 5-6,38,53,58,60
+  s_a88eff9569d5d6::t_47f83398db3d25 2,46-47,54,61,64-65
+  s_a88eff9569d5d6::t_a02d2716f167ff 7
+  s_a88eff9569d5d6::t_ce20a6727037a7 22
+stargine/ecs/material/base.mojo
+  s_a88eff9569d5d6::t_1e18bc85ca9a12 59
+  s_a88eff9569d5d6::t_edbd620de85ecc 36,66,69,75-76,84-85
+  s_a88eff9569d5d6::t_c787fde3930aa2 44,58,72,92,113
+  s_a88eff9569d5d6::t_f7a303ddebe9ab 5,18
+stargine/core/gpu/index_buffer.mojo
+  s_a88eff9569d5d6::t_be3efd43667e6e 10,15
+  s_a88eff9569d5d6::t_b186b5c6203656 24
+  s_a88eff9569d5d6::t_668f513f1661bf 27-29
+  s_a88eff9569d5d6::t_edbd620de85ecc 20,23
+  s_a88eff9569d5d6::t_5e73254d1b5358 32,35
+  s_a88eff9569d5d6::t_c787fde3930aa2 16
+  s_a88eff9569d5d6::t_87f68c3af3d84d 38-40
+  s_a88eff9569d5d6::t_028b0c0e41c9f3 31,34,37
+  s_a88eff9569d5d6::t_099191abb8bd94 7,9,11,14,25-26
+  s_a88eff9569d5d6::t_636e7da1d6f434 21
+  s_a88eff9569d5d6::t_3ddb4028508914 17
+stargine/core/events/handlers/base_handler.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 6-8,11,15,19,25-27,29,35,38,41
+  s_a88eff9569d5d6::t_b8e70af5b5a374 5,42
+stargine/event_handlers/controls.mojo
+  s_a88eff9569d5d6::t_fee34702a2e7a8 30,33
+  s_a88eff9569d5d6::t_0783b237a615b6 40,44,46-49
+  s_a88eff9569d5d6::t_edbd620de85ecc 18,38,52,78,82
+  s_a88eff9569d5d6::t_b8e70af5b5a374 28,102
+  s_a88eff9569d5d6::t_5aa332c614d68f 39
+  s_a88eff9569d5d6::t_10e2e1c066f458 7-8
+stargine/primitives/square.mojo
+  s_a88eff9569d5d6::t_edbd620de85ecc 9,23
+stargine/core/linalg/vector.mojo
+  s_a88eff9569d5d6::t_21374052f1c34d 8,12,17-18,21-22,25,30-32,36,38,42-45,49,51-52,55-56,59,63,79,83,103,112,115,119,123,134,142,146-147,151-152,156-157
+  s_a88eff9569d5d6::t_edbd620de85ecc 2,11,24,29,41,67,71,75,87,91,95,99,107,111,127,132
+  s_a88eff9569d5d6::t_b8e70af5b5a374 1
+  s_a88eff9569d5d6::t_7be5cd6a4f928c 161-163,165-167,169-171,173-175,177-179
+pixi.lock
+  s_a88eff9569d5d6::t_50c127d5e5e74b 1-3,85,89,111,113-156,164-179,213-215,217-219,221-225,293-295,297-309,311-318,320-332,362-374,502-527,585-597,705-715,761-785,885-898,911-922,1011-1023,1094-1096,1104-1105,1108-1112,1119,1123-1124,1137-1139,1141-1150,1171-1173,1175-1185,1190-1191,1194,1199-1200,1226-1228,1230-1232,1234-1239,1252-1254,1258,1262-1264,1266-1267,1269,1271-1275,1340-1343,1345-1362,1364-1371,1398-1411,1440-1443,1445-1455,1619-1621,1628-1642,1655-2237
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.18",
+  "base_commit_sha": "d9d0afd487f10a18f8e0ec2d255b29d9c76f5dcf",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_a88eff9569d5d6": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019fb1be-9b27-7801-ac5a-7e3a9a4a8019",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
