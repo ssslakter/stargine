@@ -23,10 +23,8 @@ struct VertexBuffer[T: Copyable & Movable = UInt8](Copyable, Movable, Sized):
     def __del__(deinit self):
         if self.id.count() == 1 and self.id[]:
             try:
-                # TODO(upstream-opengl): delete_buffers should accept a pointer with any origin/mutability.
-                gl.delete_buffers(1, UnsafePointer[UInt32, ImmutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
+                gl.delete_buffers(1, self.id.unsafe_ptr())
             except err:
-                # TODO(upstream-opengl): destruction should not expose a fallible API.
                 print("Failed to delete vertex buffer:", err)
 
     def __len__(self) -> Int:

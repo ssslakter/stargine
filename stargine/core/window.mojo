@@ -20,7 +20,6 @@ struct Window(Movable, Copyable):
             try:
                 video.destroy_window(self._handle[])
             except err:
-                # TODO(upstream-sdl): destruction should not expose a fallible API.
                 print("Failed to destroy SDL window:", err)
 
     def swap(self) raises:

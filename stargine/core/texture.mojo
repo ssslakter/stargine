@@ -74,10 +74,8 @@ struct _TextureInner(Movable):
     def __del__(deinit self):
         if self.id:
             try:
-                # TODO(upstream-opengl): delete_textures should accept a pointer with any origin/mutability.
-                gl.delete_textures(1, UnsafePointer[UInt32, ImmutAnyOrigin](unsafe_from_address=Int(Ptr(to=self.id))))
+                gl.delete_textures(1, Ptr(to=self.id))
             except err:
-                # TODO(upstream-opengl): destruction should not expose a fallible API.
                 print("Failed to delete texture:", err)
 
 

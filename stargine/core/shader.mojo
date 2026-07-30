@@ -93,7 +93,6 @@ struct _ShaderInner(Movable):
             try:
                 gl.delete_program(self.id)
             except err:
-                # TODO(upstream-opengl): destruction should not expose a fallible API.
                 print("Failed to delete shader program:", err)
 
 

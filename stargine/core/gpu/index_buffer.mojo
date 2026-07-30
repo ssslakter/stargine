@@ -23,9 +23,8 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
     def __del__(deinit self):
         if self.id.count() == 1 and self.id[]:
             try:
-                gl.delete_buffers(1, UnsafePointer[UInt32, ImmutAnyOrigin](unsafe_from_address=Int(self.id.unsafe_ptr())))
+                gl.delete_buffers(1, self.id.unsafe_ptr())
             except err:
-                # TODO(upstream-opengl): destruction should not expose a fallible API.
                 print("Failed to delete index buffer:", err)
 
     def bind(self) raises:
@@ -35,6 +34,7 @@ struct IndexBuffer[dtype: DType](Copyable, Movable, Sized):
         gl.bind_buffer(gl.BufferTargetARB.GL_ELEMENT_ARRAY_BUFFER, 0)
 
     def draw(self) raises:
-        # TODO(upstream-opengl): expose glDrawElements' nullable index-offset
-        # pointer. Passing a fabricated non-null pointer would be unsafe.
-        raise Error("indexed drawing is unavailable until opengl-mojo supports a null EBO offset")
+        self.bind()
+        var offset: Optional[Ptr[NoneType, ImmutAnyOrigin]] = None
+        gl.draw_elements(gl.PrimitiveType.GL_TRIANGLES, Int32(self.numel), gl.DrawElementsType.GL_UNSIGNED_INT, offset)
+        self.unbind()
