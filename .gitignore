@@ -17,3 +17,6 @@ __pycache__/
 # C extensions
 *.so
 .env
+
+# Local working notes
+TODO.local.md
