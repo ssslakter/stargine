@@ -1,0 +1,19 @@
+.gitignore
+  s_17d89f97b6d594::t_abd8605126ae5b 19-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "459333c3c7929059105d6041a7417126939feb83",
+  "prompts": {},
+  "sessions": {
+    "s_17d89f97b6d594": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a04032-d833-7110-b0ab-e2cc2819a3db",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
