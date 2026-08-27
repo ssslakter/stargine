@@ -1,6 +1,5 @@
 from opengl import VertexAttribPointerType
 from std.sys import size_of
-from ..linalg import Vec2f, Vec3f, Vec4f
 
 @fieldwise_init
 struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
@@ -24,11 +23,9 @@ struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
         return self.value != other.value
 
     def get_size(self) -> Int:
-        if self == Self.UV:
-            return size_of[Vec2f]()
-        if self == Self.COLOR:
-            return size_of[Vec4f]()
-        return size_of[Vec3f]()
+        """Packed size on the GPU. `Vec3f` pads to 16 bytes in registers, but only
+        the three components are uploaded."""
+        return self.num_components() * size_of[DType.float32]()
 
     def num_components(self) -> Int:
         if self == Self.UV:

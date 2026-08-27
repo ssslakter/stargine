@@ -8,13 +8,13 @@ from .vertex_buffer import VertexBuffer
 from .vertex_layout import VertexAttributeType, VertexLayout
 
 
-def copy_attribute[T: Copyable](mut buffer: List[UInt8], offset: Int, src: Optional[List[T]], index: Int):
+def copy_attribute[T: Copyable](mut buffer: List[UInt8], offset: Int, size: Int, src: Optional[List[T]], index: Int):
     """Copies one vertex attribute into the interleaved buffer; absent attributes stay zeroed."""
     if src:
         unsafe_memcpy(
             dest=buffer.unsafe_ptr().unsafe_offset(offset),
             src=Ptr(to=src.value()[index]).unsafe_bitcast[UInt8](),
-            count=size_of[T](),
+            count=size,
         )
 
 
@@ -31,13 +31,13 @@ def create_interleaved_buffer(
         var offset = i * layout.stride
         for el in layout.elements:
             if el.attr_type == VertexAttributeType.POSITION:
-                copy_attribute(buffer, offset, positions, i)
+                copy_attribute(buffer, offset, el.total_size, positions, i)
             elif el.attr_type == VertexAttributeType.UV:
-                copy_attribute(buffer, offset, uvs, i)
+                copy_attribute(buffer, offset, el.total_size, uvs, i)
             elif el.attr_type == VertexAttributeType.COLOR:
-                copy_attribute(buffer, offset, colors, i)
+                copy_attribute(buffer, offset, el.total_size, colors, i)
             elif el.attr_type == VertexAttributeType.NORMAL:
-                copy_attribute(buffer, offset, normals, i)
+                copy_attribute(buffer, offset, el.total_size, normals, i)
             offset += el.total_size
     return buffer^
 
