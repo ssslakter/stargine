@@ -1,0 +1,62 @@
+stargine/event_handlers/controls.mojo
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 6
+  s_1bb9b6d56b07de::t_0207c7fda7e5ac 5,29,31-41,46,48,50-53,59-60,63,65,67,69,71,73,75-78,80-91,93-94
+stargine/primitives/skybox.mojo
+  s_1bb9b6d56b07de::t_6005079f73b8c7 35,42
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 7-8
+  s_1bb9b6d56b07de::t_cfcc33da4fb65a 1-6,9-34,36-41,43
+stargine/core/__init__.mojo
+  s_1bb9b6d56b07de::t_cfcc33da4fb65a 6-7
+stargine/primitives/shaders/skybox.glsl
+  s_1bb9b6d56b07de::t_cfcc33da4fb65a 1-32
+stargine/core/texture.mojo
+  s_1bb9b6d56b07de::t_b70401f9ff39d0 86-88,91-101
+stargine/core/linalg/geom.mojo
+  s_1bb9b6d56b07de::t_6005079f73b8c7 65,67-68
+stargine/primitives/__init__.mojo
+  s_1bb9b6d56b07de::t_0d2928c50b9bfc 1
+  s_1bb9b6d56b07de::t_cfcc33da4fb65a 2
+stargine/__init__.mojo
+  s_1bb9b6d56b07de::t_18d66d845d59b6 3
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 2
+  s_1bb9b6d56b07de::t_cfcc33da4fb65a 4
+tests/linalg/main.mojo
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 18-19
+  s_1bb9b6d56b07de::t_485f9f7214ee6d 158-166
+  s_1bb9b6d56b07de::t_6005079f73b8c7 151-157,174-178
+  s_1bb9b6d56b07de::t_d92f09b9c242db 179
+stargine/core/renderer.mojo
+  s_1bb9b6d56b07de::t_894effcef7a805 3,22-44
+  s_1bb9b6d56b07de::t_3658993ce6f96d 2,45-54
+stargine/core/clock.mojo
+  s_1bb9b6d56b07de::t_5637acb217512b 1-26
+stargine/primitives/shapes.mojo
+  s_1bb9b6d56b07de::t_0d2928c50b9bfc 1-2,6-118
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 3-5
+stargine/scene/material/templates.mojo
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 1-73
+stargine/core/cubemap.mojo
+  s_1bb9b6d56b07de::t_18d66d845d59b6 1-67
+stargine/scene/__init__.mojo
+  s_1bb9b6d56b07de::t_cc6d1c090c9550 4
+stargine/scene/camera.mojo
+  s_1bb9b6d56b07de::t_84962153c1c649 1,34-40
+stargine/scene/model.mojo
+  s_1bb9b6d56b07de::t_a103776a6030ca 2-6,9-12,14,16-18,20,22-28,30-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "250d2da61cc5321abce4715629b6f663a511389c",
+  "prompts": {},
+  "sessions": {
+    "s_1bb9b6d56b07de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db25c79e-75c0-461e-a7c6-2c631b416173",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
