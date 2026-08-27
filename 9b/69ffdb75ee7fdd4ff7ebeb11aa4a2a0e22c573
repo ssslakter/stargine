@@ -1,0 +1,28 @@
+stargine/primitives/shapes.mojo
+  s_d720ac7bd3d4ed::t_52593ff37e8bee 96
+.gitignore
+  s_d720ac7bd3d4ed::t_3f6b41d5fe5c38 21
+tests/linalg/main.mojo
+  s_d720ac7bd3d4ed::t_1305d30621e5e9 201
+  s_d720ac7bd3d4ed::t_94f74bb8f263c4 196
+  s_d720ac7bd3d4ed::t_86cf619ba84b39 18,186-195,197-200
+  s_d720ac7bd3d4ed::t_614e877cc004fc 202-203
+stargine/event_handlers/controls.mojo
+  s_d720ac7bd3d4ed::t_52593ff37e8bee 50-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "9b69ffdb75ee7fdd4ff7ebeb11aa4a2a0e22c573",
+  "prompts": {},
+  "sessions": {
+    "s_d720ac7bd3d4ed": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cbeaedc1-cf5e-453b-8ef3-9cc916525575",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
