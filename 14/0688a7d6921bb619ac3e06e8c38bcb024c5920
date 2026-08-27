@@ -1,0 +1,21 @@
+pixi.toml
+  s_1bb9b6d56b07de::t_44f192e5cf0164 19-20
+pixi.lock
+  s_1bb9b6d56b07de::t_5e870574c2f9a1 152-153,436,2019-2022,2081-2084
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "140688a7d6921bb619ac3e06e8c38bcb024c5920",
+  "prompts": {},
+  "sessions": {
+    "s_1bb9b6d56b07de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db25c79e-75c0-461e-a7c6-2c631b416173",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
