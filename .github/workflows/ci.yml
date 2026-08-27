@@ -14,11 +14,17 @@ jobs:
         with:
           cache: true
       - name: Install Xvfb and Mesa
-        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri libglx-mesa0 mesa-utils
       - run: pixi run test linalg
       - run: pixi run assets
       - name: Smoke test
-        run: xvfb-run -s "-screen 0 1280x720x24" pixi run test smoke
+        # Xvfb's GLX is software-only: force Mesa's llvmpipe client-side driver,
+        # which reaches GL 4.5. The window falls back to no MSAA on its own,
+        # because no software visual offers a multisample config.
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          GALLIUM_DRIVER: llvmpipe
+        run: xvfb-run -s "-screen 0 1280x720x24 +extension GLX +render -noreset" pixi run test smoke
       - name: Build the examples
         run: |
           for example in examples/*/main.mojo; do

@@ -26,9 +26,22 @@ struct _WindowInner(Movable):
         # to be set before the window exists, not before the context.
         sdl.gl_set_attribute(sdl.GLAttr.GL_DEPTH_SIZE, depth_bits)
         sdl.gl_set_attribute(sdl.GLAttr.GL_STENCIL_SIZE, stencil_bits)
+        self.set_multisampling(samples)
+        try:
+            self.handle = video.create_window(title.copy(), width, height, flags)
+        except err:
+            # Software GLX (Xvfb, remote X, some drivers) offers no multisample
+            # visual, and asking for one fails the whole window.
+            if samples <= 1:
+                raise err
+            print("No multisampled visual (", err, "); falling back to no MSAA.")
+            self.set_multisampling(0)
+            self.handle = video.create_window(title^, width, height, flags)
+
+    @staticmethod
+    def set_multisampling(samples: Int32) raises:
         sdl.gl_set_attribute(sdl.GLAttr.GL_MULTISAMPLEBUFFERS, Int32(1) if samples > 1 else Int32(0))
         sdl.gl_set_attribute(sdl.GLAttr.GL_MULTISAMPLESAMPLES, samples if samples > 1 else Int32(0))
-        self.handle = video.create_window(title^, width, height, flags)
 
     def __deinit__(deinit self):
         try:
