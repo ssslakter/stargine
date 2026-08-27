@@ -1,0 +1,21 @@
+.github/workflows/ci.yml
+  s_942c08f38a7242::t_b364db04f649f5 17,21-27
+stargine/core/window.mojo
+  s_942c08f38a7242::t_954ce5148cc809 29-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "dc42f6694240d4941a887f6a4883b3d8e6edb6a7",
+  "prompts": {},
+  "sessions": {
+    "s_942c08f38a7242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acca0552-7f1c-4953-9458-32eb4f1d6aa6",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
