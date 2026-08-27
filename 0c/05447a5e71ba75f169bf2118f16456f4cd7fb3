@@ -1,0 +1,50 @@
+examples/wave_field/wave.glsl
+  s_1bb9b6d56b07de::t_44308de93c4024 22-24,61,63-66
+  s_1bb9b6d56b07de::t_b2ebc748e5e61a 1-21,25-60,62,67
+examples/README.md
+  s_1bb9b6d56b07de::t_80479dff8cb2b3 1-75
+examples/cube/main.mojo
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 17-18
+  s_1bb9b6d56b07de::t_485f9f7214ee6d 1-16,19-107
+examples/wave_field/main.mojo
+  s_1bb9b6d56b07de::t_485f9f7214ee6d 59
+  s_1bb9b6d56b07de::t_b70401f9ff39d0 62-63
+  s_1bb9b6d56b07de::t_b2ebc748e5e61a 1-21,24-58,60-61,64-101,103-112
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 22-23
+  s_1bb9b6d56b07de::t_1685943bc26a75 102
+examples/assets/generate.py
+  s_1bb9b6d56b07de::t_132ffe3b304976 112,114
+  s_1bb9b6d56b07de::t_855102d6394e55 1-111,113,115-189
+examples/solar_system/main.mojo
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 18-19
+  s_1bb9b6d56b07de::t_a9f9542235f98b 1-17,20-80,82-131
+  s_1bb9b6d56b07de::t_485f9f7214ee6d 81
+tests/smoke/main.mojo
+  s_1bb9b6d56b07de::t_c837cae3d9ff7f 1,10-12,17,19-20,23,27,29,41,54-58,62-76,79-81,83,87-89
+  s_1bb9b6d56b07de::t_118e8d4abfe2d9 15-16
+README.md
+  s_1bb9b6d56b07de::t_11d21661218c87 14-17,28-29,32-33,35,37-39,42-44,47,49-55,60-61,63
+  s_1bb9b6d56b07de::t_839b68f992993a 6
+examples/run_example.sh
+  s_1bb9b6d56b07de::t_dc4926718a2513 1-19
+TODO.md
+  s_1bb9b6d56b07de::t_a71c5e761bd128 1-83
+pixi.toml
+  s_1bb9b6d56b07de::t_dc4926718a2513 9-11,14-18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "0c05447a5e71ba75f169bf2118f16456f4cd7fb3",
+  "prompts": {},
+  "sessions": {
+    "s_1bb9b6d56b07de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db25c79e-75c0-461e-a7c6-2c631b416173",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
