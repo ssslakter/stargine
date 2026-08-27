@@ -47,8 +47,8 @@ struct ControlsHandler[origin: MutOrigin](EventHandler):
         elif event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_LOST):
             sdl.set_window_relative_mouse_mode(self.window.handle(), False)
         elif event_type == Int(sdl.EventType.EVENT_MOUSE_MOTION):
-            self.state.offset -= (
-                Vec2f(event.unsafe_get[MouseMotionEvent]().xrel, event.unsafe_get[MouseMotionEvent]().yrel)
+            self.state.offset += (
+                Vec2f(event.unsafe_get[MouseMotionEvent]().xrel, -event.unsafe_get[MouseMotionEvent]().yrel)
                 * Self.mouse_sensitivity
             )
         elif event_type in [Int(sdl.EventType.EVENT_KEY_DOWN), Int(sdl.EventType.EVENT_KEY_UP)]:

@@ -93,7 +93,7 @@ def sphere_mesh(rings: Int = 24, segments: Int = 48) -> StandardMesh:
         for segment in range(segments):
             var current = UInt32(ring * (segments + 1) + segment)
             var next = current + UInt32(segments + 1)
-            indices += [current, next, current + 1, current + 1, next, next + 1]
+            indices += [current, current + 1, next, current + 1, next + 1, next]
 
     return StandardMesh(positions^, uvs=uvs^, normals=normals^, indices=indices^)
 

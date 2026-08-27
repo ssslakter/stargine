@@ -15,6 +15,7 @@ from stargine.core.linalg import (
     scale,
     translate,
 )
+from stargine.primitives.shapes import sphere_mesh
 from stargine.scene.camera import Camera
 from stargine.scene.transform import Transform, radians
 
@@ -180,6 +181,24 @@ def test_look_at_and_perspective() raises:
     var proj = perspective(Float32(radians(90)), Float32(1.0), Float32(1.0), Float32(100.0))
     var near_point = proj.matmul(Vec4f(0, 0, -1, 1))
     assert_almost_equal(near_point[2] / near_point[3], -1.0, atol=1e-4)
+
+
+def test_positive_yaw_turns_towards_camera_right() raises:
+    var camera = Camera(position=Vec3f(0, 0, 0))
+    var right = camera.get_right()
+    camera.rotate_deg(5.0, 0.0)
+    assert_true(camera.get_forward().dot(right) > 0)
+
+
+def test_sphere_winding_faces_outward() raises:
+    var mesh = sphere_mesh(rings=4, segments=8)
+    ref positions = mesh.positions
+    ref indices = mesh.indices.value()
+    for triangle in range(len(indices) // 3):
+        var a = positions[Int(indices[triangle * 3])]
+        var b = positions[Int(indices[triangle * 3 + 1])]
+        var c = positions[Int(indices[triangle * 3 + 2])]
+        assert_true((b - a).cross(c - a).dot(a) > -1e-6)
 
 
 def main() raises:
