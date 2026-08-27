@@ -1,0 +1,21 @@
+stargine/core/gpu/graphics_buffer.mojo
+  s_1bb9b6d56b07de::t_7d5ab689b65b32 11,17,34,36,38,40
+stargine/core/gpu/vertex_layout.mojo
+  s_1bb9b6d56b07de::t_7d5ab689b65b32 26-28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.24",
+  "base_commit_sha": "77f9745eb86e82807a40f7e531f2569a3ddc1e47",
+  "prompts": {},
+  "sessions": {
+    "s_1bb9b6d56b07de": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db25c79e-75c0-461e-a7c6-2c631b416173",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
