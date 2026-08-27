@@ -18,5 +18,3 @@ __pycache__/
 *.so
 .env
 
-# Local working notes
-TODO.local.md

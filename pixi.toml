@@ -6,13 +6,16 @@ name = "stargine"
 platforms = ["linux-64"]
 version = "0.1.0"
 
-[tasks.app]
-cmd = "mojo main.mojo"
-env = { ROOT_DIR = "./stargine", SDL_VIDEODRIVER="wayland" }
+[tasks.example]
+args = [{"arg" = "name"}]
+cmd = "./examples/run_example.sh {{name}}"
 
 [tasks.test]
-args = [{"arg"="folder"}]
-cmd = "./tests/run_test.sh {{folder}}"
+args = [{"arg" = "name"}]
+cmd = "./tests/run_test.sh {{name}}"
+
+[tasks.assets]
+cmd = "python examples/assets/generate.py"
 
 [dependencies]
 mojo = ">=1.1.0.dev2026082605"

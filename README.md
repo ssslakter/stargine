@@ -3,7 +3,7 @@
 Stargine is a proof-of-concept game engine written entirely in [Mojo](https://www.modular.com/mojo), using OpenGL for graphics rendering. The goal of this project is to explore Mojo's potential for high-performance game development and its interoperability with existing graphics APIs.
 
 <p align="center">
-<img src="textures/preview.png" alt="A picture of a cube and a light source" width="400">
+<img src="examples/wave_field/preview.png" alt="A rippling grid surface with a sphere floating above it" width="560">
 </p>
 
 
@@ -11,9 +11,10 @@ Stargine is a proof-of-concept game engine written entirely in [Mojo](https://ww
 
 The engine is in an early experimental stage. Here's what's currently implemented:
 -   ✅ Window and OpenGL context creation via SDL3 bindings.
--   ✅ Rendering of basic 3D primitives (e.g., a colored cube).
--   ✅ A basic Entity-Component-System (ECS) architecture.
--   ✅ Loading and compiling GLSL shaders.
+-   ✅ Cube, plane and sphere primitives, with indexed meshes and compile-time vertex layouts.
+-   ✅ Point and directional lights, textured materials, and hand-written GLSL materials.
+-   ✅ Cube-map skyboxes.
+-   ✅ Loading and compiling GLSL shaders, with uniform-location caching.
 
 ## Getting Started
 
@@ -24,33 +25,42 @@ To start you need to have [Pixi](https://pixi.sh/latest/) and Git installed
 ```bash
 git clone https://github.com/ssslakter/stargine.git
 cd stargine
-pixi run app
+pixi run assets            # generates the procedural textures the examples use
+pixi run example cube
 ```
 
-*Note: The `pixi.toml` file sets `SDL_VIDEODRIVER="wayland"` by default. You may need to change this depending on the desktop environment*
+If SDL picks the wrong video backend for your desktop, set it explicitly, e.g.
+`SDL_VIDEODRIVER=wayland pixi run example cube`.
 
-### Examples and tests
+### Examples
 
-Each directory under `tests/` is a standalone example, run by name:
+Each directory under `examples/` is a standalone program that uses the engine as
+a library. See [examples/README.md](examples/README.md) for what each one covers
+and screenshots.
 
 ```bash
-pixi run test linalg          # unit tests for the vector and matrix types, no display needed
-pixi run test smoke           # renders a few frames and checks for GL object leaks, then exits
-pixi run test basic_buffers   # a coloured quad from an index buffer
-pixi run test texture         # the same quad, textured
+pixi run example cube           # a textured, lit crate
+pixi run example solar_system   # spheres, orbits and a cube-map skybox
+pixi run example wave_field     # a plane displaced by a custom vertex shader
 ```
 
-`linalg` and `smoke` terminate on their own, so they are the useful checks after a change; the other two open a window until you press ESC. Everything except `linalg` needs a real display (or Xvfb).
+### Tests
 
-The engine tracks the Mojo nightly channel, and requires the OpenGL and SDL3 bindings from
-[opengl-mojo](https://github.com/MojoGameDevs/opengl-mojo) and [sdl-mojo](https://github.com/MojoGameDevs/sdl-mojo).
+```bash
+pixi run test linalg   # unit tests for the vector and matrix types, no display needed
+pixi run test smoke    # renders a scene off-screen and checks for GL object leaks
+```
+
+Both terminate on their own, so they are the useful checks after a change.
+`smoke` needs a real display (or Xvfb).
 
 ## Project Structure
 
 -   `stargine/core`: Core engine modules (event handling, GPU abstractions, math, rendering, windowing).
--   `stargine/ecs`: The Entity-Component-System
--   `stargine/primitives`: Basic geometric primitives like cubes and squares
+-   `stargine/scene`: Cameras, transforms, meshes, materials and lights.
+-   `stargine/primitives`: Ready-made shapes and the skybox.
 -   `stargine/custom_shaders`: GLSL shader files
+-   `examples`: Standalone demo programs and their shared assets.
 
 ## About Mojo Kernels and OpenGL
 
