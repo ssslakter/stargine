@@ -2,51 +2,71 @@ from std.bit import next_power_of_two
 from std.math import sqrt
 
 
-@fieldwise_init
 struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
-    var data: SIMD[Self.dtype, next_power_of_two(Self.N)]
+    """A fixed size vector backed by SIMD storage padded to a power of two.
+
+    The padding lanes are always zero: `dot`, `length` and `normalize` reduce
+    over the whole register, so anything that writes `data` must keep them zero.
+    """
+
+    comptime Width = next_power_of_two(Self.N)
+    comptime Data = SIMD[Self.dtype, Self.Width]
+
+    var data: Self.Data
+
+    @always_inline("nodebug")
+    def __init__(out self, *, data: Self.Data):
+        self.data = data
 
     @always_inline("nodebug")
     def __init__(out self):
-        self = Self(data=SIMD[Self.dtype, next_power_of_two(Self.N)]())
+        self = Self(data=Self.Data())
 
     @always_inline("nodebug")
     @implicit
     def __init__(out self, scalar: Scalar[Self.dtype], /):
-        self = Self(data=SIMD[Self.dtype, next_power_of_two(Self.N)](scalar))
+        var data = Self.Data(scalar)
+        comptime for i in range(Self.N, Self.Width):
+            data[i] = 0
+        self = Self(data=data)
 
     @always_inline("nodebug")
     def __init__(out self, *items: Scalar[Self.dtype]):
-        self.data = SIMD[Self.dtype, next_power_of_two(Self.N)]()
+        """Builds a vector from its components.
 
-        comptime for i in range(Self.N):
-            self.data[i] = items[i]
+        A single component broadcasts to every lane; otherwise missing
+        components are zero.
+        """
+        if len(items) == 1:
+            self = Self(items[0])
+            return
+        var data = Self.Data()
+        for i in range(min(len(items), Self.N)):
+            data[i] = items[i]
+        self = Self(data=data)
+
+    @always_inline("nodebug")
+    def __init__(out self, other: Vec[Self.dtype, Self.N - 1], w: Scalar[Self.dtype] = 0, /):
+        var data = Self.Data()
+        comptime for i in range(Self.N - 1):
+            data[i] = other.data[i]
+        data[Self.N - 1] = w
+        self = Self(data=data)
 
     @always_inline("nodebug")
     def __init__(
-        out self: Vec[Self.dtype, Self.N],
-        other: Vec[Self.dtype, Self.N - 1],
-        w: Scalar[Self.dtype] = 0,
-        /,
-    ):
-        self = Self()
-        for i in range(Self.N - 1):
-            self.data[i] = other.data[i]
-        self.data[Self.N - 1] = w
-
-    @always_inline("nodebug")
-    def __init__(
-        out self: Vec[Self.dtype, Self.N],
+        out self,
         other: Vec[Self.dtype, Self.N - 2],
         z: Scalar[Self.dtype] = 0,
         w: Scalar[Self.dtype] = 0,
         /,
     ):
-        self = Self()
-        for i in range(Self.N - 2):
-            self.data[i] = other.data[i]
-        self.data[Self.N - 2] = z
-        self.data[Self.N - 1] = w
+        var data = Self.Data()
+        comptime for i in range(Self.N - 2):
+            data[i] = other.data[i]
+        data[Self.N - 2] = z
+        data[Self.N - 1] = w
+        self = Self(data=data)
 
     @always_inline("nodebug")
     def __init__(out self, value: Vec[_, Self.N]):
@@ -62,11 +82,15 @@ struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
 
     @always_inline
     def __add__(self, other: Self) -> Self:
-        return Self(self.data + other.data)
+        return Self(data=self.data + other.data)
 
     @always_inline
     def __iadd__(mut self, other: Self):
         self = self + other
+
+    @always_inline
+    def __sub__(self, other: Self) -> Self:
+        return Self(data=self.data - other.data)
 
     @always_inline
     def __isub__(mut self, other: Self):
@@ -74,7 +98,11 @@ struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
 
     @always_inline
     def __mul__(self, other: Scalar[Self.dtype]) -> Self:
-        return Self(self.data * other)
+        return Self(data=self.data * other)
+
+    @always_inline
+    def __mul__(self, other: Self) -> Self:
+        return Self(data=self.data * other.data)
 
     @always_inline
     def __imul__(mut self, other: Scalar[Self.dtype]):
@@ -85,27 +113,19 @@ struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
         self = self * other
 
     @always_inline
-    def __sub__(self, other: Self) -> Self:
-        return Self(self.data - other.data)
+    def __truediv__(self, other: Scalar[Self.dtype]) -> Self:
+        return Self(data=self.data / other)
 
     @always_inline
     def __neg__(self) -> Self:
-        return Self(-self.data)
-
-    @always_inline
-    def __mul__(self, other: Self) -> Self:
-        return Self(self.data * other.data)
-
-    @always_inline
-    def __truediv__(self, other: Scalar[Self.dtype]) -> Self:
-        return Self(self.data / other)
+        return Self(data=-self.data)
 
     @always_inline
     def __abs__(self) -> Self:
-        return Self(abs(self.data))
+        return Self(data=abs(self.data))
 
     @always_inline
-    def write_to[W: Writer](self, mut writer: W):
+    def write_to(self, mut writer: Some[Writer]):
         writer.write("Vec", Self.N, "(", self.data, ")")
 
     @always_inline

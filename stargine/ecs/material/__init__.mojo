@@ -1,4 +1,4 @@
-from .base import Material, UniformValue, UniformValueSIMD16
+from .base import Material, UniformValue
 from .templates import (
     basic_material,
     custom_material,

@@ -96,12 +96,15 @@ struct _ShaderInner(Movable):
     """Owns a GL program name and deletes it exactly once."""
 
     var id: Id
+    var locations: Dict[String, Int32]
 
     def __init__(out self):
         self.id = 0
+        self.locations = {}
 
     def __init__(out self, var vertex_src: List[String], var fragment_src: List[String]) raises:
         self.id = link_program(vertex_src^, fragment_src^)
+        self.locations = {}
 
     def __deinit__(deinit self):
         if self.id:
@@ -154,6 +157,15 @@ struct Shader(Copyable, Movable):
     def use(self) raises:
         gl.use_program(self.inner[].id)
 
+    def location(self, var name: String) raises -> Int32:
+        """Uniform locations never change for a linked program, so look each one up once."""
+        ref cache = self.inner[].locations
+        if name in cache:
+            return cache[name]
+        var found = gl.get_uniform_location(self.inner[].id, name.copy())
+        cache[name^] = found
+        return found
+
     def set_uniform(self, var name: String, texture_unit: gl.TextureUnit = gl.TextureUnit.GL_TEXTURE0) raises:
         self.set_uniform(name^, Int32(Int(texture_unit) - Int(gl.TextureUnit.GL_TEXTURE0)))
 
@@ -161,63 +173,64 @@ struct Shader(Copyable, Movable):
         self.set_uniform(name^, Vec[dtype, 1](value))
 
     def set_uniform[N: Int, dtype: DType, //](self, var name: String, value: Vec[dtype, N]) raises:
-        self.use()
-        var location = gl.get_uniform_location(self.inner[].id, name^)
+        var program = self.inner[].id
+        var location = self.location(name^)
 
         comptime if dtype == DType.float32:
             var v = rebind[Vec[DType.float32, N]](value)
             comptime if N == 1:
-                gl.uniform1f(location, v.x())
+                gl.program_uniform1f(program, location, v.x())
             elif N == 2:
-                gl.uniform2f(location, v.x(), v.y())
+                gl.program_uniform2f(program, location, v.x(), v.y())
             elif N == 3:
-                gl.uniform3f(location, v.x(), v.y(), v.z())
+                gl.program_uniform3f(program, location, v.x(), v.y(), v.z())
             elif N == 4:
-                gl.uniform4f(location, v.x(), v.y(), v.z(), v.w())
+                gl.program_uniform4f(program, location, v.x(), v.y(), v.z(), v.w())
         elif dtype == DType.int32:
             var v = rebind[Vec[DType.int32, N]](value)
             comptime if N == 1:
-                gl.uniform1i(location, v.x())
+                gl.program_uniform1i(program, location, v.x())
             elif N == 2:
-                gl.uniform2i(location, v.x(), v.y())
+                gl.program_uniform2i(program, location, v.x(), v.y())
             elif N == 3:
-                gl.uniform3i(location, v.x(), v.y(), v.z())
+                gl.program_uniform3i(program, location, v.x(), v.y(), v.z())
             elif N == 4:
-                gl.uniform4i(location, v.x(), v.y(), v.z(), v.w())
+                gl.program_uniform4i(program, location, v.x(), v.y(), v.z(), v.w())
         elif dtype == DType.uint32:
             var v = rebind[Vec[DType.uint32, N]](value)
             comptime if N == 1:
-                gl.uniform1ui(location, v.x())
+                gl.program_uniform1ui(program, location, v.x())
             elif N == 2:
-                gl.uniform2ui(location, v.x(), v.y())
+                gl.program_uniform2ui(program, location, v.x(), v.y())
             elif N == 3:
-                gl.uniform3ui(location, v.x(), v.y(), v.z())
+                gl.program_uniform3ui(program, location, v.x(), v.y(), v.z())
             elif N == 4:
-                gl.uniform4ui(location, v.x(), v.y(), v.z(), v.w())
+                gl.program_uniform4ui(program, location, v.x(), v.y(), v.z(), v.w())
 
     def set_uniform[rows: Int, cols: Int](self, var name: String, value: Matrix[DType.float32, rows, cols]) raises:
-        self.use()
-        var location = gl.get_uniform_location(self.inner[].id, name^)
-        var data = value.data.unsafe_ptr()
+        var program = self.inner[].id
+        var location = self.location(name^)
+        var flat = value.flatten()
+        var data = Ptr(to=flat).unsafe_bitcast[Float32]()
 
         comptime if rows == 4:
             comptime if cols == 4:
-                gl.uniform_matrix4fv(location, 1, True, data)
+                gl.program_uniform_matrix4fv(program, location, 1, True, data)
             elif cols == 3:
-                gl.uniform_matrix4x3fv(location, 1, True, data)
+                gl.program_uniform_matrix4x3fv(program, location, 1, True, data)
             elif cols == 2:
-                gl.uniform_matrix4x2fv(location, 1, True, data)
+                gl.program_uniform_matrix4x2fv(program, location, 1, True, data)
         elif rows == 3:
             comptime if cols == 4:
-                gl.uniform_matrix3x4fv(location, 1, True, data)
+                gl.program_uniform_matrix3x4fv(program, location, 1, True, data)
             elif cols == 3:
-                gl.uniform_matrix3fv(location, 1, True, data)
+                gl.program_uniform_matrix3fv(program, location, 1, True, data)
             elif cols == 2:
-                gl.uniform_matrix3x2fv(location, 1, True, data)
+                gl.program_uniform_matrix3x2fv(program, location, 1, True, data)
         elif rows == 2:
             comptime if cols == 4:
-                gl.uniform_matrix2x4fv(location, 1, True, data)
+                gl.program_uniform_matrix2x4fv(program, location, 1, True, data)
             elif cols == 3:
-                gl.uniform_matrix2x3fv(location, 1, True, data)
+                gl.program_uniform_matrix2x3fv(program, location, 1, True, data)
             elif cols == 2:
-                gl.uniform_matrix2fv(location, 1, True, data)
+                gl.program_uniform_matrix2fv(program, location, 1, True, data)

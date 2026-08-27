@@ -17,7 +17,7 @@ def scale[dtype: DType](vec: Vec[dtype, 3]) -> Mat4[dtype]:
 
 
 @always_inline
-def rotate[dtype: DType](angle: Scalar[dtype], axis: Vec[dtype, 3]) -> Mat4[dtype]:
+def rotate[dtype: DType](angle: Scalar[dtype], axis: Vec[dtype, 3]) -> Mat4[dtype] where dtype.is_floating_point():
     var out = Mat4[dtype]()
     var ax = axis.normalize()
     var cos_theta = cos(angle)
@@ -61,7 +61,7 @@ def perspective[dtype: DType](fov: Scalar[dtype], aspect_ratio: Scalar[dtype], n
     return mat
 
 @always_inline
-def look_at[dtype: DType](eye: Vec[dtype, 3], center: Vec[dtype, 3], up: Vec[dtype, 3]) -> Mat4[dtype]:
+def look_at[dtype: DType](eye: Vec[dtype, 3], center: Vec[dtype, 3], up: Vec[dtype, 3]) -> Mat4[dtype] where dtype.is_floating_point():
     var fwd = (eye - center).normalize()
     var right = fwd.cross(up).normalize()
     var up_new = right.cross(fwd).normalize()

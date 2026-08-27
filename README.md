@@ -34,12 +34,13 @@ pixi run app
 Each directory under `tests/` is a standalone example, run by name:
 
 ```bash
+pixi run test linalg          # unit tests for the vector and matrix types, no display needed
 pixi run test smoke           # renders a few frames and checks for GL object leaks, then exits
 pixi run test basic_buffers   # a coloured quad from an index buffer
 pixi run test texture         # the same quad, textured
 ```
 
-`smoke` is the one that terminates on its own, so it is the useful check after a change; the other two open a window until you press ESC. All of them need a real display (or Xvfb).
+`linalg` and `smoke` terminate on their own, so they are the useful checks after a change; the other two open a window until you press ESC. Everything except `linalg` needs a real display (or Xvfb).
 
 The engine tracks the Mojo nightly channel, and requires the OpenGL and SDL3 bindings from
 [opengl-mojo](https://github.com/MojoGameDevs/opengl-mojo) and [sdl-mojo](https://github.com/MojoGameDevs/sdl-mojo).
