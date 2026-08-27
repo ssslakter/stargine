@@ -1,4 +1,4 @@
-from std.math import cos, sin
+from std.math import asin, atan2, cos, sin
 from ..core.linalg import Mat4f, Vec3f, look_at, perspective
 from .transform import Transform, radians
 
@@ -31,7 +31,13 @@ struct Camera(Copyable, Movable):
         return Vec3f(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch))
 
     def get_right(self) -> Vec3f:
-        return Self.world_up.cross(self.get_forward()).normalize()
+        return self.get_forward().cross(Self.world_up).normalize()
+
+    def look_at(mut self, target: Vec3f):
+        """Aims the camera at a point, leaving its position alone."""
+        var direction = (target - self.transform.position).normalize()
+        self.transform.pitch = asin(max(min(direction.y(), 1), -1))
+        self.transform.yaw = atan2(direction.z(), direction.x())
 
     def rotate_deg(mut self, yaw: Float32, pitch: Float32):
         self.transform.rotate_deg(pitch, yaw)

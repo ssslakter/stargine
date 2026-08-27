@@ -1,14 +1,12 @@
 import sdl
 from sdl import CommonEvent, Event, KeyboardEvent, MouseMotionEvent, Scancode
-from ..app import AppState
 from ..core.events import EventHandler
 from ..core.linalg import Vec2f, Vec3f
+from ..core.window import Window
+from ..scene.camera import Camera
 
 
 struct ControlsState(Copyable, Movable):
-    comptime move_speed = 5.0
-    comptime mouse_sensitivity = 0.1
-
     var offset: Vec2f
     var forward: Bool
     var backward: Bool
@@ -28,72 +26,69 @@ struct ControlsState(Copyable, Movable):
 
 
 struct ControlsHandler[origin: MutOrigin](EventHandler):
-    var game_state: Pointer[AppState, origin= Self.origin]
-    var controls_state: ControlsState
+    """WASD plus mouse look, driving a camera the caller still owns."""
 
-    def __init__(out self, ref [Self.origin] game_state: AppState):
-        self.game_state = Pointer(to=game_state)
-        self.controls_state = ControlsState()
+    comptime move_speed = 5.0
+    comptime mouse_sensitivity = 0.1
+
+    var camera: Pointer[Camera, origin= Self.origin]
+    var window: Window
+    var state: ControlsState
+
+    def __init__(out self, ref [Self.origin] camera: Camera, var window: Window):
+        self.camera = Pointer(to=camera)
+        self.window = window^
+        self.state = ControlsState()
 
     def handle(mut self, event: Event) raises -> Bool:
         var event_type = Int(event.unsafe_get[CommonEvent]().type)
         if event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_GAINED):
-            sdl.set_window_relative_mouse_mode(self.game_state[].window.handle(), True)
+            sdl.set_window_relative_mouse_mode(self.window.handle(), True)
         elif event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_LOST):
-            sdl.set_window_relative_mouse_mode(self.game_state[].window.handle(), False)
+            sdl.set_window_relative_mouse_mode(self.window.handle(), False)
         elif event_type == Int(sdl.EventType.EVENT_MOUSE_MOTION):
-            self.handle_mouse_event(event.unsafe_get[MouseMotionEvent]())
+            self.state.offset -= (
+                Vec2f(event.unsafe_get[MouseMotionEvent]().xrel, event.unsafe_get[MouseMotionEvent]().yrel)
+                * Self.mouse_sensitivity
+            )
         elif event_type in [Int(sdl.EventType.EVENT_KEY_DOWN), Int(sdl.EventType.EVENT_KEY_UP)]:
             self.handle_key_event(event.unsafe_get[KeyboardEvent]())
         return True
 
     def handle_key_event(mut self, event: KeyboardEvent):
-        ref controls = self.controls_state
-        var is_pressed = event.down
+        ref state = self.state
+        var pressed = event.down
         var scancode = Int(event.scancode)
         if scancode == Int(Scancode.SCANCODE_W):
-            controls.forward = is_pressed
+            state.forward = pressed
         elif scancode == Int(Scancode.SCANCODE_S):
-            controls.backward = is_pressed
+            state.backward = pressed
         elif scancode == Int(Scancode.SCANCODE_A):
-            controls.left = is_pressed
+            state.left = pressed
         elif scancode == Int(Scancode.SCANCODE_D):
-            controls.right = is_pressed
+            state.right = pressed
         elif scancode == Int(Scancode.SCANCODE_SPACE):
-            controls.up = is_pressed
+            state.up = pressed
         elif scancode == Int(Scancode.SCANCODE_LSHIFT):
-            controls.down = is_pressed
+            state.down = pressed
 
-        ref cube_transform = self.game_state[].cubes[0].transform
-        if scancode == Int(Scancode.SCANCODE_UP):
-            cube_transform[].rotate(0.05)
-        elif scancode == Int(Scancode.SCANCODE_DOWN):
-            cube_transform[].rotate(-0.05)
-        elif scancode == Int(Scancode.SCANCODE_LEFT):
-            cube_transform[].rotate(0, 0.05)
-        elif scancode == Int(Scancode.SCANCODE_RIGHT):
-            cube_transform[].rotate(0, -0.05)
+    def update(mut self, delta_time: Float64):
+        ref camera = self.camera[]
+        ref state = self.state
+        var step = Float32(delta_time * Self.move_speed)
 
-    def handle_mouse_event(mut self, event: MouseMotionEvent):
-        self.controls_state.offset -= Vec2f(event.xrel, event.yrel) * ControlsState.mouse_sensitivity
+        if state.forward:
+            camera.transform.translate(camera.get_forward() * step)
+        if state.backward:
+            camera.transform.translate(camera.get_forward() * -step)
+        if state.left:
+            camera.transform.translate(camera.get_right() * -step)
+        if state.right:
+            camera.transform.translate(camera.get_right() * step)
+        if state.up:
+            camera.transform.translate(Vec3f(0.0, 1.0, 0.0) * step)
+        if state.down:
+            camera.transform.translate(Vec3f(0.0, -1.0, 0.0) * step)
 
-    def update_movement(mut self):
-        ref cam = self.game_state[].camera
-        ref controls = self.controls_state
-        var pos_delta = Float32(self.game_state[].delta_time * ControlsState.move_speed)
-
-        if controls.forward:
-            cam.transform.translate(cam.get_forward() * pos_delta)
-        if controls.backward:
-            cam.transform.translate(cam.get_forward() * -pos_delta)
-        if controls.left:
-            cam.transform.translate(cam.get_right() * -pos_delta)
-        if controls.right:
-            cam.transform.translate(cam.get_right() * pos_delta)
-        if controls.up:
-            cam.transform.translate(Vec3f(0.0, 1.0, 0.0) * pos_delta)
-        if controls.down:
-            cam.transform.translate(Vec3f(0.0, -1.0, 0.0) * pos_delta)
-
-        cam.rotate_deg(controls.offset.x(), controls.offset.y())
-        controls.offset = Vec2f(0)
+        camera.rotate_deg(state.offset.x(), state.offset.y())
+        state.offset = Vec2f(0)

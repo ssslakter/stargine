@@ -8,11 +8,11 @@ from .base import Material
 
 
 def get_shaders_path() raises -> Path:
-    return Path(env.getenv("ROOT_DIR")) / "ecs/material/shaders"
+    return Path(env.getenv("ROOT_DIR")) / "scene/material/shaders"
 
 
 def get_light_shaders_path() raises -> Path:
-    return Path(env.getenv("ROOT_DIR")) / "ecs/light/shaders"
+    return Path(env.getenv("ROOT_DIR")) / "scene/light/shaders"
 
 
 def unlit_material(color: Vec4f = Vec4f(0.5, 0.5, 0.5, 1.0)) raises -> Material:

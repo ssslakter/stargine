@@ -15,7 +15,8 @@ from stargine.core.linalg import (
     scale,
     translate,
 )
-from stargine.ecs.transform import Transform, radians
+from stargine.scene.camera import Camera
+from stargine.scene.transform import Transform, radians
 
 
 def assert_vec_equal[N: Int](got: Vec3f, expected: Vec3f) raises:
@@ -147,12 +148,34 @@ def test_local_to_world() raises:
     assert_vec_equal[3](t.transform_vector(Vec3f(1, 0, 0)), Vec3f(1, 0, -2))
 
 
+def test_camera_right_matches_view() raises:
+    var camera = Camera(position=Vec3f(0, 0, 0))
+    # Default yaw and pitch look down +X, so the camera's right is +Z.
+    assert_vec_equal[3](camera.get_forward(), Vec3f(1, 0, 0))
+    assert_vec_equal[3](camera.get_right(), Vec3f(0, 0, 1))
+
+
+def test_camera_look_at() raises:
+    var camera = Camera(position=Vec3f(0, 0, 5))
+    camera.look_at(Vec3f(0, 0, 0))
+    assert_vec_equal[3](camera.get_forward(), Vec3f(0, 0, -1))
+
+    camera.look_at(Vec3f(0, 5, 5))
+    assert_vec_equal[3](camera.get_forward(), Vec3f(0, 1, 0))
+
+
 def test_look_at_and_perspective() raises:
     var view = look_at(Vec3f(0, 0, 5), Vec3f(0, 0, 0), Vec3f(0, 1, 0))
     var origin_in_view = view.matmul(Vec4f(0, 0, 0, 1))
     assert_almost_equal(origin_in_view[0], 0.0, atol=1e-6)
     assert_almost_equal(origin_in_view[1], 0.0, atol=1e-6)
     assert_almost_equal(origin_in_view[2], -5.0, atol=1e-6)
+
+    # A mirrored basis would flip triangle winding and cull every visible face.
+    var right_of_camera = view.matmul(Vec4f(1, 0, 0, 1))
+    assert_almost_equal(right_of_camera[0], 1.0, atol=1e-6)
+    var above_camera = view.matmul(Vec4f(0, 1, 0, 1))
+    assert_almost_equal(above_camera[1], 1.0, atol=1e-6)
 
     var proj = perspective(Float32(radians(90)), Float32(1.0), Float32(1.0), Float32(100.0))
     var near_point = proj.matmul(Vec4f(0, 0, -1, 1))

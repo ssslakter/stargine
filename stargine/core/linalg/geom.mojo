@@ -62,9 +62,10 @@ def perspective[dtype: DType](fov: Scalar[dtype], aspect_ratio: Scalar[dtype], n
 
 @always_inline
 def look_at[dtype: DType](eye: Vec[dtype, 3], center: Vec[dtype, 3], up: Vec[dtype, 3]) -> Mat4[dtype] where dtype.is_floating_point():
+    # `fwd` points from the target back to the eye, so the basis stays right handed.
     var fwd = (eye - center).normalize()
-    var right = fwd.cross(up).normalize()
-    var up_new = right.cross(fwd).normalize()
+    var right = up.cross(fwd).normalize()
+    var up_new = fwd.cross(right).normalize()
     return Mat4[dtype](
         [Vec4[dtype](right, -right.dot(eye)),
          Vec4[dtype](up_new, -up_new.dot(eye)),

@@ -3,6 +3,8 @@ from .events import EventHandler, WindowHandler
 from .gpu import *
 from .linalg import *
 from .shader import Shader
+from .clock import Clock
+from .cubemap import CubeMap
 from .texture import Texture
 from .utils import Id, NDArray, Ptr, read_file
 from .window import Window

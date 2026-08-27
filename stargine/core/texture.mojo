@@ -83,13 +83,22 @@ struct Texture(Copyable, Movable):
         self.inner = ArcPointer(_TextureInner())
         self.filename = ""
 
-    def __init__(out self, var path: String) raises:
+    def __init__(out self, var path: String, smooth: Bool = True, repeat: Bool = False) raises:
+        """`smooth` filters trilinearly off the generated mip chain; turn it off for
+        pixel art. `repeat` tiles the image instead of clamping at the edges."""
         self.inner = ArcPointer(_TextureInner(path))
         self.filename = path^
-        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_WRAP_S, Int(gl.TextureWrapMode.GL_CLAMP_TO_EDGE))
-        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_WRAP_T, Int(gl.TextureWrapMode.GL_CLAMP_TO_EDGE))
-        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_MIN_FILTER, Int(gl.TextureMinFilter.GL_NEAREST))
-        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_MAG_FILTER, Int(gl.TextureMagFilter.GL_NEAREST))
+
+        var wrap = gl.TextureWrapMode.GL_REPEAT if repeat else gl.TextureWrapMode.GL_CLAMP_TO_EDGE
+        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_WRAP_S, Int(wrap))
+        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_WRAP_T, Int(wrap))
+
+        var minify = (
+            gl.TextureMinFilter.GL_LINEAR_MIPMAP_LINEAR if smooth else gl.TextureMinFilter.GL_NEAREST
+        )
+        var magnify = gl.TextureMagFilter.GL_LINEAR if smooth else gl.TextureMagFilter.GL_NEAREST
+        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_MIN_FILTER, Int(minify))
+        self.set_parameter(gl.TextureParameterName.GL_TEXTURE_MAG_FILTER, Int(magnify))
 
     def bind(self, texture_unit: gl.TextureUnit = gl.TextureUnit.GL_TEXTURE0) raises:
         gl.active_texture(texture_unit)
