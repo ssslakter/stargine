@@ -1,8 +1,14 @@
+import opengl as gl
 from opengl import VertexAttribPointerType
 from std.sys import size_of
+from ..utils import Ptr
+
 
 @fieldwise_init
-struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
+struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable, Writable):
+    """One interleaved vertex attribute. Every attribute is `f32`, which is all
+    OpenGL supports for vertex data without extensions."""
+
     var value: UInt
 
     comptime POSITION = Self(0)
@@ -22,11 +28,7 @@ struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
     def __ne__(self, other: Self) -> Bool:
         return self.value != other.value
 
-    def get_size(self) -> Int:
-        """Packed size on the GPU. `Vec3f` pads to 16 bytes in registers, but only
-        the three components are uploaded."""
-        return self.num_components() * size_of[DType.float32]()
-
+    @always_inline
     def num_components(self) -> Int:
         if self == Self.UV:
             return 2
@@ -34,62 +36,72 @@ struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
             return 4
         return 3
 
-
-struct VertexAttribute(ImplicitlyCopyable, Writable):
-    var num_components: Int
-    var attr_type: VertexAttributeType
-    var total_size: Int
-    var dtype_size: Int
-    var dtype: VertexAttribPointerType
-    var normalized: Bool
-
-    def __init__(out self, attr_type: VertexAttributeType, normalized: Bool = False):
-        # OpenGL only supports f32 vertex attributes without extensions.
-        self.attr_type = attr_type
-        self.num_components = attr_type.num_components()
-        self.dtype_size = size_of[DType.float32]()
-        self.total_size = attr_type.get_size()
-        self.dtype = VertexAttribPointerType.GL_FLOAT
-        self.normalized = normalized
+    @always_inline
+    def size(self) -> Int:
+        return self.num_components() * size_of[DType.float32]()
 
     def write_to(self, mut writer: Some[Writer]):
-        writer.write(
-            "VertexAttribute(num_components=",
-            self.num_components,
-            ", total_size=",
-            self.total_size,
-            ", type_size=",
-            self.dtype_size,
-            ", normalized=",
-            self.normalized,
-            ")",
-        )
+        if self == Self.POSITION:
+            writer.write("position")
+        elif self == Self.UV:
+            writer.write("uv")
+        elif self == Self.NORMAL:
+            writer.write("normal")
+        else:
+            writer.write("color")
 
 
-struct VertexLayout(Copyable, Movable, Writable):
-    var elements: List[VertexAttribute]
-    var stride: Int
+struct VertexLayout[*attributes: VertexAttributeType]:
+    """An interleaved vertex layout resolved entirely at compile time.
 
-    def __init__(out self, *elements: VertexAttribute):
-        self.elements = []
-        self.stride = 0
-        for el in elements:
-            self.stride += el.total_size
-            self.elements.append(el)
+    Stride and per-attribute offsets are compile-time constants, so
+    `configure` and the interleaving loop unroll with no runtime branching.
+    """
 
-    def __init__(out self, var elements: List[VertexAttribute]):
-        self.elements = elements^
-        self.stride = 0
-        for el in self.elements:
-            self.stride += el.total_size
+    comptime count = len(Self.attributes)
+    comptime stride = Self._stride()
 
-    def __init__(out self, *, copy: Self):
-        self.elements = copy.elements.copy()
-        self.stride = copy.stride
+    @staticmethod
+    def _stride() -> Int:
+        var total = 0
+        comptime for i in range(len(Self.attributes)):
+            total += Self.attributes[i].size()
+        return total
 
-    def write_to(self, mut writer: Some[Writer]):
-        writer.write("VertexLayout(stride=", self.stride, ", elements=[")
-        for el in self.elements:
-            el.write_to(writer)
-            writer.write(",\n")
-        writer.write("])")
+    @staticmethod
+    def offset[index: Int]() -> Int:
+        var total = 0
+        comptime for i in range(index):
+            total += Self.attributes[i].size()
+        return total
+
+    @staticmethod
+    def has[attribute: VertexAttributeType]() -> Bool:
+        var found = False
+        comptime for i in range(Self.count):
+            found |= Self.attributes[i] == attribute
+        return found
+
+    @staticmethod
+    def configure() raises:
+        """Points the bound vertex array at each attribute of the bound buffer."""
+        comptime for i in range(Self.count):
+            gl.vertex_attrib_pointer(
+                UInt32(i),
+                Int32(Self.attributes[i].num_components()),
+                VertexAttribPointerType.GL_FLOAT,
+                False,
+                Int32(Self.stride),
+                # OpenGL reads this argument as a byte offset into the bound buffer.
+                Ptr[UInt8, ImmutAnyOrigin](unsafe_from_address=Self.offset[i]()).unsafe_bitcast[NoneType](),
+            )
+            gl.enable_vertex_attrib_array(UInt32(i))
+
+    @staticmethod
+    def describe() -> String:
+        var out = String("VertexLayout(stride=", Self.stride, ", ")
+        comptime for i in range(Self.count):
+            out += String(Self.attributes[i], "@", Self.offset[i]())
+            if i < Self.count - 1:
+                out += ", "
+        return out + ")"

@@ -1,12 +1,12 @@
 from std.memory import ArcPointer
 from ..core.linalg import Vec3f
 from ..ecs.material import Material
-from ..ecs.mesh import Mesh
+from ..ecs.mesh import PositionMesh
 from ..ecs.transform import Transform
 
 
 struct Square(Copyable, Movable):
-    var mesh: Mesh
+    var mesh: PositionMesh
     var transform: ArcPointer[Transform]
     var material: Optional[Material]
 
@@ -21,7 +21,7 @@ struct Square(Copyable, Movable):
             Vec3f(0, 1, 0),
         ]
         var indices: List[UInt32] = [0, 1, 2, 0, 2, 3]
-        self.mesh = Mesh(positions^, indices=indices^)
+        self.mesh = PositionMesh(positions^, indices=indices^)
 
     def draw(mut self) raises:
         if self.material:

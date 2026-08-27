@@ -4,7 +4,7 @@ from std.os import env
 from std.pathlib import Path
 from stargine.core import renderer
 from stargine.core.events import WindowHandler
-from stargine.core.gpu import GraphicsBuffer, OpenGLContext, VertexAttribute, VertexAttributeType, VertexLayout
+from stargine.core.gpu import GraphicsBuffer, OpenGLContext, VertexAttributeType
 from stargine.core.linalg import Vec3f, Vec4f
 from stargine.core.shader import Shader
 from stargine.core.window import Window
@@ -34,8 +34,7 @@ def main() raises:
     ]
     var indices: List[UInt32] = [0, 1, 2, 0, 2, 3]
 
-    var layout = VertexLayout(VertexAttribute(VertexAttributeType.POSITION))
-    var buffer = GraphicsBuffer(layout, positions^, indices=indices^)
+    var buffer = GraphicsBuffer[DType.uint32, VertexAttributeType.POSITION](positions, indices=indices^)
     var shader = Shader(Path(env.getenv("TEST_DIR")) / "shader.glsl")
     shader.set_uniform("color", Vec4f(0.3, 0.5, 0.7, 1))
 

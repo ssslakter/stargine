@@ -8,7 +8,7 @@ import sdl
 from sdl import InitFlags, WindowFlags
 from std.testing import assert_true
 from stargine.app import AppState, render, win_height, win_width
-from stargine.core.gpu import GraphicsBuffer, VertexAttribute, VertexAttributeType, VertexLayout
+from stargine.core.gpu import GraphicsBuffer, VertexAttributeType
 from stargine.core.linalg import Vec3f
 from stargine.core.texture import Texture
 from stargine.core.window import Window
@@ -38,12 +38,11 @@ def count_lit_pixels() raises -> Int:
 
 def assert_gl_names_are_reused() raises:
     """A leaked buffer or texture keeps its name allocated, so the driver hands out a new one."""
-    var layout = VertexLayout(VertexAttribute(VertexAttributeType.POSITION))
     var positions: List[Vec3f] = [Vec3f(0, 0, 0), Vec3f(1, 0, 0), Vec3f(1, 1, 0)]
 
     var first_vao = 0
     for cycle in range(RESOURCE_CYCLES):
-        var buffer = GraphicsBuffer(layout, positions.copy())
+        var buffer = GraphicsBuffer[DType.uint32, VertexAttributeType.POSITION](positions)
         var texture = Texture("textures/box.png")
         _ = texture^
         if cycle == 0:

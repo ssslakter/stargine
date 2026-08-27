@@ -2,7 +2,7 @@ from std.memory import ArcPointer
 from ..core.linalg import Vec2f, Vec3f
 from ..ecs.camera import Camera
 from ..ecs.material import Material, unlit_material
-from ..ecs.mesh import Mesh
+from ..ecs.mesh import StandardMesh
 from ..ecs.transform import Transform
 
 
@@ -90,11 +90,11 @@ def generate_cube_data() -> Tuple[List[Vec3f], List[Vec2f], List[Vec3f]]:
 
 
 struct Cube(Copyable, Movable):
-    var mesh: Mesh
+    var mesh: StandardMesh
     var transform: ArcPointer[Transform]
     var material: Material
 
-    def __init__(out self, material: Optional[Material] = None, mesh: Optional[Mesh] = None) raises:
+    def __init__(out self, material: Optional[Material] = None, mesh: Optional[StandardMesh] = None) raises:
         self.transform = ArcPointer(Transform())
         self.material = material.value().copy() if material else unlit_material()
 
@@ -102,11 +102,7 @@ struct Cube(Copyable, Movable):
             self.mesh = mesh.value().copy()
         else:
             var data = generate_cube_data()
-            self.mesh = Mesh(
-                data[0].copy(),
-                uvs=Optional(data[1].copy()) if self.material.textures else None,
-                normals=data[2].copy(),
-            )
+            self.mesh = StandardMesh(data[0].copy(), uvs=data[1].copy(), normals=data[2].copy())
 
     def draw(mut self, camera: Camera) raises:
         self.material.set_vec("cameraPos", camera.transform.position)
