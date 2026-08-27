@@ -1,2 +1,9 @@
-from .base import *
-from .templates import *
+from .base import Material, UniformValue, UniformValueSIMD16
+from .templates import (
+    basic_material,
+    custom_material,
+    get_light_shaders_path,
+    get_shaders_path,
+    texture_material,
+    unlit_material,
+)

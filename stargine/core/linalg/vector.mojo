@@ -1,6 +1,5 @@
 from std.bit import next_power_of_two
 from std.math import sqrt
-from utils.static_tuple import StaticTuple
 
 
 @fieldwise_init
@@ -9,8 +8,7 @@ struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
 
     @always_inline("nodebug")
     def __init__(out self):
-        data = SIMD[Self.dtype, next_power_of_two(Self.N)]()
-        self = Self(data=data)
+        self = Self(data=SIMD[Self.dtype, next_power_of_two(Self.N)]())
 
     @always_inline("nodebug")
     @implicit
@@ -21,8 +19,7 @@ struct Vec[dtype: DType, N: Int](ImplicitlyCopyable, Movable, Writable):
     def __init__(out self, *items: Scalar[Self.dtype]):
         self.data = SIMD[Self.dtype, next_power_of_two(Self.N)]()
 
-        comptime
-        for i in range(Self.N):
+        comptime for i in range(Self.N):
             self.data[i] = items[i]
 
     @always_inline("nodebug")

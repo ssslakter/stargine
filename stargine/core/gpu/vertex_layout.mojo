@@ -1,33 +1,9 @@
 from opengl import VertexAttribPointerType
-from ..linalg import *
-from ..utils import *
-
-# TODO: create compile time map that maps Dtypes to VertexAttribPointerType
-def dtype_to_enum(dtype: DType) -> VertexAttribPointerType:
-    """Maps a DType to OpenGL's VertexAttribPointerType."""
-    if dtype == DType.float32:
-        return VertexAttribPointerType.GL_FLOAT
-    elif dtype == DType.float64:
-        return VertexAttribPointerType.GL_DOUBLE
-    elif dtype == DType.float16:
-        return VertexAttribPointerType.GL_HALF_FLOAT
-    elif dtype == DType.int8:
-        return VertexAttribPointerType.GL_BYTE
-    elif dtype == DType.int16:
-        return VertexAttribPointerType.GL_SHORT
-    elif dtype == DType.int32:
-        return VertexAttribPointerType.GL_INT
-    elif dtype == DType.uint8:
-        return VertexAttribPointerType.GL_UNSIGNED_BYTE
-    elif dtype == DType.uint16:
-        return VertexAttribPointerType.GL_UNSIGNED_SHORT
-    elif dtype == DType.uint32:
-        return VertexAttribPointerType.GL_UNSIGNED_INT
-    return VertexAttribPointerType.GL_FLOAT
-
+from std.sys import size_of
+from ..linalg import Vec2f, Vec3f, Vec4f
 
 @fieldwise_init
-struct VertexAttributeType(ImplicitlyCopyable, Movable, Equatable, Intable):
+struct VertexAttributeType(ImplicitlyCopyable, Equatable, Intable):
     var value: UInt
 
     comptime POSITION = Self(0)
@@ -53,17 +29,16 @@ struct VertexAttributeType(ImplicitlyCopyable, Movable, Equatable, Intable):
         if self == Self.COLOR:
             return size_of[Vec4f]()
         return size_of[Vec3f]()
-    
+
     def num_components(self) -> Int:
         if self == Self.UV:
             return 2
         if self == Self.COLOR:
             return 4
         return 3
-    
 
 
-struct VertexAttribute(ImplicitlyCopyable, Movable, Writable):
+struct VertexAttribute(ImplicitlyCopyable, Writable):
     var num_components: Int
     var attr_type: VertexAttributeType
     var total_size: Int
@@ -71,15 +46,16 @@ struct VertexAttribute(ImplicitlyCopyable, Movable, Writable):
     var dtype: VertexAttribPointerType
     var normalized: Bool
 
-    def __init__(out self, attr_type: VertexAttributeType,  normalized: Bool = False):
+    def __init__(out self, attr_type: VertexAttributeType, normalized: Bool = False):
+        # OpenGL only supports f32 vertex attributes without extensions.
         self.attr_type = attr_type
         self.num_components = attr_type.num_components()
-        self.dtype_size = size_of[DType.float32]() # TODO check if other types are supported
+        self.dtype_size = size_of[DType.float32]()
         self.total_size = attr_type.get_size()
-        self.dtype = dtype_to_enum(DType.float32)
+        self.dtype = VertexAttribPointerType.GL_FLOAT
         self.normalized = normalized
 
-    def write_to[W: Writer](self, mut writer: W):
+    def write_to(self, mut writer: Some[Writer]):
         writer.write(
             "VertexAttribute(num_components=",
             self.num_components,
@@ -113,11 +89,10 @@ struct VertexLayout(Copyable, Movable, Writable):
     def __init__(out self, *, copy: Self):
         self.elements = copy.elements.copy()
         self.stride = copy.stride
-    
-    def write_to[W: Writer](self, mut writer: W):
+
+    def write_to(self, mut writer: Some[Writer]):
         writer.write("VertexLayout(stride=", self.stride, ", elements=[")
         for el in self.elements:
             el.write_to(writer)
             writer.write(",\n")
         writer.write("])")
-    

@@ -15,7 +15,7 @@ args = [{"arg"="folder"}]
 cmd = "./tests/run_test.sh {{folder}}"
 
 [dependencies]
-mojo = ">=1.0.0b1.dev2026042717"
+mojo = ">=1.1.0.dev2026082605"
 opengl-mojo = {path = "../opengl-mojo"}
 sdl-mojo = {path = "../sdl-mojo"}
 ipykernel = ">=6.29.5,<7"

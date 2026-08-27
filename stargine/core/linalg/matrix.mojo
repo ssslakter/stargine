@@ -1,10 +1,10 @@
-from .vector import *
+from .vector import Vec, Vec3, Vec4, f32, i32
 
 
 struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable, Writable):
     comptime rank = 2
     # TODO: maybe use SIMD to speed up
-    comptime Data = InlineArray[Scalar[Self.dtype], Self.nrows * Self.ncols]
+    comptime Data = Array[Scalar[Self.dtype], Self.nrows * Self.ncols]
     var data: Self.Data
 
     def __init__(out self, value: Scalar[Self.dtype] = 0.0):
@@ -16,40 +16,15 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
     def __setitem__(mut self, row: Int, col: Int, value: Scalar[Self.dtype]):
         self.data[row * Self.ncols + col] = value
 
-    def __init__(
-        out self: Mat3[Self.dtype],
-        rows: Tuple[Vec3[Self.dtype], Vec3[Self.dtype], Vec3[Self.dtype]],
-    ):
-        comptime dims = 3
-        self = Mat3[Self.dtype]()
-
-        comptime
-        for i in range(dims):
-            for j in range(dims):
-                self[i, j] = rows[i][j]
-
     def __init__[r: Int, c: Int](out self, other: Matrix[Self.dtype, r, c]):
         self = Self()
 
-        comptime
-        for i in range(Self.nrows):
+        comptime for i in range(Self.nrows):
             for j in range(Self.ncols):
                 if i < r and j < c:
                     self[i, j] = other[i, j]
                 else:
                     self[i, j] = 0
-
-    def __init__(
-        out self: Mat4[Self.dtype],
-        rows: Tuple[Vec4[Self.dtype], Vec4[Self.dtype], Vec4[Self.dtype], Vec4[Self.dtype]],
-    ):
-        comptime dims = 4
-        self = Mat4[Self.dtype]()
-
-        comptime
-        for i in range(dims):
-            for j in range(dims):
-                self[i, j] = rows[i][j]
 
     def __init__(out self, rows: List[Vec[Self.dtype, Self.ncols]]):
         self = Self()
@@ -57,13 +32,10 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
             for j in range(Self.ncols):
                 self[i, j] = rows[i][j]
 
-    def __copyinit__(out self, other: Self):
-        self.data = other.data
+    def __init__(out self, *, copy: Self):
+        self.data = copy.data.copy()
 
-    def __moveinit__(out self, deinit other: Self):
-        self.data = other.data^
-
-    def write_to[W: Writer](self, mut writer: W):
+    def write_to(self, mut writer: Some[Writer]):
         writer.write("Matrix(\n")
         for i in range(self.nrows):
             writer.write("    [")
@@ -102,10 +74,6 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
         return out
 
     def __add__(var self, other: Self) -> Self:
-        constrained[
-            self.nrows == other.Self.nrows and self.ncols == other.Self.ncols,
-            "Matrices must have the same dimensions",
-        ]()
         for i in range(self.nrows):
             for j in range(self.ncols):
                 self[i, j] = self[i, j] + other[i, j]
@@ -128,10 +96,6 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
         return self
 
     def __mul__(var self, var other: Self) -> Self:
-        constrained[
-            self.ncols == other.ncols and self.nrows == other.Self.nrows,
-            "Matrices must have the same dimensions",
-        ]()
         var out = Self()
         for i in range(self.nrows):
             for j in range(self.ncols):
@@ -175,7 +139,7 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
                 self[i, j] = self[i, j] % other
         return self
 
-    def inverse2(var self) -> Self where Self == Mat2[Self.dtype]:
+    def inverse2(var self) -> Self where Self.nrows == 2 and Self.ncols == 2:
         var a = self[0, 0]
         var b = self[0, 1]
         var c = self[1, 0]
@@ -189,7 +153,7 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
         out[1, 1] = a * inv_det
         return out
 
-    def inverse(var self) -> Self where Self == Mat3[Self.dtype]:
+    def inverse(var self) -> Self where Self.nrows == 3 and Self.ncols == 3:
         var a = self[0, 0]
         var b = self[0, 1]
         var c = self[0, 2]
@@ -215,7 +179,7 @@ struct Matrix[dtype: DType, nrows: Int, ncols: Int](ImplicitlyCopyable, Movable,
         out[2, 2] = (a * e - b * d) * inv_det
         return out
 
-    def inverse4(var self) -> Self where Self == Mat4[Self.dtype]:
+    def inverse4(var self) -> Self where Self.nrows == 4 and Self.ncols == 4:
         # Extract elements for readability:
         var a = self[0, 0]
         var b = self[0, 1]

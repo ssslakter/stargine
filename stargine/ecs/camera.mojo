@@ -1,8 +1,11 @@
-from ..core import *
+from std.math import cos, sin
+from ..core.linalg import Mat4f, Vec3f, look_at, perspective
+from .transform import Transform, radians
 
 
 struct Camera(Copyable, Movable):
     comptime world_up = Vec3f(0, 1, 0)
+
     var transform: Transform
     var fov: Float32
     var aspect_ratio: Float32
@@ -24,15 +27,11 @@ struct Camera(Copyable, Movable):
         self.far = far
 
     def get_forward(self) -> Vec3f:
-        yaw, pitch = self.transform.yaw, self.transform.pitch
-        return Vec3f(
-            cos(yaw) * cos(pitch),
-            sin(pitch),
-            sin(yaw) * cos(pitch),
-        )
+        var yaw, pitch = self.transform.yaw, self.transform.pitch
+        return Vec3f(cos(yaw) * cos(pitch), sin(pitch), sin(yaw) * cos(pitch))
 
     def get_right(self) -> Vec3f:
-        return self.world_up.cross(self.get_forward()).normalize()
+        return Self.world_up.cross(self.get_forward()).normalize()
 
     def rotate_deg(mut self, yaw: Float32, pitch: Float32):
         self.transform.rotate_deg(pitch, yaw)

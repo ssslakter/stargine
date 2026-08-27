@@ -1,4 +1,5 @@
-from ...core import *
+from std.memory import ArcPointer
+from ...core.linalg import Vec3f
 from ..transform import Transform
 
 
@@ -11,14 +12,16 @@ struct PointLight(Copyable, Movable):
     var linear: Float32
     var quadratic: Float32
 
-    def __init__(out self, position: Vec3f = Vec3f(0),
+    def __init__(
+        out self,
+        position: Vec3f = Vec3f(0),
         ambient: Vec3f = Vec3f(0.2),
         diffuse: Vec3f = Vec3f(0.5),
         specular: Vec3f = Vec3f(1),
         constant: Float32 = 1.0,
         linear: Float32 = 0.09,
         quadratic: Float32 = 0.032,
-        ):
+    ):
         self.transform = ArcPointer(Transform(position=position))
         self.ambient = ambient
         self.diffuse = diffuse

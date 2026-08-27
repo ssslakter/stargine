@@ -1,18 +1,12 @@
-from sdl import Scancode
-from ...imports import *
-from ...window import *
-from .base_handler import *
+import opengl as gl
+import sdl
+from sdl import Event, Scancode
+from ...window import Window
+from .base_handler import EventHandler
 
 
 struct WindowHandler(EventHandler):
-    # var active: Bool
     var window: Window
-
-    # def enable(mut self):
-    #     self.active = True
-
-    # def disable(mut self):
-    #     self.active = False
 
     def __init__(out self, var window: Window):
         self.window = window^
@@ -21,7 +15,7 @@ struct WindowHandler(EventHandler):
         var event_type = Int(event.unsafe_get[sdl.CommonEvent]().type)
         if event_type == Int(sdl.EventType.EVENT_QUIT):
             return False
-        elif event_type == Int(sdl.EventType.EVENT_WINDOW_RESIZED):
+        if event_type == Int(sdl.EventType.EVENT_WINDOW_RESIZED):
             self.handle_window_resized(event.unsafe_get[sdl.WindowEvent]())
         if event_type != Int(sdl.EventType.EVENT_KEY_DOWN):
             return True

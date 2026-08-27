@@ -1,6 +1,6 @@
-from std.math import *
-from .vector import *
-from .matrix import *
+from std.math import cos, sin, tan
+from .vector import Vec, Vec3, Vec4
+from .matrix import Mat4
 
 
 @always_inline

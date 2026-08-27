@@ -1,7 +1,10 @@
-from std.pathlib import Path
-from ..light import *
-from .base import *
 from std.os import env
+from std.pathlib import Path
+from ...core.linalg import Vec4f
+from ...core.shader import Shader
+from ...core.texture import Texture
+from ..light import DirectionalLight, PointLight
+from .base import Material
 
 
 def get_shaders_path() raises -> Path:
@@ -20,8 +23,12 @@ def unlit_material(color: Vec4f = Vec4f(0.5, 0.5, 0.5, 1.0)) raises -> Material:
 
 def texture_material(texture: Texture) raises -> Material:
     var material = Material("texture", Shader(get_shaders_path() / "texture.glsl"))
-    material.set_texture("texture1", texture)
+    material.set_texture("texture1", texture.copy())
     return material^
+
+
+def custom_material(var shader: Shader) -> Material:
+    return Material("custom", shader^)
 
 
 def basic_material(
@@ -35,9 +42,7 @@ def basic_material(
     var light_path = get_light_shaders_path()
     var material = Material(
         "lighted",
-        Shader(
-            [path / "vertex.glsl"], [ path / "fragment.glsl", light_path / "lights.glsl",]
-        ),
+        Shader([path / "vertex.glsl"], [path / "fragment.glsl", light_path / "lights.glsl"]),
     )
     if point_light:
         var light = point_light.value().copy()
@@ -51,6 +56,7 @@ def basic_material(
         material.set_scalar("pointLight.quadratic", light.quadratic)
     else:
         material.set_bool("pointLight.enabled", False)
+
     if dir_light:
         var light = dir_light.value().copy()
         material.set_bool("dirLight.enabled", True)
@@ -65,7 +71,3 @@ def basic_material(
     material.set_texture("material.specular", specular.copy())
     material.set_scalar("material.shininess", shininess)
     return material^
-
-
-def custom_material(shader: Shader) -> Material:
-    return Material("custom", shader)

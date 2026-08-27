@@ -1,39 +1,13 @@
-from ..core import *
+from std.memory import ArcPointer
+from ..core.linalg import Vec2f, Vec3f
 from ..ecs.camera import Camera
+from ..ecs.material import Material, unlit_material
 from ..ecs.mesh import Mesh
 from ..ecs.transform import Transform
-from ..ecs.material import Material, unlit_material
 
 
-def unit_cube_vertices[
-    dim: Int, dtype: DType = DType.float32
-]() -> List[Vec[dtype, dim]]:
-    comptime num_vertices = 1 << dim
-    var vertices = List[Vec[dtype, dim]]()
-
-    for i in range(num_vertices):
-        var vertex = Vec[dtype, dim]()
-        for j in range(dim):
-            vertex[j] = Scalar[dtype]((i >> j) & 1)
-        vertices.append(vertex)
-
-    return vertices
-
-
-comptime square_uvs = [
-    Vec2f(0.0, 0.0),
-    Vec2f(1.0, 0.0),
-    Vec2f(1.0, 1.0),
-    Vec2f(0.0, 1.0),
-]
-
-
-@always_inline
-def generate_cube_data() -> Tuple[
-    List[Vec3f],  # positions
-    List[Vec2f],  # uvs
-    List[Vec3f],  # normals
-]:
+def generate_cube_data() -> Tuple[List[Vec3f], List[Vec2f], List[Vec3f]]:
+    """Returns the positions, uvs and normals of a unit cube, two triangles per face."""
     var positions: List[Vec3f] = [
         # Back face (-Z)
         Vec3f(-0.5, -0.5, -0.5), Vec3f(0.5, -0.5, -0.5), Vec3f(0.5, 0.5, -0.5),
@@ -115,45 +89,28 @@ def generate_cube_data() -> Tuple[
     return positions^, uvs^, normals^
 
 
-
 struct Cube(Copyable, Movable):
     var mesh: Mesh
     var transform: ArcPointer[Transform]
     var material: Material
 
-    def __init__(
-        out self,
-        material: Optional[Material] = None,
-        mesh_data: Optional[Mesh] = None,
-    ) raises:
+    def __init__(out self, material: Optional[Material] = None, mesh: Optional[Mesh] = None) raises:
         self.transform = ArcPointer(Transform())
-        if material:
-            self.material = material.value().copy()
-        else:
-            self.material = unlit_material()
+        self.material = material.value().copy() if material else unlit_material()
 
-        res = generate_cube_data()
-        positions = res[0].copy()
-        uvs = res[1].copy()
-        normals = res[2].copy()
-
-        if mesh_data:
-            self.mesh = mesh_data.value().copy()
+        if mesh:
+            self.mesh = mesh.value().copy()
         else:
+            var data = generate_cube_data()
             self.mesh = Mesh(
-                positions^,
-                uvs=Optional(uvs^) if self.material.textures else None,
-                normals=normals^,
+                data[0].copy(),
+                uvs=Optional(data[1].copy()) if self.material.textures else None,
+                normals=data[2].copy(),
             )
-
 
     def draw(mut self, camera: Camera) raises:
         self.material.set_vec("cameraPos", camera.transform.position)
-        self.material.set_matrix(
-            "model", self.transform[].local_to_world_matrix()
-        )
-        self.material.set_matrix(
-            "normalMatrix", self.transform[].normal_matrix()
-        )
+        self.material.set_matrix("model", self.transform[].local_to_world_matrix())
+        self.material.set_matrix("normalMatrix", self.transform[].normal_matrix())
         self.material.bind()
         self.mesh.draw()

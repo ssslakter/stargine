@@ -21,13 +21,28 @@ To start you need to have [Pixi](https://pixi.sh/latest/) and Git installed
 
 ### Installation
 
-    ```bash
-    git clone https://github.com/ssslakter/stargine.git
-    cd stargine
-    pixi run app
-    ```
+```bash
+git clone https://github.com/ssslakter/stargine.git
+cd stargine
+pixi run app
+```
 
 *Note: The `pixi.toml` file sets `SDL_VIDEODRIVER="wayland"` by default. You may need to change this depending on the desktop environment*
+
+### Examples and tests
+
+Each directory under `tests/` is a standalone example, run by name:
+
+```bash
+pixi run test smoke           # renders a few frames and checks for GL object leaks, then exits
+pixi run test basic_buffers   # a coloured quad from an index buffer
+pixi run test texture         # the same quad, textured
+```
+
+`smoke` is the one that terminates on its own, so it is the useful check after a change; the other two open a window until you press ESC. All of them need a real display (or Xvfb).
+
+The engine tracks the Mojo nightly channel, and requires the OpenGL and SDL3 bindings from
+[opengl-mojo](https://github.com/MojoGameDevs/opengl-mojo) and [sdl-mojo](https://github.com/MojoGameDevs/sdl-mojo).
 
 ## Project Structure
 

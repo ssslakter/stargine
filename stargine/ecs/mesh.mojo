@@ -1,4 +1,6 @@
-from ..core import *
+from ..core.gpu import GraphicsBuffer, VertexAttribute, VertexAttributeType, VertexLayout
+from ..core.linalg import Vec2f, Vec3f, Vec4f
+
 
 struct Mesh(Copyable, Movable):
     var positions: List[Vec3f]
@@ -6,7 +8,6 @@ struct Mesh(Copyable, Movable):
     var uvs: Optional[List[Vec2f]]
     var colors: Optional[List[Vec4f]]
     var indices: Optional[List[UInt32]]
-
     var buf: Optional[GraphicsBuffer[DType.uint32]]
 
     def __init__(
@@ -25,8 +26,7 @@ struct Mesh(Copyable, Movable):
         self.buf = None
 
     def get_layout(self) -> VertexLayout:
-        elements = List[VertexAttribute]()
-        elements.append(VertexAttribute(VertexAttributeType.POSITION))
+        var elements: List[VertexAttribute] = [VertexAttribute(VertexAttributeType.POSITION)]
         if self.uvs:
             elements.append(VertexAttribute(VertexAttributeType.UV))
         if self.normals:
@@ -36,10 +36,11 @@ struct Mesh(Copyable, Movable):
         return VertexLayout(elements^)
 
     def to_gpu(mut self) raises:
-        self.buf = GraphicsBuffer(self.get_layout(), self.positions.copy(), self.colors, self.uvs, self.normals, self.indices)
+        self.buf = GraphicsBuffer(
+            self.get_layout(), self.positions.copy(), self.colors, self.uvs, self.normals, self.indices
+        )
 
     def draw(self) raises:
         if not self.buf:
-            print("ERROR: VertexArray not bound, skipping draw")
-            return
+            raise Error("mesh has no GPU buffer, call to_gpu() first")
         self.buf.value().draw()
