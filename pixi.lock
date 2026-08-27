@@ -149,8 +149,8 @@ environments:
       - conda: https://conda.modular.com/max-nightly/linux-64/mojo-compiler-1.1.0.dev2026082605-release.conda
       - conda: https://conda.modular.com/max-nightly/noarch/mblack-26.6.0.dev2026082605-release.conda
       - conda: https://conda.modular.com/max-nightly/noarch/mojo-python-1.1.0.dev2026082605-release.conda
-      - conda_source: opengl-mojo[5ec2e2b1] @ ../opengl-mojo
-      - conda_source: sdl-mojo[1caf7421] @ ../sdl-mojo
+      - conda_source: opengl-mojo[45889205] @ git+https://github.com/mojogamedevs/opengl-mojo?tag=v0.1.0#8ac9980435ce26d1866f45b51a761745ebf5d7fe
+      - conda_source: sdl-mojo[936ad256] @ git+https://github.com/mojogamedevs/sdl-mojo#d0a42956dede3c9bbcfcfe0c21af7e4215b1551d
 packages:
 - conda: https://conda.anaconda.org/conda-forge/linux-64/_openmp_mutex-4.5-20_gnu.conda
   build_number: 20
@@ -433,6 +433,7 @@ packages:
   - __glibc >=2.17,<3.0.a0
   - libgcc >=15
   license: MIT
+  license_family: MIT
   run_exports:
     weak:
     - libffi >=3.7.0,<3.8.0a0
@@ -2015,7 +2016,10 @@ packages:
   run_exports: {}
   size: 24227
   timestamp: 1787721742928
-- conda_source: opengl-mojo[5ec2e2b1] @ ../opengl-mojo
+- conda_source: opengl-mojo[45889205] @ git+https://github.com/mojogamedevs/opengl-mojo?tag=v0.1.0#8ac9980435ce26d1866f45b51a761745ebf5d7fe
+  version: 0.1.0
+  build: hb0f4dca_0
+  subdir: linux-64
   variants:
     target_platform: linux-64
   depends:
@@ -2074,7 +2078,10 @@ packages:
   - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2026c-h151e31d_0.conda
   - conda: https://conda.modular.com/max-nightly/linux-64/mojo-compiler-1.1.0.dev2026082605-release.conda
   - conda: https://conda.modular.com/max-nightly/noarch/mojo-python-1.1.0.dev2026082605-release.conda
-- conda_source: sdl-mojo[1caf7421] @ ../sdl-mojo
+- conda_source: sdl-mojo[936ad256] @ git+https://github.com/mojogamedevs/sdl-mojo#d0a42956dede3c9bbcfcfe0c21af7e4215b1551d
+  version: 0.2.0
+  build: hb0f4dca_0
+  subdir: linux-64
   variants:
     target_platform: linux-64
   depends:
