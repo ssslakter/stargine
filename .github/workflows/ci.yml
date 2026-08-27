@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: prefix-dev/setup-pixi@v0
+        with:
+          cache: true
+      - name: Install Xvfb and Mesa
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils
+      - run: pixi run test linalg
+      - run: pixi run assets
+      - name: Smoke test
+        run: xvfb-run -s "-screen 0 1280x720x24" pixi run test smoke
+      - name: Build the examples
+        run: |
+          for example in examples/*/main.mojo; do
+            pixi run mojo build -I . "$example" -o "/tmp/$(basename "$(dirname "$example")")"
+          done

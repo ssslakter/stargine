@@ -1,6 +1,6 @@
 #shader vertex
 
-#version 330 core
+#version 450 core
 
 layout (location = 0) in vec3 a_Position;
 layout (location = 1) in vec2 a_TexCoord;
@@ -42,7 +42,7 @@ void main()
 
 #shader fragment
 
-#version 330 core
+#version 450 core
 
 uniform sampler2D surface;
 uniform vec3 crest;

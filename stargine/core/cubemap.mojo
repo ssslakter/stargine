@@ -27,7 +27,7 @@ struct _CubeMapInner(Movable):
             gl.tex_image_2d(
                 target,
                 0,
-                gl.InternalFormat.GL_RGBA,
+                gl.InternalFormat.GL_SRGB8_ALPHA8,
                 Int32(image.shape[1]),
                 Int32(image.shape[0]),
                 0,

@@ -18,4 +18,4 @@ __pycache__/
 *.so
 .env
 
-TODO.local.md
+*.local.md

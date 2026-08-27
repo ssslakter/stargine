@@ -10,11 +10,15 @@ Stargine is a proof-of-concept game engine written entirely in [Mojo](https://ww
 ## Current Status
 
 The engine is in an early experimental stage. Here's what's currently implemented:
--   ✅ Window and OpenGL context creation via SDL3 bindings.
+-   ✅ Window and OpenGL 4.5 core context via SDL3 bindings, with 4x MSAA, a
+    24-bit depth buffer, sRGB rendering and GL debug messages.
 -   ✅ Cube, plane and sphere primitives, with indexed meshes and compile-time vertex layouts.
 -   ✅ Point and directional lights, textured materials, and hand-written GLSL materials.
 -   ✅ Cube-map skyboxes.
 -   ✅ Loading and compiling GLSL shaders, with uniform-location caching.
+
+Where it is going — a shader module system, OpenGL 4.5 with explicit pipelines,
+asset import, physics, and an ECS last — is laid out in `Roadmap.local.md`.
 
 ## Getting Started
 
@@ -49,6 +53,7 @@ pixi run example wave_field     # a plane displaced by a custom vertex shader
 ```bash
 pixi run test linalg   # unit tests for the vector and matrix types, no display needed
 pixi run test smoke    # renders a scene off-screen and checks for GL object leaks
+pixi run test bench    # frame time p50/p99/max against 10-1000 cubes
 ```
 
 Both terminate on their own, so they are the useful checks after a change.
@@ -59,7 +64,7 @@ Both terminate on their own, so they are the useful checks after a change.
 -   `stargine/core`: Core engine modules (event handling, GPU abstractions, math, rendering, windowing).
 -   `stargine/scene`: Cameras, transforms, meshes, materials and lights.
 -   `stargine/primitives`: Ready-made shapes and the skybox.
--   `stargine/custom_shaders`: GLSL shader files
+-   `stargine/custom_shaders`: spare GLSL sources, not wired into the engine yet.
 -   `examples`: Standalone demo programs and their shared assets.
 
 ## About Mojo Kernels and OpenGL

@@ -42,7 +42,11 @@ struct ControlsHandler[origin: MutOrigin](EventHandler):
 
     def handle(mut self, event: Event) raises -> Bool:
         var event_type = Int(event.unsafe_get[CommonEvent]().type)
-        if event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_GAINED):
+        if event_type == Int(sdl.EventType.EVENT_WINDOW_RESIZED):
+            var resized = event.unsafe_get[sdl.WindowEvent]()
+            if resized.data2:
+                self.camera[].aspect_ratio = Float32(resized.data1) / Float32(resized.data2)
+        elif event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_GAINED):
             sdl.set_window_relative_mouse_mode(self.window.handle(), True)
         elif event_type == Int(sdl.EventType.EVENT_WINDOW_FOCUS_LOST):
             sdl.set_window_relative_mouse_mode(self.window.handle(), False)

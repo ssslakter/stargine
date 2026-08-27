@@ -31,18 +31,23 @@ struct _TextureInner(Movable):
     def __init__(out self):
         self.id = 0
 
-    def __init__(out self, path: String) raises:
+    def __init__(out self, path: String, srgb: Bool) raises:
         self = Self()
         gl.gen_textures(1, Ptr(to=self.id))
         gl.bind_texture(gl.TextureTarget.GL_TEXTURE_2D, self.id)
         try:
             var image = load_image(path.copy())
             var height, width, channels = image.shape[0], image.shape[1], image.shape[2]
+            var internal_format = (
+                gl.InternalFormat.GL_SRGB8_ALPHA8
+                if srgb
+                else materialize[channels_to_internal_format]()[channels]
+            )
             gl.pixel_storei(gl.PixelStoreParameter.GL_UNPACK_ALIGNMENT, 1)
             gl.tex_image_2d(
                 gl.TextureTarget.GL_TEXTURE_2D,
                 0,
-                materialize[channels_to_internal_format]()[channels],
+                internal_format,
                 Int32(width),
                 Int32(height),
                 0,
@@ -83,10 +88,14 @@ struct Texture(Copyable, Movable):
         self.inner = ArcPointer(_TextureInner())
         self.filename = ""
 
-    def __init__(out self, var path: String, smooth: Bool = True, repeat: Bool = False) raises:
+    def __init__(
+        out self, var path: String, smooth: Bool = True, repeat: Bool = False, srgb: Bool = True
+    ) raises:
         """`smooth` filters trilinearly off the generated mip chain; turn it off for
-        pixel art. `repeat` tiles the image instead of clamping at the edges."""
-        self.inner = ArcPointer(_TextureInner(path))
+        pixel art. `repeat` tiles the image instead of clamping at the edges.
+        `srgb` decodes the image to linear on read: leave it on for anything that
+        is a colour, turn it off for data maps (specular, roughness, normals)."""
+        self.inner = ArcPointer(_TextureInner(path, srgb))
         self.filename = path^
 
         var wrap = gl.TextureWrapMode.GL_REPEAT if repeat else gl.TextureWrapMode.GL_CLAMP_TO_EDGE

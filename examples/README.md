@@ -58,18 +58,10 @@ per-frame uniforms, texture wrapping and mip filtering.
 
 ## What these examples make obvious
 
-Writing them surfaced the engine's current rough edges, in rough order of how
-often they got in the way:
+Writing them surfaced the engine's rough edges, and those are now the roadmap:
+transform hierarchy, `$ROOT_DIR`, per-object `view`/`projection` uniforms and
+the `_ = context^` lifetime dance are all tracked in `Roadmap.local.md`.
 
-- **No transform hierarchy.** `solar_system` has to place the moon by reading
-  its planet's world position and adding an offset by hand. A `Transform` with
-  a parent would remove that.
-- **No CPU access to shader-side geometry.** `wave_field` duplicates its wave
-  function in Mojo and in GLSL so the sphere can ride the surface.
-- **`view` and `projection` are per-object uniforms.** Every model uploads both
-  every frame even though they are the same for the whole frame.
-- **Engine assets are found through `$ROOT_DIR`.** The examples only work
-  because the runner script sets it; a library should not need that.
-- **Values die at their last use**, so every example ends with `_ = context^`
-  and `_ = window^` to keep the GL context alive until the resources above it
-  are gone. Forgetting either one is a crash at exit, not a compile error.
+One edge is not on it: **there is no CPU access to shader-side geometry**, so
+`wave_field` duplicates its wave function in Mojo and in GLSL to make the
+sphere ride the surface.

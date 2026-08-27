@@ -1,6 +1,6 @@
 #shader vertex
 
-#version 330 core
+#version 450 core
 
 layout (location = 0) in vec3 a_Position;
 
@@ -36,7 +36,7 @@ void main()
 
 #shader fragment
 
-#version 330 core
+#version 450 core
 
 uniform vec4 color;
 uniform vec4 light;

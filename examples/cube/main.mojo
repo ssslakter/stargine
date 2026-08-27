@@ -70,7 +70,7 @@ def main() raises:
     var box = cube(
         basic_material(
             Texture(TEXTURES + "box.png"),
-            Texture(TEXTURES + "box_specular.png"),
+            Texture(TEXTURES + "box_specular.png", srgb=False),
             point_light=light.copy(),
             dir_light=DirectionalLight(direction=Vec3f(0, -1, 0)),
         )

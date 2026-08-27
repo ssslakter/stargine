@@ -5,7 +5,7 @@ from std.os import PathLike
 from .linalg import Matrix, Vec
 from .utils import Id, Ptr, read_file
 
-comptime SHADER_VERSION_HEADER = "#version 330 core\n"
+comptime SHADER_VERSION_HEADER = "#version 450 core\n"
 
 
 def parse_combined_shader[T: PathLike](path: T) raises -> Tuple[String, String]:
