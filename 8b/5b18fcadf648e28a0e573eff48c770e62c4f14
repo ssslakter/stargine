@@ -1,0 +1,71 @@
+README.md
+  s_942c08f38a7242::t_01dd91a1c24317 13-14,56
+  s_942c08f38a7242::t_15de331981c71c 20-21
+  s_942c08f38a7242::t_7fec3d191a5879 22,67
+examples/wave_field/wave.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 3,45
+stargine/core/shader.mojo
+  s_942c08f38a7242::t_8877ab7d0744bb 8
+stargine/primitives/shaders/skybox.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 3,22
+stargine/core/texture.mojo
+  s_942c08f38a7242::t_55b33debb7e60f 34,41-45,50,91-93,95-98
+tests/smoke/main.mojo
+  s_942c08f38a7242::t_2ff8cfab9e8ad5 68
+stargine/event_handlers/controls.mojo
+  s_942c08f38a7242::t_c1eb7f1fdc5e54 45-49
+stargine/custom_shaders/random.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 3,39
+stargine/core/window.mojo
+  s_942c08f38a7242::t_0736bd34281413 15-28,46-55,59-61
+  s_942c08f38a7242::t_af4896559fed1c 29-30
+stargine/core/cubemap.mojo
+  s_942c08f38a7242::t_55b33debb7e60f 30
+stargine/core/gpu/opengl.mojo
+  s_942c08f38a7242::t_e6f63557a3b458 10-20,23-24,34-40,45-48,54-56,61-62
+  s_942c08f38a7242::t_1afa0ae09b35cd 21
+  s_942c08f38a7242::t_93c576a2fe5fba 22,57-58
+  s_942c08f38a7242::t_0736bd34281413 59-60
+  s_942c08f38a7242::t_bd8a3e9b2057bd 63
+stargine/scene/material/shaders/basic/vertex.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 1
+tests/bench/main.mojo
+  s_942c08f38a7242::t_5ec517dce4d1d2 54-57,59-65,67,69-77,79-90
+  s_942c08f38a7242::t_2475a3c96d2216 35,37-46,53,92
+  s_942c08f38a7242::t_d9c70693e09c22 1-34,36,47-52,58,66,68,78,91,93-94
+.gitignore
+  h_cec284cdd16cba 21
+examples/README.md
+  s_942c08f38a7242::t_15de331981c71c 63
+  s_942c08f38a7242::t_1bfe2ec872ef27 61-62,65-67
+  s_942c08f38a7242::t_ab7048e33767ae 64
+stargine/scene/material/shaders/texture.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 3,23
+stargine/scene/material/shaders/unlit.glsl
+  s_942c08f38a7242::t_8877ab7d0744bb 3,19
+.github/workflows/ci.yml
+  s_942c08f38a7242::t_8c95be36d013ae 1-26
+examples/cube/main.mojo
+  s_942c08f38a7242::t_2ff8cfab9e8ad5 73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "8b5b18fcadf648e28a0e573eff48c770e62c4f14",
+  "prompts": {},
+  "humans": {
+    "h_cec284cdd16cba": {
+      "author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  },
+  "sessions": {
+    "s_942c08f38a7242": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "acca0552-7f1c-4953-9458-32eb4f1d6aa6",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
