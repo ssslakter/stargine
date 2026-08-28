@@ -17,8 +17,9 @@ The engine is in an early experimental stage. Here's what's currently implemente
 -   ✅ Cube-map skyboxes.
 -   ✅ Loading and compiling GLSL shaders, with uniform-location caching.
 
-Where it is going — a shader module system, OpenGL 4.5 with explicit pipelines,
-asset import, physics, and an ECS last — is laid out in `Roadmap.local.md`.
+Planned next, roughly in order: a shader module system users can build custom
+materials on, a renderer that batches instead of re-binding per object, glTF
+import, collision queries, and an ECS once the layers under it have settled.
 
 ## Getting Started
 
