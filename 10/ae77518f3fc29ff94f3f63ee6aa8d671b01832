@@ -1,0 +1,22 @@
+README.md
+  s_9441b3425f7e23::t_bceec43eaf9fbd 20-22
+examples/README.md
+  s_9441b3425f7e23::t_c80bfcff61eea6 16,18-23,31-33,40-41,47-49,51,54-55
+  s_9441b3425f7e23::t_04165adc068fb8 4-5,27,35,43,53
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "10ae77518f3fc29ff94f3f63ee6aa8d671b01832",
+  "prompts": {},
+  "sessions": {
+    "s_9441b3425f7e23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7f175b63-5bd0-4e82-90c2-d9f53ac3020f",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Slava Chaunin <67190162+Ssslakter@users.noreply.github.com>"
+    }
+  }
+}
